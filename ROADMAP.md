@@ -42,7 +42,7 @@ Obiettivo: un'app che si può far provare a qualcuno e che "sembra vera".
 > **Fine Fase 2.**
 
 ## Fase 3 — Backend (diventa multi-utente)
-- 🟡 **3.1 Scelta e setup** — Supabase (UE, Francoforte): schema, regole di sicurezza RLS (età, blocchi, verifica, limiti), storage foto/vocali, tempo reale, client nel codice, guida `docs/SUPABASE.md`, test `npm run db:test` (42 controlli). **Manca:** creare il progetto e fare `db push` (passi 1–5 della guida)
+- ✅ **3.1 Scelta e setup** — Supabase (UE, Francoforte): schema, regole di sicurezza RLS (età, blocchi, verifica, limiti), storage foto/vocali, tempo reale, client nel codice, guida `docs/SUPABASE.md`, test `npm run db:test` (42 controlli). Progetto `along` creato in UE, migrazione applicata, app collegata (“Collegato”)
 - 🔜 **3.2 Account** — registrazione e login (email / magic link)
 - ⬜ **3.3 Profili, like e match su database** — sostituire i dati finti
 - ⬜ **3.4 Chat in tempo reale** — messaggi, note vocali vere (microfono), timer 48h lato server
