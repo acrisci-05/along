@@ -12,7 +12,9 @@ export function suggestMeetup(state: AppState, userId: string, chat?: Chat) {
     state.plans.filter((p) => p.hostId === 'me' && planStatus(p, now) !== 'EXPIRED').sort((a, b) => b.createdAt - a.createdAt)[0]
   if (plan && (chat?.mode ?? 'local') === 'local') {
     const when = (plan.whenLabel ?? planWhen(plan, now).replace(' · ', ' alle ')).toLowerCase()
-    return { title: plan.title, when, place: plan.district ? `${plan.habitat.split('·')[0].trim()}, ${plan.district}` : plan.habitat }
+    const base = plan.habitat.split('·')[0].trim()
+    const place = plan.district && !base.toLowerCase().includes(plan.district.toLowerCase()) ? `${base}, ${plan.district}` : base
+    return { title: plan.title, when, place }
   }
   if (chat?.mode === 'remote' || (u && u.city !== state.me.city)) {
     return { title: 'Videochiamata di 20 minuti', when: 'domani alle 21:30', place: 'online' }

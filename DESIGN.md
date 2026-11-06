@@ -32,6 +32,7 @@ Titoli 800 con tracking leggermente stretto. Etichette: testo semplice 600 in `m
 - **Like ricevuti:** mazzo, una risposta alla volta; destra = Match, sinistra = Non stavolta.
 - **Match:** biglietto doppio (tu + l'altra persona) che si unisce e viene timbrato "MATCH", con la proposta della prima uscita.
 - **Proposta di uscita:** messaggio a forma di biglietto (cosa, quando, dove); quando viene accettata il timer 48h si ferma.
+- **Chat:** intestazione con avatar e nome (sotto: "sta scrivendo…"), biglietto dell'uscita fissato (tocca per i dettagli), barra del timer che si consuma (salvia → ambra → rosso). Fumetti: miei `forest`, suoi `surface-2`. Tutte le azioni nel "+" a sinistra del campo di testo, microfono a destra. Conferme ✓ / ✓✓ e "Visualizzato" sotto l'ultimo messaggio, disattivabili nel profilo.
 
 ## Emoji
 Restano nelle categorie e in pochi punti di personalità; mai come decorazione dei titoli.

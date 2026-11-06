@@ -420,7 +420,7 @@ export function createInitialState(): AppState {
       { id: 'l-3', userId: 'u-omar', question: MY_DILEMMA, answer: 'Un disco di Pino Daniele. Tanto prima o poi passo da Napoli.', at: now - 9 * H, status: 'new' },
     ],
     likesOut: [],
-    prefs: { intent: 'date', show: 'all', ageMin: 20, ageMax: 35 },
+    prefs: { intent: 'date', show: 'all', ageMin: 20, ageMax: 35, readReceipts: true, typingIndicator: true },
     savedBy: ['u-irene', 'u-samuele', 'u-lea'],
     daily: { day: todayKey(), seen: 0, answered: 0, matches: 0 },
   }
@@ -443,7 +443,13 @@ export const PRESET_DILEMMAS = [
   'Una cosa che sai fare benissimo e nessuno se lo aspetta?',
 ]
 
-export const FAREWELL = 'È stato un piacere, ma non sento la scintilla giusta. Buona fortuna! ✨'
+export const FAREWELL = 'È stato un piacere conoscerti, ma non sento la scintilla giusta. Ti auguro il meglio!'
+
+export const FAREWELLS = [
+  { label: 'Non sento la scintilla', text: 'È stato un piacere conoscerti, ma non sento la scintilla giusta. Ti auguro il meglio!' },
+  { label: 'Non è il momento giusto', text: 'Mi ha fatto piacere parlare con te, ma non è il momento giusto per me. Buona fortuna!' },
+  { label: 'Cerchiamo cose diverse', text: 'Credo che cerchiamo cose diverse, e preferisco dirtelo subito. In bocca al lupo!' },
+]
 
 export const AUTO_REPLIES: Record<string, string[]> = {
   generic: [

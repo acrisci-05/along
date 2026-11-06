@@ -255,11 +255,34 @@ export function LifetimeBadge({ small }: { small?: boolean }) {
 }
 
 /* ---------------- Waveform / voice bubble ---------------- */
-export function VoiceBubble({ duration, wave, mine }: { duration: number; wave: number[]; mine?: boolean }) {
+export function VoiceBubble({ duration, wave, mine, audioUrl }: { duration: number; wave: number[]; mine?: boolean; audioUrl?: string }) {
   const [playing, setPlaying] = useState(false)
   const [progress, setProgress] = useState(0)
+  const audio = useRef<HTMLAudioElement | null>(null)
+
+  useEffect(() => () => audio.current?.pause(), [])
+
   useEffect(() => {
     if (!playing) return
+    // real recording: follow the audio element
+    if (audioUrl) {
+      const a = audio.current ?? new Audio(audioUrl)
+      audio.current = a
+      const onTime = () => setProgress(a.duration && isFinite(a.duration) ? a.currentTime / a.duration : a.currentTime / duration)
+      const onEnd = () => {
+        setPlaying(false)
+        setProgress(0)
+      }
+      a.addEventListener('timeupdate', onTime)
+      a.addEventListener('ended', onEnd)
+      a.play().catch(onEnd)
+      return () => {
+        a.pause()
+        a.removeEventListener('timeupdate', onTime)
+        a.removeEventListener('ended', onEnd)
+      }
+    }
+    // simulated note
     const start = performance.now() - progress * duration * 1000
     let raf = 0
     const step = (t: number) => {
@@ -276,26 +299,23 @@ export function VoiceBubble({ duration, wave, mine }: { duration: number; wave: 
     return () => cancelAnimationFrame(raf)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [playing])
+
   const mm = `${Math.floor(duration / 60)}:${String(Math.round(duration % 60)).padStart(2, '0')}`
   return (
     <div className="flex items-center gap-2.5">
       <button
         onClick={() => setPlaying((p) => !p)}
-        className={cn('grid size-8 shrink-0 place-items-center rounded-full', mine ? 'bg-ink text-brand' : 'bg-violet text-cream')}
+        className={cn('grid size-8 shrink-0 place-items-center rounded-full', mine ? 'bg-cream text-forest' : 'bg-brand text-ink')}
         aria-label={playing ? 'Pausa nota vocale' : 'Riproduci nota vocale'}
       >
         {playing ? <Pause size={14} /> : <Play size={14} className="ml-0.5" />}
       </button>
       <div className="flex h-7 items-center gap-[3px]" aria-hidden>
         {wave.map((v, i) => (
-          <span
-            key={i}
-            className={cn('w-[3px] rounded-full transition-colors', i / wave.length <= progress ? (mine ? 'bg-ink' : 'bg-violet') : mine ? 'bg-ink/35' : 'bg-cream/30')}
-            style={{ height: `${v * 9 + 10}%` }}
-          />
+          <span key={i} className={cn('w-[3px] rounded-full transition-colors', i / wave.length <= progress ? 'bg-cream' : 'bg-cream/35')} style={{ height: `${v * 9 + 10}%` }} />
         ))}
       </div>
-      <span className={cn('text-xs tabular-nums', mine ? 'text-ink/70' : 'text-cream/55')}>{mm}</span>
+      <span className="text-xs tabular-nums text-cream/60">{mm}</span>
     </div>
   )
 }

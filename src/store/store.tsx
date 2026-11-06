@@ -54,9 +54,9 @@ interface Store {
   joinPlan: (planId: string, answer: string) => JoinResult
   messageUser: (userId: string, answer: string) => JoinResult
   sendMessage: (chatId: string, text: string) => void
-  sendVoice: (chatId: string, duration: number) => void
+  sendVoice: (chatId: string, duration: number, extra?: { audioUrl?: string; wave?: number[] }) => void
   sendTrack: (chatId: string, title: string, artist: string) => void
-  closeElegantly: (chatId: string) => void
+  closeElegantly: (chatId: string, text?: string) => void
   evolveChat: (chatId: string) => void
   stopClock: (chatId: string) => void
   acceptWaiting: (chatId: string) => boolean
@@ -221,7 +221,10 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       const chat = s.chats.find((c) => c.id === chatId)
       if (!chat || chat.status !== 'active') return
       const from = pick(chat.peerIds)
-      later(() => setTyping((t) => ({ ...t, [chatId]: from })), 700)
+      later(() => {
+        setTyping((t) => ({ ...t, [chatId]: from }))
+        setState((prev) => ({ ...prev, chats: prev.chats.map((c) => (c.id === chatId ? { ...c, messages: c.messages.map((m) => (m.from === 'me' && !m.seen ? { ...m, seen: true } : m)) } : c)) }))
+      }, 700)
       later(() => {
         setTyping((t) => ({ ...t, [chatId]: undefined }))
         setState((prev) => {
@@ -318,7 +321,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   )
 
   const finishChat = useCallback(
-    (chatId: string, status: 'closed' | 'evolved') => {
+    (chatId: string, status: 'closed' | 'evolved', farewellText?: string) => {
       const now = Date.now()
       const s = stateRef.current
       const chat = s.chats.find((c) => c.id === chatId)
@@ -326,7 +329,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       const wasActive = chat.status === 'active'
       const extra: Message[] =
         status === 'closed'
-          ? [{ id: uid('m'), from: 'me', kind: 'farewell', text: FAREWELL, at: now }]
+          ? [{ id: uid('m'), from: 'me', kind: 'farewell', text: farewellText ?? FAREWELL, at: now }]
           : [{ id: uid('m'), from: 'system', kind: 'system', text: 'Missione compiuta: vi vedete dal vivo / contatti scambiati. Slot liberato 🎉', at: now }]
       const marked = s.chats.map((c) =>
         c.id === chatId ? { ...c, status, closedReason: status === 'closed' ? 'Chiusura con eleganza' : 'Evoluta dal vivo', incoming: undefined, messages: [...c.messages, ...extra] } : c,
@@ -359,7 +362,10 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       }))
       const chat = stateRef.current.chats.find((c) => c.id === chatId)
       const from = chat?.peerIds[0] ?? ''
-      later(() => setTyping((t) => ({ ...t, [chatId]: from })), 900)
+      later(() => {
+        setTyping((t) => ({ ...t, [chatId]: from }))
+        setState((prev) => ({ ...prev, chats: prev.chats.map((c) => (c.id === chatId ? { ...c, messages: c.messages.map((m) => (m.from === 'me' && !m.seen ? { ...m, seen: true } : m)) } : c)) }))
+      }, 900)
       later(() => {
         setTyping((t) => ({ ...t, [chatId]: undefined }))
         const at = Date.now()
@@ -603,9 +609,9 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       joinPlan,
       messageUser,
       sendMessage: (chatId, text) => pushMine(chatId, { kind: 'text', text }, 'textSent'),
-      sendVoice: (chatId, duration) => pushMine(chatId, { kind: 'voice', duration, wave: randomWave() }, 'voiceSent'),
+      sendVoice: (chatId, duration, extra) => pushMine(chatId, { kind: 'voice', duration, wave: extra?.wave ?? randomWave(), audioUrl: extra?.audioUrl }, 'voiceSent'),
       sendTrack: (chatId, title, artist) => pushMine(chatId, { kind: 'track', text: `${title} · ${artist}` }, 'textSent'),
-      closeElegantly: (chatId) => finishChat(chatId, 'closed'),
+      closeElegantly: (chatId, text) => finishChat(chatId, 'closed', text),
       evolveChat: (chatId) => finishChat(chatId, 'evolved'),
       stopClock,
       acceptWaiting,

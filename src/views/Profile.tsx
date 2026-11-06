@@ -8,7 +8,7 @@ import { BadgeRow, BestieSticker, earnedBadges, KarmaMeter } from '../components
 import { Avatar, Button, Eyebrow, LifetimeBadge, RevolutTip, Sheet, Toggle } from '../components/ui'
 
 export function Profile() {
-  const { state, updateMe, setLifetime, reset, simulateIncoming, toast } = useStore()
+  const { state, updateMe, setLifetime, reset, simulateIncoming, toast, setPrefs } = useStore()
   const nav = useNav()
   const me = state.me
   const [editing, setEditing] = useState(false)
@@ -174,6 +174,27 @@ export function Profile() {
       )}
 
       <RevolutTip />
+
+      {/* chat privacy */}
+      <section className="space-y-2">
+        <Eyebrow>Privacy in chat</Eyebrow>
+        <div className="divide-y divide-line rounded-2xl border border-line bg-surface">
+          <div className="flex items-center justify-between gap-3 p-3.5">
+            <div>
+              <p className="text-base font-semibold">Conferme di lettura</p>
+              <p className="text-sm text-muted">Se le disattivi, non vedi nemmeno le conferme degli altri.</p>
+            </div>
+            <Toggle checked={state.prefs.readReceipts !== false} onChange={(v) => setPrefs({ readReceipts: v })} label="Conferme di lettura" />
+          </div>
+          <div className="flex items-center justify-between gap-3 p-3.5">
+            <div>
+              <p className="text-base font-semibold">Mostra quando sto scrivendo</p>
+              <p className="text-sm text-muted">Se lo disattivi, non vedi nemmeno quando scrivono gli altri.</p>
+            </div>
+            <Toggle checked={state.prefs.typingIndicator !== false} onChange={(v) => setPrefs({ typingIndicator: v })} label="Mostra quando sto scrivendo" />
+          </div>
+        </div>
+      </section>
 
       {/* settings */}
       <section className="space-y-2">

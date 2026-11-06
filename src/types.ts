@@ -85,6 +85,9 @@ export interface Prefs {
   show: 'all' | 'f' | 'm'
   ageMin: number
   ageMax: number
+  /** WhatsApp-style, reciprocal: if off you don't send nor see them */
+  readReceipts?: boolean
+  typingIndicator?: boolean
 }
 
 export interface PlanDetails {
@@ -142,6 +145,9 @@ export interface Message {
   wave?: number[]
   question?: string
   proposal?: Proposal
+  /** blob: URL of a real recording (session only, not persisted across reloads) */
+  audioUrl?: string
+  seen?: boolean
   at: number
 }
 
