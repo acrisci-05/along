@@ -3,6 +3,7 @@ import type { AppState, Chat, Like, Message, Plan, Prefs, Toast, User } from '..
 import { AUTO_REPLIES, createInitialState, DEMO_VERSION, FAREWELL, INCOMING_POOL, SAMPLE_ANSWERS, todayKey } from '../data/mock'
 import { ageFromBirth, isMinor, sameAgeGroup } from '../lib/age'
 import { inMinorHours } from '../lib/safety'
+import { photoFingerprint } from '../lib/verify'
 import { affinity, H, planStatus, randomWave, uid } from '../lib/utils'
 
 const KEY = 'along:state'
@@ -92,6 +93,7 @@ interface Store {
   unblockUser: (userId: string) => void
   reportUser: (userId: string, reason: string, details?: string) => void
   injectSuspicious: () => void
+  verifyMe: () => void
   /** true if this person can see/meet userId (adult and 16-17 pools never mix) */
   allowed: (userId: string) => boolean
   planVisible: (plan: Plan) => boolean
@@ -705,6 +707,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       unblockUser: (userId) => setState((prev) => ({ ...prev, blocked: prev.blocked.filter((x) => x !== userId) })),
       reportUser: (userId, reason, details) =>
         setState((prev) => ({ ...prev, reports: [...prev.reports, { id: uid('r'), userId, reason, details: details?.trim() || undefined, at: Date.now() }] })),
+      verifyMe: () =>
+        setState((prev) => ({ ...prev, me: { ...prev.me, verified: true, verifiedAt: Date.now(), verifiedFor: photoFingerprint(prev.me) } })),
       injectSuspicious: () => {
         const s = stateRef.current
         const chat = s.chats.find((c) => c.status === 'active')

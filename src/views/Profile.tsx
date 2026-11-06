@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { motion } from 'motion/react'
-import { BellRing, Eye, ShieldAlert, Crown, Info, KeyRound, MapPin, Pencil, RotateCcw, Sparkles } from 'lucide-react'
+import { BadgeCheck, BellRing, Eye, ShieldAlert, Crown, Info, KeyRound, MapPin, Pencil, RotateCcw, Sparkles } from 'lucide-react'
 import { useNav } from '../nav'
 import { useStore } from '../store/store'
 import { cn } from '../lib/utils'
@@ -9,6 +9,8 @@ import { PHOTO_MIN } from '../lib/photos'
 import { EditProfile } from '../components/EditProfile'
 import { ProfilePreview } from '../components/ProfilePreview'
 import { InfoRows } from '../components/ProfileInfo'
+import { VerifiedBadge } from '../components/Verify'
+import { verifyStatus } from '../lib/verify'
 import { BadgeRow, earnedBadges, KarmaMeter } from '../components/Karma'
 import { Avatar, Button, Eyebrow, LifetimeBadge, RevolutTip, Sheet, Toggle } from '../components/ui'
 
@@ -34,7 +36,7 @@ export function Profile() {
           </div>
           <div className="min-w-0 flex-1">
             <h1 className="text-xl font-bold leading-tight">
-              {me.name}, {me.age}
+              {me.name}, {me.age} <VerifiedBadge user={me} size={20} />
             </h1>
             <p className="flex items-center gap-1 text-sm text-cream/55">
               <MapPin size={13} /> {me.city}
@@ -67,6 +69,8 @@ export function Profile() {
           </button>
         </div>
       </section>
+
+      <VerifySection />
 
       <PhotoStrip onEdit={() => setEditing(true)} />
 
@@ -323,6 +327,41 @@ function PhotoStrip({ onEdit }: { onEdit: () => void }) {
         </div>
       )}
       <p className="text-xs text-muted">Prima del match gli altri vedono solo la principale, sfocata. Dopo il match tutte.</p>
+    </section>
+  )
+}
+
+function VerifySection() {
+  const { state } = useStore()
+  const nav = useNav()
+  const status = verifyStatus(state.me)
+  const minor = isMinor(state.me)
+  if (status === 'verified')
+    return (
+      <section className="flex items-center gap-3 rounded-2xl border border-line bg-surface p-3.5">
+        <BadgeCheck size={22} className="shrink-0 text-brand" />
+        <div className="min-w-0 flex-1">
+          <p className="font-semibold">Profilo verificato</p>
+          <p className="text-xs text-muted">Dal {new Date(state.me.verifiedAt ?? Date.now()).toLocaleDateString('it-IT')} · selfie cancellato dopo il controllo</p>
+        </div>
+      </section>
+    )
+  return (
+    <section className={cn('rounded-2xl border p-4', minor ? 'border-gold/50 bg-gold/10' : 'border-line bg-surface')}>
+      <p className="flex items-center gap-2 font-semibold">
+        <BadgeCheck size={20} className={minor ? 'text-gold' : 'text-muted'} />
+        {status === 'suspended' ? 'Verifica sospesa' : minor ? 'Verifica obbligatoria' : 'Verifica il profilo'}
+      </p>
+      <p className="mt-1 text-sm text-muted">
+        {status === 'suspended'
+          ? 'Hai cambiato la foto principale: rifai il selfie (30 secondi) per riavere la spunta.'
+          : minor
+            ? 'Sotto i 18 anni serve un selfie e un documento prima di poter rispondere, accettare match o chattare.'
+            : 'Un selfie con un gesto, 30 secondi. Ottieni la spunta e compari a chi cerca solo profili verificati.'}
+      </p>
+      <button onClick={() => nav.openVerify()} className="mt-3 h-10 rounded-full bg-brand px-4 text-sm font-bold text-ink">
+        {status === 'suspended' ? 'Rifai il selfie' : 'Verifica ora'}
+      </button>
     </section>
   )
 }

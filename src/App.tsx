@@ -9,6 +9,9 @@ import { Discover } from './views/Discover'
 import { Likes } from './views/Likes'
 import { MatchOverlay } from './components/MatchOverlay'
 import { SafetySheet, type SafetyMode } from './components/Safety'
+import { VerifyFlow } from './components/Verify'
+import { isMinor } from './lib/age'
+import { isVerified } from './lib/verify'
 import { Onboarding } from './components/Onboarding'
 import { Radar } from './views/Radar'
 import { MyPlans } from './views/MyPlans'
@@ -49,6 +52,7 @@ export default function App() {
   const [creating, setCreating] = useState(false)
   const [paywall, setPaywall] = useState<{ open: boolean; reason?: string }>({ open: false })
   const [safety, setSafety] = useState<{ userId: string; mode: SafetyMode } | null>(null)
+  const [verify, setVerify] = useState<{ reason?: string } | null>(null)
   const [frame, setFrame] = useState<'phone' | 'wide'>(() => readPref('along:frame', 'phone'))
   const scrollRef = useRef<HTMLDivElement>(null)
 
@@ -97,6 +101,7 @@ export default function App() {
       openCreate: () => setCreating(true),
       openPaywall: (reason) => setPaywall({ open: true, reason }),
       openSafety: (userId, mode = 'menu') => setSafety({ userId, mode }),
+      openVerify: (reason) => setVerify({ reason }),
       openGatekeeperForUser: (id) => {
         setUserId(null)
         setGate({ kind: 'user', id })
@@ -121,7 +126,7 @@ export default function App() {
   }
 
   const wide = frame === 'wide'
-  const overlayOpen = !!(planId || userId || gate || creating || paywall.open || chatId || !state.onboarded || store.match || safety)
+  const overlayOpen = !!(planId || userId || gate || creating || paywall.open || chatId || !state.onboarded || store.match || safety || verify)
 
   return (
     <MotionConfig reducedMotion="user">
@@ -311,6 +316,11 @@ export default function App() {
               host={gateUser}
               context={gate?.kind === 'plan' ? `“${gatePlan?.title}”` : `una chat con ${gateUser?.name}`}
               onSubmit={(answer) => {
+                if (isMinor(state.me) && !isVerified(state.me)) {
+                  setGate(null)
+                  setVerify({ reason: 'Sotto i 18 anni devi verificare il profilo prima di scrivere o unirti a un piano.' })
+                  return { ok: true, chatId: '' }
+                }
                 if (gate!.kind === 'plan') return joinPlan(gate!.id, answer)
                 store.likeUser(gate!.id, answer)
                 store.toast({ tone: 'coral', title: `Risposta inviata a ${gateUser?.name} 💌`, body: 'Se le/gli piace, è match e le foto si svelano.' })
@@ -347,6 +357,7 @@ export default function App() {
               }}
             />
             <MatchOverlay />
+            <VerifyFlow open={!!verify} reason={verify?.reason} onClose={() => setVerify(null)} />
             <Onboarding />
           </div>
 

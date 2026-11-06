@@ -12,6 +12,7 @@ export interface Nav {
   openPaywall: (reason?: string) => void
   openGatekeeperForUser: (id: string) => void
   openSafety: (userId: string, mode?: 'menu' | 'block' | 'report') => void
+  openVerify: (reason?: string) => void
 }
 
 export const NavCtx = createContext<Nav | null>(null)

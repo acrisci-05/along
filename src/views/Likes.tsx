@@ -7,6 +7,7 @@ import { useNow, useStore } from '../store/store'
 import { affinity, timeAgo } from '../lib/utils'
 import { Avatar, Eyebrow } from '../components/ui'
 import { Portrait } from '../components/Portrait'
+import { useNeedsVerification, VerifiedBadge } from '../components/Verify'
 
 export function Likes() {
   const { state, user, acceptLike, declineLike, simulateIncoming, allowed } = useStore()
@@ -14,6 +15,7 @@ export function Likes() {
   const now = useNow(30_000)
   const fresh = state.likesIn.filter((l) => l.status === 'new' && allowed(l.userId)).sort((a, b) => b.at - a.at)
   const [dir, setDir] = useState<'left' | 'right'>('left')
+  const needsVerify = useNeedsVerification()
   const pending = state.likesOut.filter((l) => l.status === 'pending')
 
   return (
@@ -44,6 +46,10 @@ export function Likes() {
                   key={fresh[0].id}
                   like={fresh[0]}
                   onMatch={() => {
+                    if (needsVerify) {
+                      nav.openVerify('Sotto i 18 anni devi verificare il profilo prima di accettare un match.')
+                      return
+                    }
                     setDir('right')
                     acceptLike(fresh[0].id)
                   }}
@@ -188,7 +194,7 @@ function LikeCard({ like, behind, onMatch, onDecline, onInfo }: { like: Like; be
             <button onClick={onInfo} className="mt-4 flex items-center justify-between border-t border-cream/15 pt-3 text-left">
               <span>
                 <span className="block text-lg font-bold">
-                  {u.name} <span className="font-medium">{u.age}</span>
+                  {u.name} <span className="font-medium">{u.age}</span> <VerifiedBadge user={u} size={18} />
                 </span>
                 <span className="block text-sm text-cream/70">
                   {u.city} · {affinity(state.me, u)}% di sintonia · {u.intent.map((i) => (i === 'date' ? 'Date' : 'Amici')).join(', ')}

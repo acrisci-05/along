@@ -31,16 +31,18 @@ Obiettivo: un'app che si può far provare a qualcuno e che "sembra vera".
 - ✅ **1.5 Onboarding vero (C)** — benvenuto + 3 passi (chi sei con data di nascita e foto/avatar · cosa cerchi · dilemma dalla lista). Età minima 16 anni; 16-17 solo modalità Amici e in un gruppo separato: maggiorenni e minorenni non si vedono né si incontrano mai
 - ✅ **1.6 Sicurezza base (E)** — Blocca e Segnala separati (card, profilo, chat) con motivo e conferma; avvisi su numero/indirizzo/social in uscita e su soldi/codici/foto intime/altre app in entrata; 16-17: piani solo 8–20, solo luoghi pubblici, niente vocali 1:1; persone bloccate nel profilo con Sblocca
 
-> **Fine Fase 1.** Punti aperti emersi: verifica reale dell'età/identità prima del lancio (step 2.4) e moderazione vera delle segnalazioni (step 4.5).
+> **Fine Fase 1.** Punti aperti emersi: verifica reale dell'età/identità prima del lancio (flusso pronto nello step 2.4, serve un fornitore di verifica collegato al backend) e moderazione vera delle segnalazioni (step 4.5).
 
 ## Fase 2 — Profilo reale
 - ✅ **2.1 Foto vere** — galleria da 2 a 6 foto (onboarding e profilo), ritaglio 4:5 con zoom, griglia riordinabile trascinando o con le frecce; prima del match solo la principale sfocata, dopo il match tutte sfogliabili; avatar illustrato come alternativa ("Senza foto")
 - ✅ **2.2 Profilo ricco** — pagina unica "Modifica profilo" (foto/avatar, nome, bio 160, lavoro o studio, lingue, fumo e alcol, passioni a categorie 3–8 + personalizzate, Habitat 1–5 per quartiere, dilemma) con un solo Salva e avviso modifiche non salvate; anteprima "Come ti vedono gli altri" prima e dopo il match; info nei profili degli altri
 - ❌ **2.3 Bestie Vouching** — tolto: lo sticker scritto dal migliore amico è stato rimosso dall'app
-- 🔜 **2.4 Verifica profilo** — selfie di verifica (simulata) e badge "verificato"
+- ✅ **2.4 Verifica profilo** — selfie con gesto casuale (fotocamera vera o caricamento), documento obbligatorio per 16-17, controllo simulato, selfie e documento cancellati subito; spunta ovunque, filtro "solo verificati", spunta sospesa se cambi la foto principale, avviso discreto in chat; per i 16-17 verifica obbligatoria prima di rispondere, accettare match, unirsi a piani o chattare
+
+> **Fine Fase 2.**
 
 ## Fase 3 — Backend (diventa multi-utente)
-- ⬜ **3.1 Scelta e setup** — es. Supabase: progetto, schema dati, regole di sicurezza
+- 🔜 **3.1 Scelta e setup** — es. Supabase: progetto, schema dati, regole di sicurezza
 - ⬜ **3.2 Account** — registrazione e login (email / magic link)
 - ⬜ **3.3 Profili, like e match su database** — sostituire i dati finti
 - ⬜ **3.4 Chat in tempo reale** — messaggi, note vocali vere (microfono), timer 48h lato server

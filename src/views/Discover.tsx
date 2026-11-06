@@ -8,7 +8,9 @@ import { DAILY_LIMIT, todayKey } from '../data/mock'
 import { isMinor } from '../lib/age'
 import { affinity, cn, planStatus, planWhen, sharedInterests } from '../lib/utils'
 import { Portrait } from '../components/Portrait'
-import { Button, Chip, Sheet } from '../components/ui'
+import { Button, Chip, Sheet, Toggle } from '../components/ui'
+import { useNeedsVerification, VerifiedBadge } from '../components/Verify'
+import { isVerified } from '../lib/verify'
 import { Explore, TravelBridge } from './Explore'
 
 const PAGES = ['La locandina', 'In comune', 'Affidabilità'] as const
@@ -50,6 +52,7 @@ function Deck({ mode, setMode, onPlans }: { mode: Mode; setMode: (m: Mode) => vo
   const store = useStore()
   const { state, setPrefs, passUser, likeUser, undoSwipe, resetDeck, toast, newDay, allowed } = store
   const minor = isMinor(state.me)
+  const needsVerify = useNeedsVerification()
   const [dir, setDir] = useState<'left' | 'right'>('left')
   const daily = state.daily.day === todayKey() ? state.daily : { day: todayKey(), seen: 0, answered: 0, matches: 0 }
   const dayOver = daily.seen >= DAILY_LIMIT
@@ -67,6 +70,7 @@ function Deck({ mode, setMode, onPlans }: { mode: Mode; setMode: (m: Mode) => vo
       .filter((u) => u.intent.includes(prefs.intent))
       .filter((u) => prefs.show === 'all' || u.gender === prefs.show)
       .filter((u) => u.age >= prefs.ageMin && u.age <= prefs.ageMax)
+      .filter((u) => !prefs.verifiedOnly || isVerified(u))
       .filter((u) => {
         const near = u.city === me.city || travelCities.includes(u.city.toLowerCase())
         return mode === 'local' ? near : u.city !== me.city
@@ -165,6 +169,10 @@ function Deck({ mode, setMode, onPlans }: { mode: Mode; setMode: (m: Mode) => vo
                 passUser(top.id)
               }}
               onLike={(answer) => {
+                if (needsVerify) {
+                  nav.openVerify('Sotto i 18 anni devi verificare il profilo prima di rispondere a qualcuno.')
+                  return
+                }
                 setDir('right')
                 likeUser(top.id, answer)
                 toast({ tone: 'coral', title: `Risposta inviata a ${top.name} 💌`, body: 'Se le/gli piace, è match e le foto si svelano.' })
@@ -229,6 +237,13 @@ function Deck({ mode, setMode, onPlans }: { mode: Mode; setMode: (m: Mode) => vo
               max
               <input type="range" min={prefs.ageMin} max={minor ? 17 : 60} value={prefs.ageMax} onChange={(e) => setPrefs({ ageMax: Number(e.target.value) })} className="flex-1" />
             </label>
+          </div>
+          <div className="flex items-center justify-between gap-3 rounded-xl border border-line p-3">
+            <div>
+              <p className="text-sm font-semibold">Solo profili verificati</p>
+              <p className="text-xs text-muted">Persone che hanno fatto il selfie di verifica</p>
+            </div>
+            <Toggle checked={!!prefs.verifiedOnly} onChange={(v) => setPrefs({ verifiedOnly: v })} label="Solo profili verificati" />
           </div>
           <Button className="w-full" onClick={() => setFilters(false)}>
             Mostra {deck.length} profil{deck.length === 1 ? 'o' : 'i'}
@@ -367,7 +382,7 @@ export function SwipeCard({
               <button onClick={() => !dragged.current && onInfo?.()} className="pointer-events-auto flex w-full items-end justify-between gap-2 text-left" aria-label={`Profilo completo di ${user.name}`}>
                 <span className="min-w-0">
                   <span className="block text-2xl font-extrabold leading-none tracking-[-0.03em]">
-                    {user.name} <span className="font-medium">{user.age}</span>
+                    {user.name} <span className="font-medium">{user.age}</span> <VerifiedBadge user={user} size={20} />
                   </span>
                   <span className="mt-1.5 block truncate text-sm text-cream/80">
                     {distanceLabel(user, me)} · {aff}% di sintonia · {user.intent.map((i) => (i === 'date' ? 'Date' : 'Amici')).join(', ')}

@@ -6,6 +6,7 @@ import { Avatar, Button, Eyebrow, LifetimeBadge, Sheet } from './ui'
 import { BadgeRow } from './Karma'
 import { PhotoCarousel } from './Portrait'
 import { InfoRows } from './ProfileInfo'
+import { VerifiedBadge } from './Verify'
 import { LivingPlanCard } from './LivingPlanCard'
 
 export function PlanDetailSheet({ planId, onClose, onJoin }: { planId: string | null; onClose: () => void; onJoin: (planId: string) => void }) {
@@ -171,7 +172,7 @@ export function UserSheet({ userId, onClose }: { userId: string | null; onClose:
             <Avatar user={u} size={84} />
             <div className="min-w-0">
               <h2 className="text-xl font-bold leading-tight">
-                {u.name}, {u.age}
+                {u.name}, {u.age} <VerifiedBadge user={u} size={22} />
               </h2>
               <p className="flex items-center gap-1 text-sm text-cream/55">
                 <MapPin size={13} /> {u.city}

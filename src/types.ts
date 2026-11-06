@@ -47,6 +47,10 @@ export interface User {
   photos?: string[]
   work?: string
   languages?: string[]
+  verified?: boolean
+  verifiedAt?: number
+  /** fingerprint of the main photo the verification was done on */
+  verifiedFor?: string
   smoke?: Habit
   drink?: Habit
   distanceKm?: number
@@ -90,6 +94,7 @@ export interface Prefs {
   /** WhatsApp-style, reciprocal: if off you don't send nor see them */
   readReceipts?: boolean
   typingIndicator?: boolean
+  verifiedOnly?: boolean
 }
 
 export interface PlanDetails {

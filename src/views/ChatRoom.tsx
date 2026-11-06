@@ -5,6 +5,8 @@ import type { Chat, Message, Plan, User } from '../types'
 import { FAREWELLS, HABITATS } from '../data/mock'
 import { INCOMING_COPY, OUTGOING_COPY, scanIncoming, scanOutgoing, type OutgoingRisk } from '../lib/safety'
 import { isMinor } from '../lib/age'
+import { isVerified } from '../lib/verify'
+import { useNeedsVerification, VerifiedBadge } from '../components/Verify'
 import { suggestMeetup } from '../lib/meetup'
 import { useNav } from '../nav'
 import { useNow, useStore } from '../store/store'
@@ -36,6 +38,7 @@ export function ChatRoom({ chatId, onClose }: { chatId: string; onClose: () => v
   const [panel, setPanel] = useState<Panel>(null)
   const receipts = state.prefs.readReceipts !== false
   const showTyping = state.prefs.typingIndicator !== false
+  const needsVerify = useNeedsVerification()
 
   useEffect(() => {
     if (chat?.unread) markRead(chat.id)
@@ -82,7 +85,10 @@ export function ChatRoom({ chatId, onClose }: { chatId: string; onClose: () => v
               ))}
             </div>
             <span className="min-w-0">
-              <span className="block truncate text-base font-bold">{peers.map((p) => p.name).join(', ')}</span>
+              <span className="flex items-center gap-1 truncate text-base font-bold">
+                <span className="truncate">{peers.map((p) => p.name).join(', ')}</span>
+                {peers.length === 1 && <VerifiedBadge user={peers[0]} />}
+              </span>
               <span className="block truncate text-xs text-muted">{typingUser ? 'sta scrivendo…' : readOnly ? chat.closedReason ?? 'Conclusa' : chat.mode === 'remote' ? 'A distanza · capsule audio' : chat.title}</span>
             </span>
           </button>
@@ -117,6 +123,12 @@ export function ChatRoom({ chatId, onClose }: { chatId: string; onClose: () => v
 
       {/* body */}
       <div ref={scroller} className="no-scrollbar relative min-h-0 flex-1 space-y-2.5 overflow-y-auto px-4 py-4" aria-live="polite">
+        {!readOnly && peers.some((p) => !isVerified(p)) && (
+          <p className="flex items-start gap-2 rounded-xl border border-line px-3 py-2 text-xs text-muted">
+            <ShieldAlert size={14} className="mt-px shrink-0" />
+            {peers.length === 1 ? 'Questo profilo non è verificato.' : `Non verificati: ${peers.filter((p) => !isVerified(p)).map((p) => p.name).join(', ')}.`} Prima di vedervi, scegli un luogo pubblico.
+          </p>
+        )}
         {chat.messages.map((m, i) => (
           <Bubble
             key={m.id}
@@ -154,7 +166,16 @@ export function ChatRoom({ chatId, onClose }: { chatId: string; onClose: () => v
       {/* composer */}
       {!readOnly && (
         <div className="border-t border-line bg-ink px-3 pb-3 pt-2">
-          <Composer chat={chat} onPlus={() => setPanel('actions')} />
+          {needsVerify ? (
+            <div className="flex items-center gap-3 rounded-xl border border-gold/40 bg-gold/10 p-3">
+              <p className="flex-1 text-sm text-gold">Sotto i 18 anni puoi scrivere solo dopo aver verificato il profilo.</p>
+              <button onClick={() => nav.openVerify('Sotto i 18 anni devi verificare il profilo prima di chattare.')} className="h-9 shrink-0 rounded-full bg-brand px-3.5 text-sm font-bold text-ink">
+                Verifica
+              </button>
+            </div>
+          ) : (
+            <Composer chat={chat} onPlus={() => setPanel('actions')} />
+          )}
         </div>
       )}
 
