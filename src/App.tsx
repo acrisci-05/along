@@ -122,10 +122,10 @@ export default function App() {
   return (
     <MotionConfig reducedMotion="user">
       <NavCtx.Provider value={nav}>
-        <div className="relative min-h-dvh overflow-hidden bg-[#0a0a0a] md:flex md:items-center md:justify-center md:gap-14 md:p-6">
+        <div className="relative min-h-dvh overflow-hidden bg-[#15100d] md:flex md:items-center md:justify-center md:gap-14 md:p-6">
           {/* desktop ambient */}
           <div className="pointer-events-none fixed inset-0 hidden md:block" aria-hidden>
-            <div className="absolute -left-40 top-10 size-[520px] rounded-full bg-coral/10 blur-3xl" />
+            <div className="absolute -left-40 top-10 size-[520px] rounded-full bg-brand/10 blur-3xl" />
           </div>
 
           {/* desktop side panel */}
@@ -134,7 +134,7 @@ export default function App() {
             <p className="font-display text-3xl font-bold leading-[0.98] text-cream">
               Less scrolling.
               <br />
-              <span className="text-coral">More doing.</span>
+              <span className="text-brand">More doing.</span>
               <br />
               <span className="text-gradient-neon">Find your people.</span>
             </p>
@@ -151,12 +151,12 @@ export default function App() {
           <div
             className={cn(
               'relative z-10 mx-auto flex h-dvh w-full flex-col overflow-hidden bg-ink',
-              !wide && 'md:h-[min(880px,calc(100dvh-48px))] md:w-[402px] md:rounded-[54px] md:border-[11px] md:border-[#1f1f1f] md:shadow-[0_0_0_1px_rgb(255_255_255/0.06),0_40px_120px_-20px_rgb(0_0_0/0.9),0_0_80px_-30px_rgb(139_92_246/0.5)]',
+              !wide && 'md:h-[min(880px,calc(100dvh-48px))] md:w-[402px] md:rounded-[54px] md:border-[11px] md:border-[#2a221c] md:shadow-[0_0_0_1px_rgb(255_255_255/0.06),0_40px_120px_-20px_rgb(0_0_0/0.9),0_0_80px_-30px_rgb(139_92_246/0.5)]',
               wide && 'md:h-dvh md:max-w-[720px] md:border-x md:border-cream/5',
             )}
           >
             {/* quiet backdrop: a single warm light, no animated mesh */}
-            <div className="pointer-events-none absolute inset-x-0 top-0 h-72 bg-[radial-gradient(ellipse_at_top,rgb(255_128_109/0.10),transparent_70%)]" aria-hidden />
+            <div className="pointer-events-none absolute inset-x-0 top-0 h-72 bg-[radial-gradient(ellipse_at_top,rgb(156_197_161/0.10),transparent_70%)]" aria-hidden />
 
             {!wide && <div className="absolute left-1/2 top-2 z-[60] hidden h-[26px] w-[110px] -translate-x-1/2 rounded-full bg-black md:block" aria-hidden />}
 
@@ -169,7 +169,7 @@ export default function App() {
                 <nav className="hidden items-center gap-1 md:flex" aria-label="Navigazione principale">
                   {TABS.map((t) =>
                     t.id === 'create' ? (
-                      <button key={t.id} onClick={() => setCreating(true)} className="ml-1 inline-flex h-9 items-center gap-1 rounded-full bg-coral px-3 text-sm font-semibold text-ink">
+                      <button key={t.id} onClick={() => setCreating(true)} className="ml-1 inline-flex h-9 items-center gap-1 rounded-md bg-brand px-3 text-sm font-semibold text-ink">
                         <Plus size={15} /> Crea
                       </button>
                     ) : (
@@ -177,7 +177,7 @@ export default function App() {
                         key={t.id}
                         onClick={() => setTab(t.id as Tab)}
                         aria-current={tab === t.id ? 'page' : undefined}
-                        className={cn('h-9 rounded-full px-3 text-sm font-medium', tab === t.id ? 'bg-cream/10 text-cream' : 'text-cream/55 hover:text-cream')}
+                        className={cn('h-9 rounded-md px-3 text-sm font-medium', tab === t.id ? 'bg-cream/10 text-cream' : 'text-cream/55 hover:text-cream')}
                       >
                         {t.label}
                       </button>
@@ -186,17 +186,17 @@ export default function App() {
                 </nav>
               )}
               <div className="flex items-center gap-2">
-                <span className="rounded-full border border-line px-2.5 py-1 font-display text-sm font-bold tabular-nums text-cream/85" aria-label={`Karma ${state.me.karma}`}>
+                <span className="rounded-md border border-line px-2.5 py-1 font-display text-sm font-bold tabular-nums text-cream/85" aria-label={`Karma ${state.me.karma}`}>
                   ⚡ {state.me.karma}
                 </span>
                 {!state.lifetime && (
-                  <button onClick={() => setPaywall({ open: true })} className="grid size-9 place-items-center rounded-full border border-line text-coral" aria-label="ALONG Forever">
+                  <button onClick={() => setPaywall({ open: true })} className="grid size-9 place-items-center rounded-full border border-line text-brand" aria-label="ALONG Forever">
                     <Sparkles size={15} />
                   </button>
                 )}
                 <button
                   onClick={() => setTab('profile')}
-                  className={cn('rounded-full p-[2px]', state.lifetime || tab === 'profile' ? 'bg-coral' : 'bg-line')}
+                  className={cn('rounded-full p-[2px]', state.lifetime || tab === 'profile' ? 'bg-brand' : 'bg-line')}
                   aria-label="Il mio profilo"
                 >
                   <span className="block rounded-full bg-ink p-[2px]">
@@ -229,7 +229,7 @@ export default function App() {
                         key={t.id}
                         whileTap={{ scale: 0.9 }}
                         onClick={() => setCreating(true)}
-                        className="grid h-11 w-14 place-items-center rounded-md bg-coral text-ink"
+                        className="grid h-11 w-14 place-items-center rounded-md bg-brand text-ink"
                         aria-label="Proponi un piano"
                       >
                         <Plus size={24} strokeWidth={2.8} />
@@ -245,11 +245,11 @@ export default function App() {
                       aria-current={active ? 'page' : undefined}
                       aria-label={badgeFor(t.id) > 0 ? `${t.label} (${badgeFor(t.id)} novità)` : t.label}
                     >
-                      {active && <motion.span layoutId="nav-dot" className="absolute -top-1.5 h-[3px] w-8 bg-coral" />}
+                      {active && <motion.span layoutId="nav-dot" className="absolute -top-1.5 h-[3px] w-8 bg-brand" />}
                       <span className="relative">
                         <Icon size={21} className={active ? 'text-cream' : 'text-cream/45'} strokeWidth={active ? 2.4 : 2} />
                         {badgeFor(t.id) > 0 && (
-                          <span className="absolute -right-2.5 -top-1.5 grid h-4 min-w-4 place-items-center rounded-full bg-coral px-1 text-[10px] font-bold leading-none text-ink">{badgeFor(t.id)}</span>
+                          <span className="absolute -right-2.5 -top-1.5 grid h-4 min-w-4 place-items-center rounded-full bg-brand px-1 text-[10px] font-bold leading-none text-ink">{badgeFor(t.id)}</span>
                         )}
                       </span>
                       <span className={cn('font-display text-[10px] font-bold uppercase tracking-wide', active ? 'text-cream' : 'text-cream/40')}>{t.label}</span>
@@ -271,10 +271,10 @@ export default function App() {
                     exit={{ opacity: 0, y: -10, scale: 0.95 }}
                     className={cn(
                       'glass-strong pointer-events-auto flex w-full max-w-sm items-start gap-3 rounded-2xl p-3 shadow-2xl',
-                      { lime: 'border-coral/40', coral: 'border-coral/40', violet: 'border-violet/50', cyan: 'border-cyan/40', gold: 'border-gold/50' }[t.tone],
+                      { lime: 'border-brand/40', coral: 'border-brand/40', violet: 'border-violet/50', cyan: 'border-cyan/40', gold: 'border-gold/50' }[t.tone],
                     )}
                   >
-                    <span className={cn('mt-1 size-2.5 shrink-0 rounded-full', { lime: 'bg-coral', coral: 'bg-coral', violet: 'bg-violet', cyan: 'bg-cyan', gold: 'bg-gold' }[t.tone])} />
+                    <span className={cn('mt-1 size-2.5 shrink-0 rounded-full', { lime: 'bg-brand', coral: 'bg-brand', violet: 'bg-violet', cyan: 'bg-cyan', gold: 'bg-gold' }[t.tone])} />
                     <div className="min-w-0 flex-1">
                       <p className="text-sm font-semibold">{t.title}</p>
                       {t.body && <p className="text-sm text-cream/60">{t.body}</p>}
@@ -349,9 +349,7 @@ export default function App() {
 
 function Logo({ big }: { big?: boolean }) {
   return (
-    <span className={cn('font-display font-extrabold tracking-[-0.05em]', big ? 'text-3xl' : 'text-xl')}>
-      along<span className="text-coral">.</span>
-    </span>
+    <span className={cn('font-display font-extrabold tracking-[-0.05em] text-brand', big ? 'text-3xl' : 'text-2xl')}>along</span>
   )
 }
 
@@ -384,7 +382,7 @@ function Onboarding() {
     <Sheet open={!state.onboarded} onClose={setOnboarded}>
       <div className="space-y-5">
         <div>
-          <p className="serif text-sm text-coral">Benvenut* su ALONG</p>
+          <p className="serif text-sm text-brand">Benvenut* su ALONG</p>
           <h2 className="mt-1 text-2xl font-bold leading-[1.02]">
             Meno swipe a vuoto.
             <br />

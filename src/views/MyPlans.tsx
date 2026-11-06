@@ -26,7 +26,7 @@ export function MyPlans() {
       <header>
         <Eyebrow>I miei piani</Eyebrow>
         <h1 className="mt-1 text-2xl font-bold leading-none">
-          Le tue <span className="text-coral">mosse</span>
+          Le tue <span className="text-brand">mosse</span>
         </h1>
       </header>
 
@@ -39,7 +39,7 @@ export function MyPlans() {
           ] as const
         ).map(([k, l, n]) => (
           <button key={k} role="tab" aria-selected={seg === k} onClick={() => setSeg(k)} className={cn('relative h-10 rounded-xl text-sm font-semibold', seg === k ? 'text-ink' : 'text-cream/60')}>
-            {seg === k && <motion.span layoutId="seg-pill" className="absolute inset-0 rounded-xl bg-coral" transition={{ type: 'spring', stiffness: 420, damping: 34 }} />}
+            {seg === k && <motion.span layoutId="seg-pill" className="absolute inset-0 rounded-xl bg-brand" transition={{ type: 'spring', stiffness: 420, damping: 34 }} />}
             <span className="relative">
               {l} <span className="opacity-60">{n}</span>
             </span>
@@ -55,11 +55,11 @@ export function MyPlans() {
             </p>
             <div className="mt-1 flex gap-1" aria-hidden>
               {Array.from({ length: limits.plans === Infinity ? Math.max(5, hostedActivePlans.length + 1) : limits.plans }).map((_, i) => (
-                <span key={i} className={cn('h-1.5 w-6 rounded-full', i < hostedActivePlans.length ? 'bg-coral' : 'bg-cream/10')} />
+                <span key={i} className={cn('h-1.5 w-6 rounded-full', i < hostedActivePlans.length ? 'bg-brand' : 'bg-cream/10')} />
               ))}
             </div>
           </div>
-          <button onClick={nav.openCreate} className="inline-flex h-9 items-center gap-1 rounded-full bg-coral px-3 text-sm font-semibold text-ink">
+          <button onClick={nav.openCreate} className="inline-flex h-9 items-center gap-1 rounded-md bg-brand px-3 text-sm font-semibold text-ink">
             <Plus size={15} /> Nuovo
           </button>
         </div>
@@ -85,7 +85,7 @@ export function MyPlans() {
                       {p.interested.map((id) => {
                         const u = user(id)
                         return (
-                          <button key={id} onClick={() => nav.openUser(id)} className="flex items-center gap-1.5 rounded-full bg-cream/5 py-1 pl-1 pr-2.5 text-sm hover:bg-cream/10">
+                          <button key={id} onClick={() => nav.openUser(id)} className="flex items-center gap-1.5 rounded-md bg-cream/5 py-1 pl-1 pr-2.5 text-sm hover:bg-cream/10">
                             <Avatar user={u} size={22} /> {u.name}
                           </button>
                         )
@@ -108,10 +108,10 @@ export function MyPlans() {
         ))}
         {!list.length && (
           <div className="rounded-3xl border border-dashed border-cream/15 p-6 text-center">
-            <Sparkles className="mx-auto text-coral" />
+            <Sparkles className="mx-auto text-brand" />
             <p className="mt-2 font-display text-lg font-bold">{seg === 'saved' ? 'Nessun piano salvato' : seg === 'join' ? 'Non partecipi ancora a nessun piano' : 'Non ospiti ancora nulla'}</p>
             <p className="mt-1 text-sm text-cream/55">{seg === 'saved' ? 'Tocca il segnalibro sulle card che ti ispirano.' : 'Esplora o crea qualcosa: meno scroll, più fare.'}</p>
-            <button onClick={() => (seg === 'host' ? nav.openCreate() : nav.setTab('explore'))} className="mt-4 rounded-full bg-coral px-4 py-2 text-sm font-semibold text-ink">
+            <button onClick={() => (seg === 'host' ? nav.openCreate() : nav.setTab('explore'))} className="mt-4 rounded-md bg-brand px-4 py-2 text-sm font-semibold text-ink">
               {seg === 'host' ? 'Crea un piano' : 'Vai a Esplora'}
             </button>
           </div>

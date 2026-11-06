@@ -102,9 +102,9 @@ export function GatekeeperSheet({
                   <p className="text-sm text-cream/55">{host.name} chiede di rispondere a:</p>
                 </div>
               </div>
-              <div className="relative overflow-hidden rounded-3xl bg-coral p-5 text-ink">
-                <KeyRound className="absolute -right-3 -top-3 size-20 text-ink/10" aria-hidden />
-                <p className="font-display text-xs font-bold uppercase tracking-[0.2em] text-ink/60">Il dilemma</p>
+              <div className="relative overflow-hidden rounded-3xl bg-forest p-5 text-cream">
+                <KeyRound className="absolute -right-3 -top-3 size-20 text-cream/10" aria-hidden />
+                <p className="font-display text-xs font-bold text-cream/60">Il dilemma</p>
                 <p className="mt-1.5 font-display text-lg font-bold leading-tight">{dilemma.question}</p>
               </div>
               {dilemma.options && dilemma.options.length > 0 && (
@@ -114,7 +114,7 @@ export function GatekeeperSheet({
                       type="button"
                       key={o}
                       onClick={() => setAnswer(o)}
-                      className={`rounded-full border px-3 py-1.5 text-sm transition ${answer === o ? 'border-coral bg-coral text-ink' : 'border-cream/15 text-cream/80 hover:border-cream/35'}`}
+                      className={`rounded-full border px-3 py-1.5 text-sm transition ${answer === o ? 'border-brand bg-brand text-ink' : 'border-cream/15 text-cream/80 hover:border-cream/35'}`}
                     >
                       {o}
                     </button>
@@ -129,7 +129,7 @@ export function GatekeeperSheet({
                   rows={3}
                   maxLength={220}
                   placeholder="Rispondi con sincerità (o con stile)…"
-                  className="w-full resize-none rounded-2xl border border-cream/10 bg-ink/70 p-3.5 text-base text-cream placeholder:text-cream/30 focus:border-coral/60 focus:outline-none"
+                  className="w-full resize-none rounded-2xl border border-cream/10 bg-ink/70 p-3.5 text-base text-cream placeholder:text-cream/30 focus:border-brand/60 focus:outline-none"
                 />
               </label>
               <div className="flex items-center justify-between text-sm text-cream/45">

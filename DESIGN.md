@@ -1,50 +1,37 @@
-# ALONG — Design system (Editorial Poster)
+# ALONG — Design system
 
-Scelto nello step 1.1: **direzione B · Editorial Poster**, brand **corallo**, **Bricolage Grotesque + Inter**, emoji solo come firma.
+**Direzione attuale (step 1.3):** scura, seria, pochi colori, stile app d'incontri famosa.
+**Marrone notte + verde salvia**, un solo font (**Work Sans**), card a **foto intera**.
 I token vivono in `src/index.css` (`@theme`).
 
+> Storia: 1.1 era "Editorial Poster" (corallo, Bricolage, locandine colorate). Sostituita in 1.3 su richiesta: meno colori, meno "look AI", più serio.
+
 ## Colori
-| Ruolo | Token | Uso |
-|---|---|---|
-| Sfondo | `ink` #101010 | pagina |
-| Superfici | `surface` #1a1a1a · `surface-2` #242424 · `line` #2e2e2e | card, input, bordi |
-| Testo | `cream` #F6F4EF (+ /70, /55, /40) | testo primario e secondario |
-| **Brand** | `coral` #FF806D | azioni principali, match, Date, indicatore attivo |
-| Amici | `lime` #D7FF66 | solo intento "Amici" |
-| Senza Confini | `violet` #C4B5FD | solo modalità remota |
-| Timer 48h | `cyan` > 12h · `ember` 12–6h · `alarm` < 6h | solo Border Beam e countdown |
-| Sala d'Attesa | `gold` #F5C451 | solo richieste in attesa |
-| Locandine | `p-food`, `p-drink`, `p-sport`, `p-cinema`, `p-study`, `p-walk`, `p-gaming`, `p-music`, `p-books`, `p-talk`, `p-travel` | sfondo pieno delle card-locandina, testo sempre `ink` |
+| Ruolo | Token | Valore | Uso |
+|---|---|---|---|
+| Fondo | `ink` | #1C1612 | pagina |
+| Superfici | `surface` · `surface-2` · `line` | #2A221C · #352B24 · #3A3029 | card, input, bordi |
+| Testo | `cream` · `muted` | #F2EBDF · #9A8C7D | testo e testo secondario |
+| **Azione (unico colore)** | `brand` | #9CC5A1 salvia | bottoni principali, logo, stato attivo |
+| Verde scuro | `forest` | #24473A | blocchi in evidenza (dilemma, biglietto, Forever) |
+| Semantici | `gold` / `ember` · `alarm` | #D9A55B · #E0675A | Sala d'Attesa e timer 12–6h · timer < 6h, errori |
 
-Regola: **un solo colore d'azione per schermata (corallo)**. Gli altri colori hanno un significato e compaiono solo lì.
+Regole: **un solo colore d'azione** (salvia). Niente colori per categoria, niente gradienti decorativi, niente vetro o glow.
+`coral` e `lime` esistono solo come alias di `brand` per compatibilità.
 
-## Tipografia (7 dimensioni)
-| Classe | px | Uso |
-|---|---|---|
-| `text-xs` | 11 | metadati, badge |
-| `text-sm` | 13 | testo secondario, chip |
-| `text-base` | 15 | testo |
-| `text-lg` | 18 | sottotitoli |
-| `text-xl` | 24 | titoli di card |
-| `text-2xl` | 32 | titoli di pagina |
-| `text-3xl` | 48 | numeri e titoli-poster |
-
-- Titoli: `font-display` (Bricolage Grotesque) 800, tracking stretto.
-- Testo: Inter.
-- Etichette editoriali: utility `serif` (Instrument Serif corsivo), es. *"il suo dilemma —"*. Niente più MAIUSCOLO spaziato.
+## Tipografia
+Solo **Work Sans** (400–800). Scala a 7 passi: `text-xs` 11 · `sm` 13 · `base` 15 · `lg` 18 · `xl` 24 · `2xl` 32 · `3xl` 48.
+Titoli 800 con tracking leggermente stretto. Etichette: testo semplice 600 in `muted`, **niente corsivo e niente trattino lungo**.
 
 ## Forme
-- Raggi: `rounded-sm` 6 (locandine, sticker) · `rounded-md` 10 (bottoni, card-poster) · `rounded-2xl` 14 (superfici, input) · `rounded-3xl` 20 (sheet) · `rounded-full` (avatar, chip).
-- Niente vetro, glow o sfondi animati. Ombra-firma: `poster-shadow` (3px 4px 0 ink) solo per sticker e badge.
+- Raggi: `rounded-md` 10 per chip, badge e pulsanti secondari; `rounded-2xl` 14 per card; `rounded-full` solo per avatar e i due pulsanti d'azione di Scopri/Like.
+- Niente "pillole" tonde ovunque.
 
-## Componenti
-- `Button`: primary corallo, outline crema 2px, ghost su `surface-2`; disabilitato = superficie piena (mai trasparente).
-- `Chip`: inattivo con bordo `line`; attivo crema (o corallo per l'intento Date).
-- `Eyebrow`: serif corsivo.
-- Card di Scopri = **locandina** a 3 pagine-storia (tocca a destra/sinistra, frecce ↑/↓): *Locandina* (orario gigante, foto sfocata incorniciata, sticker inclinato), *In comune* (% sintonia, passioni e Habitat condivisi), *Affidabilità* (karma e badge). Nome e dilemma restano fissi in basso.
-- Animazioni firma: passo = il poster si stacca e cade ruotando; rispondo = la card si gira come un biglietto e vola via.
-- Fine selezione giornaliera (20 profili): locandina crema "Per oggi è tutto." con riepilogo e conto alla rovescia.
-- Bottom nav: barra piatta con bordo superiore, etichette maiuscole Bricolage, "+" corallo quadrato.
+## Componenti chiave
+- **Card di Scopri:** foto intera sfocata (svelata al match), barre-storia in alto, 3 pagine (piano, in comune, affidabilità), nome e dilemma fissi in basso. Azioni: annulla · ✕ · **Rispondi**.
+- **Like ricevuti:** mazzo, una risposta alla volta; destra = Match, sinistra = Non stavolta.
+- **Match:** biglietto doppio (tu + l'altra persona) che si unisce e viene timbrato "MATCH", con la proposta della prima uscita.
+- **Proposta di uscita:** messaggio a forma di biglietto (cosa, quando, dove); quando viene accettata il timer 48h si ferma.
 
 ## Emoji
-Solo come firma: categorie, sticker Bestie, schermata di match. Altrove icone Lucide.
+Restano nelle categorie e in pochi punti di personalità; mai come decorazione dei titoli.

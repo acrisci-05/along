@@ -21,11 +21,11 @@ export function BestieSticker({
           'sticker rounded-2xl p-4 text-ink shadow-[0_14px_30px_-12px_rgb(0_0_0/0.7)]',
           finish === 'paper' && 'bg-[#FFF6C9]',
           finish === 'holo' && 'holo',
-          finish === 'neon' && 'bg-coral',
+          finish === 'neon' && 'bg-brand',
         )}
       >
         <div className="mb-3 flex items-center justify-between">
-          <span className="rounded-full bg-ink px-2.5 py-1 font-display text-xs font-bold uppercase tracking-widest text-cream">Bestie Vouching</span>
+          <span className="rounded-md bg-ink px-2.5 py-1 font-display text-xs font-bold uppercase tracking-widest text-cream">Bestie Vouching</span>
           <span className="font-display text-xs font-semibold text-ink/60">certified ✓</span>
         </div>
         <dl className="space-y-2.5">
@@ -65,14 +65,14 @@ function ShareBestie({ name, onShare }: { name: string; onShare: () => void }) {
     window.setTimeout(() => setCopied(false), 2200)
   }
   return (
-    <button onClick={share} className="mt-4 inline-flex items-center gap-2 rounded-full border border-cream/15 px-3.5 py-2 text-sm font-medium text-cream/85 transition hover:border-coral/50 hover:text-coral">
+    <button onClick={share} className="mt-4 inline-flex items-center gap-2 rounded-md border border-cream/15 px-3.5 py-2 text-sm font-medium text-cream/85 transition hover:border-brand/50 hover:text-brand">
       {copied ? <Check size={15} /> : <Share2 size={15} />} {copied ? 'Link copiato!' : 'Condividi link con il tuo bestie'}
     </button>
   )
 }
 
 const BADGE_META = {
-  fast: { icon: Zap, label: 'Fast Replier', emoji: '⚡', color: 'text-coral bg-coral/10 border-coral/25' },
+  fast: { icon: Zap, label: 'Fast Replier', emoji: '⚡', color: 'text-brand bg-brand/10 border-brand/25' },
   voice: { icon: Mic, label: 'Voice Lover', emoji: '🎙️', color: 'text-violet bg-violet/15 border-violet/30' },
   zero: { icon: ShieldCheck, label: 'Zero Ghosting', emoji: '🛡️', color: 'text-cyan bg-cyan/10 border-cyan/25' },
 } as const
@@ -82,7 +82,7 @@ export function BadgeRow({ badges }: { badges: User['badges'] }) {
   return (
     <div className="flex flex-wrap gap-1.5">
       {badges.map((b) => (
-        <span key={b} className={cn('inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs font-semibold', BADGE_META[b].color)}>
+        <span key={b} className={cn('inline-flex items-center gap-1 rounded-md border px-2 py-0.5 text-xs font-semibold', BADGE_META[b].color)}>
           <span aria-hidden>{BADGE_META[b].emoji}</span> {BADGE_META[b].label}
         </span>
       ))}
@@ -106,12 +106,12 @@ export function KarmaMeter({ karma, stats }: { karma: number; stats: MeStats }) 
           <p className="flex items-center gap-1.5 text-sm font-semibold uppercase tracking-widest text-cream/50">
             <Gauge size={14} /> Karma Meter
           </p>
-          <p className="mt-1 font-display text-3xl font-bold tabular-nums text-coral">{karma}</p>
+          <p className="mt-1 font-display text-3xl font-bold tabular-nums text-brand">{karma}</p>
         </div>
-        <span className="rounded-full bg-coral/10 px-2.5 py-1 text-sm font-semibold text-coral">{level}</span>
+        <span className="rounded-md bg-brand/10 px-2.5 py-1 text-sm font-semibold text-brand">{level}</span>
       </div>
       <div className="mt-3 h-2 overflow-hidden rounded-full bg-cream/10" role="progressbar" aria-valuenow={karma} aria-valuemin={0} aria-valuemax={300} aria-label="Livello karma">
-        <div className="h-full rounded-full bg-coral transition-[width] duration-700" style={{ width: `${pct}%` }} />
+        <div className="h-full rounded-full bg-brand transition-[width] duration-700" style={{ width: `${pct}%` }} />
       </div>
       <ul className="mt-4 space-y-2">
         {rows.map((r) => {

@@ -14,6 +14,7 @@ export function lastPreview(chat: Chat, name: (id: string) => string) {
   if (m.kind === 'voice') return `${who}🎙️ Nota vocale`
   if (m.kind === 'dilemma') return `${who}🔑 ${m.text}`
   if (m.kind === 'track') return `${who}🎵 ${m.text}`
+  if (m.kind === 'proposal') return `${who}Proposta: ${m.proposal?.title ?? 'uscita'}`
   return `${who}${m.text ?? ''}`
 }
 
@@ -30,7 +31,7 @@ export function Crew() {
       <header>
         <Eyebrow>Chat · Focus Mode</Eyebrow>
         <h1 className="mt-1 text-2xl font-bold leading-none">
-          Pochi match, <span className="text-coral">uscite vere</span>
+          Pochi match, <span className="text-brand">uscite vere</span>
         </h1>
       </header>
 
@@ -38,7 +39,7 @@ export function Crew() {
       <section className="glass rounded-3xl p-4" aria-label="Slot chat attivi">
         <div className="flex items-center justify-between">
           <p className="text-sm font-semibold">
-            Slot attivi <span className="tabular-nums text-coral">{activeChats.length}</span>/{limits.slots}
+            Slot attivi <span className="tabular-nums text-brand">{activeChats.length}</span>/{limits.slots}
           </p>
           {!state.lifetime ? (
             <button onClick={() => nav.openPaywall('Espandi a 5 slot chat attivi in contemporanea, per sempre. Pagamento unico.')} className="text-sm font-semibold text-violet hover:underline">
@@ -103,18 +104,18 @@ export function Crew() {
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2">
                     <p className="truncate font-display text-base font-bold">{peers.map((p) => p.name).join(', ')}</p>
-                    {c.unread > 0 && <span className="grid size-5 place-items-center rounded-full bg-coral text-xs font-bold text-ink">{c.unread}</span>}
+                    {c.unread > 0 && <span className="grid size-5 place-items-center rounded-full bg-brand text-xs font-bold text-ink">{c.unread}</span>}
                   </div>
                   <p className="truncate text-sm text-cream/45">{c.title}</p>
                   <p className="truncate text-sm text-cream/70">{lastPreview(c, (id) => user(id).name)}</p>
                 </div>
                 <div className="shrink-0 text-right">
                   {c.mode === 'remote' ? (
-                    <span className="inline-flex items-center gap-1 rounded-full bg-violet/15 px-2 py-0.5 text-xs font-semibold text-violet">
+                    <span className="inline-flex items-center gap-1 rounded-md bg-violet/15 px-2 py-0.5 text-xs font-semibold text-violet">
                       <Mic size={11} /> Pen-Pal
                     </span>
                   ) : c.clockStopped ? (
-                    <span className="rounded-full bg-coral/15 px-2 py-0.5 text-xs font-semibold text-coral">✓ Confermato</span>
+                    <span className="rounded-md bg-brand/15 px-2 py-0.5 text-xs font-semibold text-brand">✓ Confermato</span>
                   ) : (
                     <span className={cn('inline-flex items-center gap-1 text-sm font-bold tabular-nums', TONE_TEXT[tone])}>
                       <Timer size={12} /> {formatCountdown((c.deadline ?? now) - now)}
@@ -209,7 +210,7 @@ export function Crew() {
                       </div>
                       <span
                         className={cn(
-                          'rounded-full px-2 py-0.5 text-xs font-semibold',
+                          'rounded-md px-2 py-0.5 text-xs font-semibold',
                           c.status === 'evolved' ? 'bg-cyan/15 text-cyan' : c.status === 'expired' ? 'bg-alarm/15 text-alarm' : 'bg-cream/10 text-cream/60',
                         )}
                       >

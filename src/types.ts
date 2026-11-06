@@ -124,7 +124,14 @@ export interface Plan {
   createdAt: number
 }
 
-export type MessageKind = 'text' | 'voice' | 'system' | 'dilemma' | 'track' | 'farewell'
+export type MessageKind = 'text' | 'voice' | 'system' | 'dilemma' | 'track' | 'farewell' | 'proposal'
+
+export interface Proposal {
+  title: string
+  when: string
+  place: string
+  status: 'pending' | 'accepted'
+}
 
 export interface Message {
   id: string
@@ -134,6 +141,7 @@ export interface Message {
   duration?: number
   wave?: number[]
   question?: string
+  proposal?: Proposal
   at: number
 }
 

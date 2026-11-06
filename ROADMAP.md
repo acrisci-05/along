@@ -26,8 +26,8 @@ Obiettivo: un'app che si può far provare a qualcuno e che "sembra vera".
 
 - ✅ **1.1 Design system (F)** — direzione Editorial Poster, brand corallo, Bricolage + Inter, 7 dimensioni di testo, 4 raggi, niente vetro/glow, card di Scopri a locandina → vedi `DESIGN.md`
 - ✅ **1.2 Scopri (A)** — card-locandina a 3 pagine-storia (Locandina · In comune · Affidabilità), Bestie solo dopo il match, selezione di 20 profili al giorno con locandina "Per oggi è tutto", animazione "poster che si stacca"
-- 🔜 **1.3 Match & Like (A)** — schermata match più emozionante, like ricevuti a carte da sfogliare, notifiche in-app più chiare
-- ⬜ **1.4 Chat (B)** — chat più pulita, suggerimenti per rompere il ghiaccio legati al dilemma, proposta di ritrovo con data/ora/luogo in un tap
+- ✅ **1.3 Match & Like (A)** — nuovo stile scuro marrone + salvia (solo Work Sans), card a foto intera, like ricevuti a mazzo, match "biglietto doppio", proposta di uscita in 1 tap che ferma il timer
+- 🔜 **1.4 Chat (B)** — chat più pulita, suggerimenti per rompere il ghiaccio legati al dilemma, proposta di ritrovo con data/ora/luogo in un tap
 - ⬜ **1.5 Onboarding vero (C)** — creare il proprio profilo: nome, età, cosa cerchi, interessi, Habitat, dilemma (non più "Alex")
 - ⬜ **1.6 Sicurezza base (E)** — blocca e segnala, conferma 18+, consigli per il primo incontro, condividi il piano con un amico
 

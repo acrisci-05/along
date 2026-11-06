@@ -39,8 +39,8 @@ export function Paywall({ open, onClose, reason }: { open: boolean; onClose: () 
         {phase === 'done' ? (
           <motion.div key="done" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="flex flex-col items-center pt-8 text-center">
             <div className="relative">
-              <motion.div className="absolute inset-0 rounded-full bg-coral/40 blur-2xl" animate={{ scale: [1, 1.3, 1] }} transition={{ repeat: Infinity, duration: 2.4 }} />
-              <div className="relative grid size-24 place-items-center rounded-full bg-coral text-ink">
+              <motion.div className="absolute inset-0 rounded-full bg-brand/40 blur-2xl" animate={{ scale: [1, 1.3, 1] }} transition={{ repeat: Infinity, duration: 2.4 }} />
+              <div className="relative grid size-24 place-items-center rounded-full bg-brand text-ink">
                 <Check size={44} strokeWidth={3} />
               </div>
             </div>
@@ -59,21 +59,21 @@ export function Paywall({ open, onClose, reason }: { open: boolean; onClose: () 
           </motion.div>
         ) : (
           <motion.div key="pay" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-            <div className="relative overflow-hidden rounded-md bg-coral p-5 text-ink">
-              <p className="serif text-lg text-ink/70">pay once, own it forever —</p>
+            <div className="relative overflow-hidden rounded-2xl bg-forest p-5 text-cream">
+              <p className="text-sm font-semibold text-brand">Pay once, own it forever</p>
               <h2 className="mt-1 text-3xl leading-[0.95]">
                 ALONG Forever.
               </h2>
-              <p className="mt-2 text-base leading-snug text-ink/75">
-                {reason ?? 'Niente abbonamenti mensili. Paghi una volta, sblocchi tutto per sempre — come un buon quaderno.'}
+              <p className="mt-2 text-base leading-snug text-cream/75">
+                {reason ?? 'Niente abbonamenti mensili. Paghi una volta, sblocchi tutto per sempre, come un buon quaderno.'}
               </p>
               <div className="mt-4 flex items-end gap-3">
                 <span className="whitespace-nowrap font-display text-3xl font-extrabold leading-none tracking-[-0.04em] tabular-nums">{price}</span>
-                <span className="whitespace-nowrap pb-1 text-sm text-ink/60">
+                <span className="whitespace-nowrap pb-1 text-sm text-cream/60">
                   una tantum{launch && <span className="ml-1.5 line-through">19,99 €</span>}
                 </span>
               </div>
-              <div className="mt-4 flex items-center justify-between rounded-sm bg-ink px-3 py-2">
+              <div className="mt-4 flex items-center justify-between rounded-md bg-ink/40 px-3 py-2">
                 <span className="text-sm text-cream/80">Prezzo di lancio · primi iscritti</span>
                 <Toggle checked={launch} onChange={setLaunch} label="Prezzo di lancio" />
               </div>
@@ -88,7 +88,7 @@ export function Paywall({ open, onClose, reason }: { open: boolean; onClose: () 
                   transition={{ delay: 0.05 * i }}
                   className="flex items-center gap-3 rounded-2xl border border-cream/5 bg-cream/[0.03] p-3"
                 >
-                  <span className="grid size-9 place-items-center rounded-xl bg-coral/10 text-coral">
+                  <span className="grid size-9 place-items-center rounded-xl bg-brand/10 text-brand">
                     <f.icon size={18} />
                   </span>
                   <div>
@@ -113,7 +113,7 @@ export function Paywall({ open, onClose, reason }: { open: boolean; onClose: () 
                 <Toggle checked={state.lifetime} onChange={(v) => setLifetime(v)} label="Simula stato Lifetime" tone="gold" />
               </div>
 
-            <div className="sticky bottom-0 -mx-5 -mb-8 mt-2 bg-gradient-to-t from-[#161616] via-[#161616] to-transparent px-5 pb-6 pt-6">
+            <div className="sticky bottom-0 -mx-5 -mb-8 mt-2 bg-gradient-to-t from-[#221b16] via-[#221b16] to-transparent px-5 pb-6 pt-6">
               <Button className="w-full" size="lg" onClick={buy} disabled={phase === 'paying'}>
                 {phase === 'paying' ? (
                   <>

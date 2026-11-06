@@ -79,6 +79,7 @@ interface Store {
   acceptLike: (likeId: string) => void
   declineLike: (likeId: string) => void
   setPrefs: (p: Partial<Prefs>) => void
+  proposeMeetup: (chatId: string, p: { title: string; when: string; place: string }) => void
 }
 
 export interface MatchEvent {
@@ -347,6 +348,50 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     [limits.slots, toast, announcePromoted],
   )
 
+  /** Sends a meetup ticket; the peer accepts it (simulated) and the 48h clock stops. */
+  const proposeMeetup = useCallback(
+    (chatId: string, prop: { title: string; when: string; place: string }) => {
+      const now = Date.now()
+      const msgId = uid('m')
+      setState((prev) => ({
+        ...prev,
+        chats: prev.chats.map((c) => (c.id === chatId ? { ...c, messages: [...c.messages, { id: msgId, from: 'me', kind: 'proposal', proposal: { ...prop, status: 'pending' }, at: now }] } : c)),
+      }))
+      const chat = stateRef.current.chats.find((c) => c.id === chatId)
+      const from = chat?.peerIds[0] ?? ''
+      later(() => setTyping((t) => ({ ...t, [chatId]: from })), 900)
+      later(() => {
+        setTyping((t) => ({ ...t, [chatId]: undefined }))
+        const at = Date.now()
+        setState((prev) => {
+          const c = prev.chats.find((x) => x.id === chatId)
+          if (!c || c.status !== 'active') return prev
+          return {
+            ...prev,
+            me: { ...prev.me, karma: prev.me.karma + 5 },
+            stats: { ...prev.stats, clocksStopped: prev.stats.clocksStopped + 1 },
+            plans: prev.plans.map((p) => (c.planId === p.id ? { ...p, confirmed: true } : p)),
+            chats: prev.chats.map((x) =>
+              x.id === chatId
+                ? {
+                    ...x,
+                    clockStopped: true,
+                    messages: [
+                      ...x.messages.map((m) => (m.id === msgId && m.proposal ? { ...m, proposal: { ...m.proposal, status: 'accepted' as const } } : m)),
+                      { id: uid('m'), from, kind: 'text', text: 'Perfetto, ci sto! Ci vediamo lì.', at },
+                      { id: uid('m'), from: 'system', kind: 'system', text: `Uscita confermata: ${prop.title}, ${prop.when}, ${prop.place}. Timer fermato.`, at: at + 1 },
+                    ],
+                  }
+                : x,
+            ),
+          }
+        })
+        toast({ tone: 'cyan', title: 'Uscita confermata', body: `${prop.when}, ${prop.place}. +5 Karma.` })
+      }, 2400)
+    },
+    [later, toast],
+  )
+
   const stopClock = useCallback(
     (chatId: string) => {
       const now = Date.now()
@@ -559,7 +604,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       messageUser,
       sendMessage: (chatId, text) => pushMine(chatId, { kind: 'text', text }, 'textSent'),
       sendVoice: (chatId, duration) => pushMine(chatId, { kind: 'voice', duration, wave: randomWave() }, 'voiceSent'),
-      sendTrack: (chatId, title, artist) => pushMine(chatId, { kind: 'track', text: `${title} — ${artist}` }, 'textSent'),
+      sendTrack: (chatId, title, artist) => pushMine(chatId, { kind: 'track', text: `${title} · ${artist}` }, 'textSent'),
       closeElegantly: (chatId) => finishChat(chatId, 'closed'),
       evolveChat: (chatId) => finishChat(chatId, 'evolved'),
       stopClock,
@@ -607,6 +652,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         toast({ tone: 'lime', title: '“Non stavolta” inviato con gentilezza', body: '+3 Karma. Nessuno resta appeso.' })
       },
       setPrefs: (p) => setState((prev) => ({ ...prev, prefs: { ...prev.prefs, ...p } })),
+      proposeMeetup,
       reset: () => {
         timers.current.forEach((t) => clearTimeout(t))
         timers.current = []
@@ -616,7 +662,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         toast({ tone: 'cyan', title: 'Dati demo ripristinati', body: 'Tutto è tornato allo stato iniziale.' })
       },
     }
-  }, [state, limits, typing, toasts, user, toast, dismissToast, joinPlan, messageUser, pushMine, finishChat, stopClock, acceptWaiting, createPlan, simulateIncomingFor, setLifetime, match, likeUser, acceptLike])
+  }, [state, limits, typing, toasts, user, toast, dismissToast, joinPlan, messageUser, pushMine, finishChat, stopClock, acceptWaiting, createPlan, simulateIncomingFor, setLifetime, match, likeUser, acceptLike, proposeMeetup])
 
   return <Ctx.Provider value={store}>{children}</Ctx.Provider>
 }

@@ -80,7 +80,7 @@ export function Explore({ mode, setMode }: { mode: Mode; setMode: (m: Mode) => v
         <h1 className="mt-1 text-2xl font-bold leading-[1.02]">
           Less scrolling.
           <br />
-          <span className={mode === 'local' ? 'text-coral' : 'text-violet'}>More doing.</span>
+          <span className={mode === 'local' ? 'text-brand' : 'text-violet'}>More doing.</span>
         </h1>
       </header>
 
@@ -201,7 +201,7 @@ function EmptyState({ onCreate }: { onCreate: () => void }) {
     <div className="rounded-3xl border border-dashed border-cream/15 p-6 text-center">
       <p className="font-display text-lg font-bold">Ancora niente qui.</p>
       <p className="mt-1 text-sm text-cream/55">Sii tu la prima scintilla: crea un piano in meno di 60 secondi.</p>
-      <button onClick={onCreate} className="mt-4 inline-flex items-center gap-1.5 rounded-full bg-coral px-4 py-2 text-sm font-semibold text-ink">
+      <button onClick={onCreate} className="mt-4 inline-flex items-center gap-1.5 rounded-md bg-brand px-4 py-2 text-sm font-semibold text-ink">
         <Plus size={16} /> Crea piano
       </button>
     </div>
@@ -250,7 +250,7 @@ export function TravelBridge() {
         {state.travelDestinations.length > 0 && (
           <div className="mt-3 flex flex-wrap gap-2">
             {state.travelDestinations.map((d) => (
-              <span key={d} className="inline-flex items-center gap-1.5 rounded-full bg-cyan px-3 py-1 text-sm font-semibold text-ink">
+              <span key={d} className="inline-flex items-center gap-1.5 rounded-md bg-cyan px-3 py-1 text-sm font-semibold text-ink">
                 ✈️ {d}
                 <button onClick={() => removeTravel(d)} aria-label={`Rimuovi ${d}`} className="rounded-full p-0.5 hover:bg-ink/15">
                   <X size={13} />
@@ -283,7 +283,7 @@ export function TravelBridge() {
         {state.travelDestinations.length === 0 && (
           <div className="mt-2 flex flex-wrap gap-1.5">
             {suggestions.map((s) => (
-              <button key={s} onClick={() => add(s)} className="rounded-full border border-cream/10 px-2.5 py-1 text-sm text-cream/70 hover:border-cyan/50">
+              <button key={s} onClick={() => add(s)} className="rounded-md border border-cream/10 px-2.5 py-1 text-sm text-cream/70 hover:border-cyan/50">
                 {s}
               </button>
             ))}

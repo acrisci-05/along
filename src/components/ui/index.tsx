@@ -9,11 +9,11 @@ import { useRevealed } from '../../store/store'
 /* ---------------- Button ---------------- */
 type Variant = 'primary' | 'coral' | 'violet' | 'ghost' | 'outline' | 'gold' | 'danger'
 const VARIANTS: Record<Variant, string> = {
-  primary: 'bg-coral text-ink hover:brightness-105',
-  coral: 'bg-coral text-ink hover:brightness-105',
+  primary: 'bg-brand text-ink hover:brightness-105',
+  coral: 'bg-brand text-ink hover:brightness-105',
   violet: 'bg-cream text-ink hover:bg-white',
   gold: 'bg-gold text-ink hover:brightness-105',
-  ghost: 'bg-surface-2 text-cream hover:bg-[#2c2c2c]',
+  ghost: 'bg-surface-2 text-cream hover:bg-[#3a3029]',
   outline: 'border-2 border-cream/80 text-cream hover:bg-cream hover:text-ink',
   danger: 'bg-alarm/15 text-alarm border border-alarm/30 hover:bg-alarm/25',
 }
@@ -60,7 +60,7 @@ export function Chip({
     lime: 'bg-cream text-ink border-cream',
     violet: 'bg-cream text-ink border-cream',
     cyan: 'bg-cream text-ink border-cream',
-    coral: 'bg-coral text-ink border-coral',
+    coral: 'bg-brand text-ink border-brand',
   }[tone]
   return (
     <button
@@ -68,7 +68,7 @@ export function Chip({
       onClick={onClick}
       aria-pressed={active}
       className={cn(
-        'shrink-0 whitespace-nowrap rounded-full border px-3 py-1.5 text-sm font-medium transition',
+        'shrink-0 whitespace-nowrap rounded-md border px-3 py-1.5 text-sm font-medium transition',
         active ? activeTone : 'border-line text-cream/70 hover:border-cream/40 hover:text-cream',
         className,
       )}
@@ -192,7 +192,7 @@ export function Sheet({
             aria-modal="true"
             aria-labelledby={labelledBy ?? (title ? id : undefined)}
             className={cn(
-              'relative z-10 flex w-full flex-col rounded-t-3xl border-t border-line bg-[#161616] outline-none',
+              'relative z-10 flex w-full flex-col rounded-t-3xl border-t border-line bg-[#221b16] outline-none',
               full ? 'h-[94%]' : 'max-h-[92%]',
             )}
             initial={{ y: '100%' }}
@@ -225,7 +225,7 @@ export function Sheet({
 
 /* ---------------- Toggle ---------------- */
 export function Toggle({ checked, onChange, label, tone = 'lime' }: { checked: boolean; onChange: (v: boolean) => void; label: string; tone?: 'lime' | 'violet' | 'gold' }) {
-  const on = { lime: 'bg-coral', violet: 'bg-violet', gold: 'bg-gold' }[tone]
+  const on = { lime: 'bg-brand', violet: 'bg-violet', gold: 'bg-gold' }[tone]
   return (
     <button
       type="button"
@@ -248,7 +248,7 @@ export function Eyebrow({ children, className }: { children: ReactNode; classNam
 /* ---------------- Lifetime badge ---------------- */
 export function LifetimeBadge({ small }: { small?: boolean }) {
   return (
-    <span className={cn('inline-flex items-center gap-1 rounded-sm bg-coral font-display font-extrabold uppercase tracking-wide text-ink poster-shadow', small ? 'px-2 py-0.5 text-[10px]' : 'px-2.5 py-1 text-xs')}>
+    <span className={cn('inline-flex items-center gap-1 rounded-sm bg-brand font-display font-extrabold uppercase tracking-wide text-ink poster-shadow', small ? 'px-2 py-0.5 text-[10px]' : 'px-2.5 py-1 text-xs')}>
       ✦ Founding Member · Lifetime
     </span>
   )
@@ -281,7 +281,7 @@ export function VoiceBubble({ duration, wave, mine }: { duration: number; wave: 
     <div className="flex items-center gap-2.5">
       <button
         onClick={() => setPlaying((p) => !p)}
-        className={cn('grid size-8 shrink-0 place-items-center rounded-full', mine ? 'bg-ink text-coral' : 'bg-violet text-cream')}
+        className={cn('grid size-8 shrink-0 place-items-center rounded-full', mine ? 'bg-ink text-brand' : 'bg-violet text-cream')}
         aria-label={playing ? 'Pausa nota vocale' : 'Riproduci nota vocale'}
       >
         {playing ? <Pause size={14} /> : <Play size={14} className="ml-0.5" />}
@@ -307,7 +307,7 @@ function RevolutMark({ className }: { className?: string }) {
   return (
     <svg viewBox="0 0 32 32" className={className} aria-hidden>
       <rect width="32" height="32" rx="9" fill="#F6F4EF" />
-      <path d="M10 8h7.2c3.4 0 5.6 2 5.6 5 0 2.3-1.3 4-3.4 4.7L24 24h-4.1l-3.9-6h-2.3v6H10V8Zm3.7 3.1v3.9h3.3c1.4 0 2.1-.8 2.1-2s-.7-1.9-2.1-1.9h-3.3Z" fill="#101010" />
+      <path d="M10 8h7.2c3.4 0 5.6 2 5.6 5 0 2.3-1.3 4-3.4 4.7L24 24h-4.1l-3.9-6h-2.3v6H10V8Zm3.7 3.1v3.9h3.3c1.4 0 2.1-.8 2.1-2s-.7-1.9-2.1-1.9h-3.3Z" fill="#1c1612" />
     </svg>
   )
 }
@@ -315,20 +315,20 @@ function RevolutMark({ className }: { className?: string }) {
 export function RevolutTip({ compact }: { compact?: boolean }) {
   if (compact) {
     return (
-      <a href={REVOLUT_URL} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 rounded-full border border-cream/15 px-3 py-1.5 text-xs font-medium text-cream/80 transition hover:border-coral/60 hover:text-coral">
+      <a href={REVOLUT_URL} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 rounded-md border border-cream/15 px-3 py-1.5 text-xs font-medium text-cream/80 transition hover:border-brand/60 hover:text-brand">
         <RevolutMark className="size-4" /> Offrici una birra 🍺
       </a>
     )
   }
   return (
     <div className="relative overflow-hidden rounded-3xl border border-cream/10 bg-surface p-4">
-      <div className="absolute -right-8 -top-10 size-32 rounded-full bg-coral/25 blur-3xl" aria-hidden />
+      <div className="absolute -right-8 -top-10 size-32 rounded-full bg-brand/25 blur-3xl" aria-hidden />
       <div className="relative flex items-start gap-3">
         <RevolutMark className="size-10 shrink-0" />
         <div className="min-w-0">
           <p className="font-display text-base font-bold">Offrici una birra ☕⚡</p>
           <p className="mt-1 text-sm leading-snug text-cream/70">
-            Ti piace ALONG e vuoi supportare lo sviluppo indipendente? Offri un caffè/birra al creator su Revolut. Niente pubblicità, niente dati venduti — solo gratitudine.
+            Ti piace ALONG e vuoi supportare lo sviluppo indipendente? Offri un caffè/birra al creator su Revolut. Niente pubblicità, niente dati venduti, solo gratitudine.
           </p>
           <a
             href={REVOLUT_URL}

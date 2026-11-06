@@ -81,7 +81,7 @@ export function Radar() {
       </div>
 
       {view === 'map' ? (
-        <div className="relative aspect-[1/1.05] overflow-hidden rounded-3xl border border-cyan/20 bg-[#141414]">
+        <div className="relative aspect-[1/1.05] overflow-hidden rounded-3xl border border-cyan/20 bg-[#1f1915]">
           <svg viewBox="0 0 100 105" className="absolute inset-0 h-full w-full" aria-hidden>
             <defs>
               <pattern id="grid" width="6" height="6" patternUnits="userSpaceOnUse">
@@ -137,7 +137,7 @@ export function Radar() {
                 aria-pressed={active}
               >
                 <span className="relative flex flex-col items-center">
-                  <span className="flex items-center gap-1 rounded-full px-1.5 py-0.5 text-xs font-bold text-ink shadow-lg" style={{ background: color, boxShadow: `0 0 16px ${color}88` }}>
+                  <span className="flex items-center gap-1 rounded-md px-1.5 py-0.5 text-xs font-bold text-ink shadow-lg" style={{ background: color, boxShadow: `0 0 16px ${color}88` }}>
                     {CATEGORY_META[h.kind as keyof typeof CATEGORY_META]?.emoji}
                     {count > 0 && <span>{count}</span>}
                   </span>
@@ -162,12 +162,12 @@ export function Radar() {
                 <p className="flex items-center gap-1.5 font-display font-bold">
                   <MapPin size={15} className="text-cyan" /> {d.name}
                 </p>
-                <span className={cn('rounded-full px-2 py-0.5 text-xs font-semibold', d.plans.length ? 'bg-cyan/15 text-cyan' : 'bg-cream/5 text-cream/40')}>{d.plans.length} piani</span>
+                <span className={cn('rounded-md px-2 py-0.5 text-xs font-semibold', d.plans.length ? 'bg-cyan/15 text-cyan' : 'bg-cream/5 text-cream/40')}>{d.plans.length} piani</span>
               </div>
               {d.plans.length > 0 && (
                 <div className="mt-2 flex flex-wrap gap-1.5">
                   {d.plans.map((p) => (
-                    <button key={p.id} onClick={() => nav.openPlan(p.id)} className="rounded-full border border-cream/10 px-2.5 py-1 text-sm text-cream/80 hover:border-cyan/50">
+                    <button key={p.id} onClick={() => nav.openPlan(p.id)} className="rounded-md border border-cream/10 px-2.5 py-1 text-sm text-cream/80 hover:border-cyan/50">
                       {CATEGORY_META[p.category].emoji} {p.title}
                     </button>
                   ))}
@@ -193,7 +193,7 @@ export function Radar() {
             {!selectedPlans.length && (
               <div className="rounded-2xl border border-dashed border-cream/15 p-4 text-center text-sm text-cream/55">
                 Nessun piano qui ora.{' '}
-                <button onClick={nav.openCreate} className="font-semibold text-coral underline-offset-2 hover:underline">
+                <button onClick={nav.openCreate} className="font-semibold text-brand underline-offset-2 hover:underline">
                   Creane uno
                 </button>
               </div>

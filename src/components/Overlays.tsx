@@ -26,12 +26,12 @@ export function PlanDetailSheet({ planId, onClose, onJoin }: { planId: string | 
           <div className="space-y-5">
             <div>
               <div className="flex flex-wrap items-center gap-2">
-                <span className={cn('rounded-full px-2.5 py-1 text-sm font-semibold', meta.tone, meta.text)}>
+                <span className={cn('rounded-md px-2.5 py-1 text-sm font-semibold', meta.tone, meta.text)}>
                   {meta.emoji} {meta.label}
                 </span>
-                <span className={cn('rounded-full px-2 py-0.5 font-display text-xs font-bold tracking-wider', STATUS_STYLE[status])}>{status}</span>
+                <span className={cn('rounded-md px-2 py-0.5 font-display text-xs font-bold tracking-wider', STATUS_STYLE[status])}>{status}</span>
                 {plan.mode === 'remote' && (
-                  <span className="inline-flex items-center gap-1 rounded-full bg-violet/15 px-2.5 py-1 text-sm font-semibold text-violet">
+                  <span className="inline-flex items-center gap-1 rounded-md bg-violet/15 px-2.5 py-1 text-sm font-semibold text-violet">
                     <Globe2 size={12} /> Senza Confini
                   </span>
                 )}
@@ -43,7 +43,7 @@ export function PlanDetailSheet({ planId, onClose, onJoin }: { planId: string | 
                   <p className="mt-1 text-sm font-semibold">{planWhen(plan, now)}</p>
                 </div>
                 <div className="glass rounded-2xl p-3">
-                  {plan.mode === 'remote' ? <Globe2 size={15} className="text-violet" /> : <MapPin size={15} className="text-coral" />}
+                  {plan.mode === 'remote' ? <Globe2 size={15} className="text-violet" /> : <MapPin size={15} className="text-brand" />}
                   <p className="mt-1 line-clamp-2 text-sm font-semibold">
                     {plan.habitat}
                     {plan.district ? ` · ${plan.district}` : ''}
@@ -59,7 +59,7 @@ export function PlanDetailSheet({ planId, onClose, onJoin }: { planId: string | 
                 <p className="font-display text-base font-bold">{isHost ? 'Tu' : `${host.name}, ${host.age}`}</p>
                 <BadgeRow badges={host.badges} />
               </div>
-              {!isHost && <span className="text-sm font-semibold text-coral">Profilo →</span>}
+              {!isHost && <span className="text-sm font-semibold text-brand">Profilo →</span>}
             </button>
 
             {plan.vibes.length > 0 && (
@@ -67,7 +67,7 @@ export function PlanDetailSheet({ planId, onClose, onJoin }: { planId: string | 
                 <Eyebrow>Instant Vibe</Eyebrow>
                 <div className="mt-2 flex flex-wrap gap-1.5">
                   {plan.vibes.map((v) => (
-                    <span key={v} className="rounded-full border border-coral/25 bg-coral/5 px-2.5 py-1 text-sm text-coral">
+                    <span key={v} className="rounded-md border border-brand/25 bg-brand/5 px-2.5 py-1 text-sm text-brand">
                       {v}
                     </span>
                   ))}
@@ -104,8 +104,8 @@ export function PlanDetailSheet({ planId, onClose, onJoin }: { planId: string | 
             </div>
 
             {!isHost && (
-              <div className="relative overflow-hidden rounded-3xl border border-coral/30 bg-coral/5 p-4">
-                <p className="flex items-center gap-1.5 font-display text-xs font-bold uppercase tracking-[0.2em] text-coral">
+              <div className="relative overflow-hidden rounded-3xl border border-brand/30 bg-brand/5 p-4">
+                <p className="flex items-center gap-1.5 font-display text-xs font-bold uppercase tracking-[0.2em] text-brand">
                   <KeyRound size={13} /> Gatekeeper
                 </p>
                 <p className="mt-1 font-display text-lg font-semibold leading-snug">{plan.dilemma.question}</p>
@@ -114,10 +114,10 @@ export function PlanDetailSheet({ planId, onClose, onJoin }: { planId: string | 
 
             <LivingPlanCard plan={plan} users={plan.participants.map(user)} preview now={now} />
 
-            <div className="sticky bottom-0 -mx-5 -mb-8 flex gap-2 bg-gradient-to-t from-[#161616] via-[#161616] to-transparent px-5 pb-6 pt-5">
+            <div className="sticky bottom-0 -mx-5 -mb-8 flex gap-2 bg-gradient-to-t from-[#221b16] via-[#221b16] to-transparent px-5 pb-6 pt-5">
               <button
                 onClick={() => toggleSave(plan.id)}
-                className={cn('grid size-12 shrink-0 place-items-center rounded-2xl', state.saved.includes(plan.id) ? 'bg-coral text-ink' : 'bg-cream/10 text-cream')}
+                className={cn('grid size-12 shrink-0 place-items-center rounded-2xl', state.saved.includes(plan.id) ? 'bg-brand text-ink' : 'bg-cream/10 text-cream')}
                 aria-label="Salva"
                 aria-pressed={state.saved.includes(plan.id)}
               >
@@ -178,8 +178,8 @@ export function UserSheet({ userId, onClose }: { userId: string | null; onClose:
                 )}
               </p>
               <div className="mt-1.5 flex items-center gap-2">
-                <span className="rounded-full bg-violet/20 px-2 py-0.5 text-sm font-bold text-violet">{affinity(state.me, u)}% sintonia</span>
-                <span className="text-sm font-semibold text-coral">⚡ {u.karma} karma</span>
+                <span className="rounded-md bg-violet/20 px-2 py-0.5 text-sm font-bold text-violet">{affinity(state.me, u)}% sintonia</span>
+                <span className="text-sm font-semibold text-brand">⚡ {u.karma} karma</span>
               </div>
             </div>
           </div>
@@ -192,7 +192,7 @@ export function UserSheet({ userId, onClose }: { userId: string | null; onClose:
               {u.interests.map((i) => {
                 const shared = sharedInterests(state.me, u).includes(i)
                 return (
-                  <span key={i} className={cn('rounded-full border px-2.5 py-1 text-sm', shared ? 'border-violet bg-violet/25 text-cream' : 'border-cream/10 text-cream/65')}>
+                  <span key={i} className={cn('rounded-md border px-2.5 py-1 text-sm', shared ? 'border-violet bg-violet/25 text-cream' : 'border-cream/10 text-cream/65')}>
                     {shared && '✦ '}
                     {i}
                   </span>
@@ -223,13 +223,13 @@ export function UserSheet({ userId, onClose }: { userId: string | null; onClose:
             </div>
           )}
 
-          <div className="rounded-3xl border border-coral/30 bg-coral/5 p-4">
-            <p className="flex items-center gap-1.5 font-display text-xs font-bold uppercase tracking-[0.2em] text-coral">
+          <div className="rounded-3xl border border-brand/30 bg-brand/5 p-4">
+            <p className="flex items-center gap-1.5 font-display text-xs font-bold uppercase tracking-[0.2em] text-brand">
               <KeyRound size={13} /> Il dilemma di {u.name}
             </p>
             <p className="mt-1 font-display text-lg font-semibold leading-snug">{u.dilemma.question}</p>
           </div>
-          <div className="sticky bottom-0 -mx-5 -mb-8 bg-gradient-to-t from-[#161616] via-[#161616] to-transparent px-5 pb-6 pt-5">
+          <div className="sticky bottom-0 -mx-5 -mb-8 bg-gradient-to-t from-[#221b16] via-[#221b16] to-transparent px-5 pb-6 pt-5">
             {dm ? (
               <Button className="w-full" size="lg" onClick={() => nav.openChat(dm.id)}>
                 <MessageCircle size={18} /> Apri la chat

@@ -138,7 +138,7 @@ export function QuickCreate({ open, onClose, onPaywall, onCreated }: { open: boo
         <h2 id="qc-title" className="text-xl font-bold">
           Quick Create
         </h2>
-        <span className={cn('inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-sm font-semibold tabular-nums', elapsed < 60 ? 'bg-cyan/15 text-cyan' : 'bg-coral/15 text-coral')}>
+        <span className={cn('inline-flex items-center gap-1 rounded-md px-2.5 py-1 text-sm font-semibold tabular-nums', elapsed < 60 ? 'bg-cyan/15 text-cyan' : 'bg-brand/15 text-brand')}>
           <Timer size={13} /> {mm} / 1:00
         </span>
       </div>
@@ -153,8 +153,8 @@ export function QuickCreate({ open, onClose, onPaywall, onCreated }: { open: boo
         {STEPS.map((s, i) => (
           <li key={s} className="flex-1">
             <button type="button" onClick={() => i < step && setStep(i)} className="block w-full text-left" aria-current={i === step ? 'step' : undefined} disabled={i > step}>
-              <span className={cn('block h-1 rounded-full transition-colors', i <= step ? 'bg-coral' : 'bg-cream/10')} />
-              <span className={cn('mt-1 block text-xs font-semibold', i === step ? 'text-coral' : 'text-cream/35')}>
+              <span className={cn('block h-1 rounded-full transition-colors', i <= step ? 'bg-brand' : 'bg-cream/10')} />
+              <span className={cn('mt-1 block text-xs font-semibold', i === step ? 'text-brand' : 'text-cream/35')}>
                 {i + 1}. {s}
               </span>
             </button>
@@ -181,7 +181,7 @@ export function QuickCreate({ open, onClose, onPaywall, onCreated }: { open: boo
                     onChange={(e) => setTitle(e.target.value)}
                     maxLength={60}
                     placeholder="Es. Pizza fritta e passeggiata"
-                    className="mt-2 h-12 w-full rounded-2xl border border-cream/10 bg-ink/70 px-4 text-base placeholder:text-cream/30 focus:border-coral/60 focus:outline-none"
+                    className="mt-2 h-12 w-full rounded-2xl border border-cream/10 bg-ink/70 px-4 text-base placeholder:text-cream/30 focus:border-brand/60 focus:outline-none"
                   />
                 </label>
                 <div>
@@ -280,7 +280,7 @@ export function QuickCreate({ open, onClose, onPaywall, onCreated }: { open: boo
                       type="button"
                       onClick={() => setWhenKey(k)}
                       aria-pressed={whenKey === k}
-                      className={cn('h-11 rounded-2xl border text-sm font-semibold transition', whenKey === k ? 'border-coral bg-coral text-ink' : 'border-cream/10 hover:border-cream/25')}
+                      className={cn('h-11 rounded-2xl border text-sm font-semibold transition', whenKey === k ? 'border-brand bg-brand text-ink' : 'border-cream/10 hover:border-cream/25')}
                     >
                       {l}
                     </button>
@@ -295,7 +295,7 @@ export function QuickCreate({ open, onClose, onPaywall, onCreated }: { open: boo
                         value={custom}
                         min={new Date().toISOString().slice(0, 10)}
                         onChange={(e) => setCustom(e.target.value)}
-                        className="mt-1 h-11 w-full rounded-2xl border border-cream/10 bg-ink/70 px-3 text-cream [color-scheme:dark] focus:border-coral/60 focus:outline-none"
+                        className="mt-1 h-11 w-full rounded-2xl border border-cream/10 bg-ink/70 px-3 text-cream [color-scheme:dark] focus:border-brand/60 focus:outline-none"
                       />
                     </label>
                   )}
@@ -305,7 +305,7 @@ export function QuickCreate({ open, onClose, onPaywall, onCreated }: { open: boo
                       type="time"
                       value={time}
                       onChange={(e) => setTime(e.target.value)}
-                      className="mt-1 h-11 w-full rounded-2xl border border-cream/10 bg-ink/70 px-3 text-cream [color-scheme:dark] focus:border-coral/60 focus:outline-none"
+                      className="mt-1 h-11 w-full rounded-2xl border border-cream/10 bg-ink/70 px-3 text-cream [color-scheme:dark] focus:border-brand/60 focus:outline-none"
                     />
                   </label>
                 </div>
@@ -321,7 +321,7 @@ export function QuickCreate({ open, onClose, onPaywall, onCreated }: { open: boo
                       <Minus size={18} />
                     </button>
                     <div className="text-center">
-                      <p className="font-display text-3xl font-bold tabular-nums text-coral">{capacity}</p>
+                      <p className="font-display text-3xl font-bold tabular-nums text-brand">{capacity}</p>
                       <p className="text-xs text-cream/45">persone, te compres*</p>
                     </div>
                     <button type="button" onClick={() => setCapacity((c) => Math.min(8, c + 1))} className="grid size-11 place-items-center rounded-xl bg-cream/5 hover:bg-cream/10" aria-label="Più posti">
@@ -337,7 +337,7 @@ export function QuickCreate({ open, onClose, onPaywall, onCreated }: { open: boo
                       value={cost}
                       onChange={(e) => setCost(e.target.value.replace(/[^0-9]/g, '').slice(0, 3))}
                       placeholder="Es. 15"
-                      className="mt-2 h-11 w-full rounded-2xl border border-cream/10 bg-ink/70 px-4 placeholder:text-cream/30 focus:border-coral/60 focus:outline-none"
+                      className="mt-2 h-11 w-full rounded-2xl border border-cream/10 bg-ink/70 px-4 placeholder:text-cream/30 focus:border-brand/60 focus:outline-none"
                     />
                   </label>
                 )}
@@ -366,11 +366,11 @@ export function QuickCreate({ open, onClose, onPaywall, onCreated }: { open: boo
                   rows={3}
                   maxLength={140}
                   placeholder="Es. Alba o tramonto? E perché?"
-                  className="w-full resize-none rounded-2xl border border-cream/10 bg-ink/70 p-3.5 text-base placeholder:text-cream/30 focus:border-coral/60 focus:outline-none"
+                  className="w-full resize-none rounded-2xl border border-cream/10 bg-ink/70 p-3.5 text-base placeholder:text-cream/30 focus:border-brand/60 focus:outline-none"
                 />
                 <div className="flex flex-wrap gap-2">
                   {PRESET_DILEMMAS.map((d) => (
-                    <button key={d} type="button" onClick={() => setDilemma(d)} className="rounded-2xl border border-cream/10 px-3 py-2 text-left text-sm text-cream/75 hover:border-coral/40">
+                    <button key={d} type="button" onClick={() => setDilemma(d)} className="rounded-2xl border border-cream/10 px-3 py-2 text-left text-sm text-cream/75 hover:border-brand/40">
                       {d}
                     </button>
                   ))}
@@ -390,7 +390,7 @@ export function QuickCreate({ open, onClose, onPaywall, onCreated }: { open: boo
         </AnimatePresence>
       </div>
 
-      <div className="sticky bottom-0 -mx-5 -mb-8 mt-4 flex gap-2 bg-gradient-to-t from-[#161616] via-[#161616] to-transparent px-5 pb-6 pt-5">
+      <div className="sticky bottom-0 -mx-5 -mb-8 mt-4 flex gap-2 bg-gradient-to-t from-[#221b16] via-[#221b16] to-transparent px-5 pb-6 pt-5">
         {step > 0 && (
           <Button variant="ghost" onClick={() => setStep((s) => s - 1)} aria-label="Indietro">
             <ArrowLeft size={18} />

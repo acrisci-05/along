@@ -113,16 +113,16 @@ export function LivingPlanCard({
           status === 'CONFIRMED' && 'bg-cyan/60',
         )}
       />
-      <div className="relative rounded-3xl bg-[#1a1a1a]/95 p-4">
+      <div className="relative rounded-3xl bg-[#2a221c]/95 p-4">
         {/* header */}
         <div className="flex items-center gap-2">
-          <span className={cn('inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold', meta.tone, meta.text)}>
+          <span className={cn('inline-flex items-center gap-1 rounded-md px-2.5 py-1 text-xs font-semibold', meta.tone, meta.text)}>
             <span aria-hidden>{meta.emoji}</span> {meta.label}
           </span>
-          <span className="inline-flex items-center gap-1 rounded-full bg-cream/[0.06] px-2.5 py-1 text-xs font-medium text-cream/80">
+          <span className="inline-flex items-center gap-1 rounded-md bg-cream/[0.06] px-2.5 py-1 text-xs font-medium text-cream/80">
             <Clock size={12} /> {planWhen(plan, now)}
           </span>
-          <span className={cn('ml-auto rounded-full px-2 py-0.5 font-display text-xs font-bold tracking-wider', STATUS_STYLE[status])}>{status}</span>
+          <span className={cn('ml-auto rounded-md px-2 py-0.5 font-display text-xs font-bold tracking-wider', STATUS_STYLE[status])}>{status}</span>
         </div>
 
         {/* title */}
@@ -130,14 +130,14 @@ export function LivingPlanCard({
           {onOpen ? (
             <button type="button" onClick={onOpen} className="text-left focus-visible:outline-none">
               {plan.title}
-              <span className="absolute inset-0 rounded-3xl group-has-[:focus-visible]:ring-2 group-has-[:focus-visible]:ring-coral" aria-hidden />
+              <span className="absolute inset-0 rounded-3xl group-has-[:focus-visible]:ring-2 group-has-[:focus-visible]:ring-brand" aria-hidden />
             </button>
           ) : (
             plan.title || <span className="text-cream/30">Il tuo piano…</span>
           )}
         </h3>
         <p className="mt-1.5 flex items-center gap-1.5 text-sm text-cream/60">
-          {remote ? <Globe2 size={14} className="text-violet" /> : <MapPin size={14} className="text-coral" />}
+          {remote ? <Globe2 size={14} className="text-violet" /> : <MapPin size={14} className="text-brand" />}
           <span className="truncate">
             {plan.habitat || 'Scegli un habitat'}
             {plan.district && ` · ${plan.district}`}
@@ -150,9 +150,9 @@ export function LivingPlanCard({
         {/* vibes */}
         {plan.vibes.length > 0 && (
           <div className="mt-3 flex flex-wrap gap-1.5">
-            <span className="text-xs font-semibold uppercase tracking-wider text-coral/80">Instant Vibe</span>
+            <span className="text-xs font-semibold uppercase tracking-wider text-brand/80">Instant Vibe</span>
             {plan.vibes.slice(0, 3).map((v) => (
-              <span key={v} className="rounded-full border border-cream/10 px-2 py-0.5 text-xs text-cream/70">
+              <span key={v} className="rounded-md border border-cream/10 px-2 py-0.5 text-xs text-cream/70">
                 {v}
               </span>
             ))}
@@ -187,7 +187,7 @@ export function LivingPlanCard({
                 e.stopPropagation()
                 onSave()
               }}
-              className={cn('relative z-10 grid size-9 place-items-center rounded-full transition', saved ? 'bg-coral text-ink' : 'bg-cream/[0.06] text-cream/70 hover:bg-cream/10')}
+              className={cn('relative z-10 grid size-9 place-items-center rounded-full transition', saved ? 'bg-brand text-ink' : 'bg-cream/[0.06] text-cream/70 hover:bg-cream/10')}
               aria-label={saved ? 'Rimuovi dai salvati' : 'Salva piano'}
               aria-pressed={saved}
             >

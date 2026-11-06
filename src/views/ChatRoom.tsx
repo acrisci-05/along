@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { AnimatePresence, motion } from 'motion/react'
-import { ArrowLeft, Calculator, Calendar, CheckCircle2, Hand, KeyRound, Lock, MapPin, Mic, Music2, Send, Square, Timer, Unlock, Users } from 'lucide-react'
+import { ArrowLeft, Calculator, Calendar, CalendarCheck, CheckCircle2, Hand, KeyRound, Lock, MapPin, Mic, Music2, Send, Square, Timer, Unlock, Users } from 'lucide-react'
 import type { Chat, Message, Plan, User } from '../types'
 import { FAREWELL } from '../data/mock'
+import { suggestMeetup } from '../lib/meetup'
 import { useNav } from '../nav'
 import { useNow, useStore } from '../store/store'
 import { cn, euro, formatCountdown, meaningfulCount, planWhen, timerTone, TONE_TEXT } from '../lib/utils'
@@ -25,6 +26,7 @@ export function ChatRoom({ chatId, onClose }: { chatId: string; onClose: () => v
   const scroller = useRef<HTMLDivElement>(null)
   const [confirmClose, setConfirmClose] = useState(false)
   const [showTracks, setShowTracks] = useState(false)
+  const [proposing, setProposing] = useState(false)
 
   useEffect(() => {
     if (chat?.unread) markRead(chat.id)
@@ -52,7 +54,7 @@ export function ChatRoom({ chatId, onClose }: { chatId: string; onClose: () => v
       role="dialog"
       aria-label={`Chat: ${chat.title}`}
     >
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-60 bg-[radial-gradient(ellipse_at_top,rgb(255_128_109/0.08),transparent_70%)]" aria-hidden />
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-60 bg-[radial-gradient(ellipse_at_top,rgb(156_197_161/0.08),transparent_70%)]" aria-hidden />
       {/* header */}
       <header className="glass-strong relative z-10 flex items-center gap-3 border-x-0 border-t-0 px-3 pb-3 pt-3">
         <button onClick={onClose} className="grid size-10 place-items-center rounded-full hover:bg-cream/5" aria-label="Torna alla crew">
@@ -70,13 +72,13 @@ export function ChatRoom({ chatId, onClose }: { chatId: string; onClose: () => v
           <p className="truncate text-xs text-cream/50">{chat.title}</p>
         </div>
         {!readOnly && chat.mode === 'local' && chat.deadline && (
-          <span className={cn('inline-flex shrink-0 items-center gap-1 rounded-full bg-cream/5 px-2.5 py-1 text-sm font-bold tabular-nums', TONE_TEXT[tone])} aria-label="Timer anti-ghosting">
+          <span className={cn('inline-flex shrink-0 items-center gap-1 rounded-md bg-cream/5 px-2.5 py-1 text-sm font-bold tabular-nums', TONE_TEXT[tone])} aria-label="Timer anti-ghosting">
             {chat.clockStopped ? <CheckCircle2 size={13} /> : <Timer size={13} />}
             {chat.clockStopped ? 'Fermo' : formatCountdown(chat.deadline - now)}
           </span>
         )}
         {chat.mode === 'remote' && !readOnly && (
-          <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-violet/15 px-2.5 py-1 text-xs font-semibold text-violet">
+          <span className="inline-flex shrink-0 items-center gap-1 rounded-md bg-violet/15 px-2.5 py-1 text-xs font-semibold text-violet">
             <Mic size={12} /> Capsule
           </span>
         )}
@@ -117,20 +119,25 @@ export function ChatRoom({ chatId, onClose }: { chatId: string; onClose: () => v
       {!readOnly && (
         <div className="glass-strong relative z-10 border-x-0 border-b-0 px-3 pb-3 pt-2">
           <div className="no-scrollbar -mx-3 mb-2 flex gap-2 overflow-x-auto px-3">
-            {chat.mode === 'local' && !chat.clockStopped && (
-              <button onClick={() => store.stopClock(chat.id)} className="inline-flex h-8 shrink-0 items-center gap-1.5 rounded-full bg-cyan px-3 text-sm font-bold text-ink">
-                <Square size={12} fill="currentColor" /> Stop the Clock
+            {!chat.clockStopped && (
+              <button onClick={() => setProposing(true)} className="inline-flex h-8 shrink-0 items-center gap-1.5 rounded-md bg-brand px-3 text-sm font-bold text-ink">
+                <CalendarCheck size={14} /> Proponi uscita
               </button>
             )}
-            <button onClick={() => store.evolveChat(chat.id)} className="inline-flex h-8 shrink-0 items-center gap-1.5 rounded-full border border-coral/40 px-3 text-sm font-semibold text-coral hover:bg-coral/10">
+            {chat.mode === 'local' && !chat.clockStopped && (
+              <button onClick={() => store.stopClock(chat.id)} className="inline-flex h-8 shrink-0 items-center gap-1.5 rounded-md border border-line px-3 text-sm font-semibold text-cream/80">
+                <Square size={11} fill="currentColor" /> Stop the Clock
+              </button>
+            )}
+            <button onClick={() => store.evolveChat(chat.id)} className="inline-flex h-8 shrink-0 items-center gap-1.5 rounded-md border border-brand/40 px-3 text-sm font-semibold text-brand hover:bg-brand/10">
               🤝 {chat.mode === 'local' ? 'Ci siamo visti · libera slot' : 'Contatti scambiati'}
             </button>
             {chat.mode === 'remote' && (
-              <button onClick={() => setShowTracks(true)} className="inline-flex h-8 shrink-0 items-center gap-1.5 rounded-full border border-violet/40 px-3 text-sm font-semibold text-violet hover:bg-violet/10">
+              <button onClick={() => setShowTracks(true)} className="inline-flex h-8 shrink-0 items-center gap-1.5 rounded-md border border-violet/40 px-3 text-sm font-semibold text-violet hover:bg-violet/10">
                 <Music2 size={13} /> Condividi brano
               </button>
             )}
-            <button onClick={() => setConfirmClose(true)} className="inline-flex h-8 shrink-0 items-center gap-1.5 rounded-full px-3 text-sm font-medium text-cream/45 hover:text-cream/80">
+            <button onClick={() => setConfirmClose(true)} className="inline-flex h-8 shrink-0 items-center gap-1.5 rounded-md px-3 text-sm font-medium text-cream/45 hover:text-cream/80">
               <Hand size={13} /> Chiudi con eleganza
             </button>
           </div>
@@ -143,7 +150,7 @@ export function ChatRoom({ chatId, onClose }: { chatId: string; onClose: () => v
         <div className="mt-4 rounded-2xl bg-cream p-4 text-ink">
           <p className="font-display text-base font-semibold leading-snug">“{FAREWELL}”</p>
         </div>
-        <p className="mt-3 text-center text-sm font-semibold text-coral">+15 Punti Karma · niente ghosting</p>
+        <p className="mt-3 text-center text-sm font-semibold text-brand">+15 Punti Karma · niente ghosting</p>
         <div className="mt-4 grid grid-cols-2 gap-2">
           <Button variant="ghost" onClick={() => setConfirmClose(false)}>
             Annulla
@@ -158,6 +165,16 @@ export function ChatRoom({ chatId, onClose }: { chatId: string; onClose: () => v
           </Button>
         </div>
       </Sheet>
+
+      <ProposalSheet
+        open={proposing}
+        onClose={() => setProposing(false)}
+        initial={suggestMeetup(store.state, chat.peerIds[0], chat)}
+        onSend={(p) => {
+          store.proposeMeetup(chat.id, p)
+          setProposing(false)
+        }}
+      />
 
       <Sheet open={showTracks} onClose={() => setShowTracks(false)} title="Condividi un brano">
         <ul className="space-y-2">
@@ -193,7 +210,7 @@ function PlanHub({ chat, plan, peers, now, readOnly, meaningful }: { chat: Chat;
       {plan && (
         <div className="grid grid-cols-3 gap-2">
           <button onClick={() => nav.openPlan(plan.id)} className="glass rounded-2xl p-2.5 text-left">
-            <MapPin size={14} className="text-coral" />
+            <MapPin size={14} className="text-brand" />
             <p className="mt-1 text-xs font-semibold uppercase tracking-wider text-cream/40">Dove</p>
             <p className="line-clamp-2 text-sm font-medium leading-tight">{plan.habitat}</p>
           </button>
@@ -203,7 +220,7 @@ function PlanHub({ chat, plan, peers, now, readOnly, meaningful }: { chat: Chat;
             <p className="line-clamp-2 text-sm font-medium leading-tight">{planWhen(plan, now)}</p>
           </div>
           <div className="glass rounded-2xl p-2.5">
-            <Users size={14} className="text-coral" />
+            <Users size={14} className="text-brand" />
             <p className="mt-1 text-xs font-semibold uppercase tracking-wider text-cream/40">Chi viene</p>
             <p className="text-sm font-medium leading-tight">
               {plan.participants.length}/{plan.capacity} in crew
@@ -221,7 +238,7 @@ function PlanHub({ chat, plan, peers, now, readOnly, meaningful }: { chat: Chat;
         </div>
       )}
       {chat.clockStopped && (
-        <div className="flex items-center gap-2 rounded-2xl border border-coral/30 bg-coral/10 p-3 text-sm text-coral">
+        <div className="flex items-center gap-2 rounded-2xl border border-brand/30 bg-brand/10 p-3 text-sm text-brand">
           <CheckCircle2 size={16} /> Ritrovo confermato. Timer fermo. Ci vediamo lì!
         </div>
       )}
@@ -238,13 +255,13 @@ function PlanHub({ chat, plan, peers, now, readOnly, meaningful }: { chat: Chat;
         <div className="rounded-2xl border border-violet/25 bg-violet/5 p-3">
           <div className="flex items-center justify-between text-sm">
             <span className="flex items-center gap-1.5 font-semibold">
-              {meaningful >= 5 ? <Unlock size={14} className="text-coral" /> : <Lock size={14} className="text-violet" />} Progressive Unblur
+              {meaningful >= 5 ? <Unlock size={14} className="text-brand" /> : <Lock size={14} className="text-violet" />} Progressive Unblur
             </span>
             <span className="tabular-nums text-cream/60">{Math.min(5, meaningful)}/5 messaggi significativi</span>
           </div>
           <div className="mt-2 flex gap-1">
             {Array.from({ length: 5 }).map((_, i) => (
-              <span key={i} className={cn('h-1.5 flex-1 rounded-full transition-colors duration-500', i < meaningful ? (meaningful >= 5 ? 'bg-coral' : 'bg-violet') : 'bg-cream/10')} />
+              <span key={i} className={cn('h-1.5 flex-1 rounded-full transition-colors duration-500', i < meaningful ? (meaningful >= 5 ? 'bg-brand' : 'bg-violet') : 'bg-cream/10')} />
             ))}
           </div>
           <p className="mt-1.5 text-xs text-cream/45">{meaningful >= 5 ? 'Foto svelate in alta definizione ✨' : 'Messaggi di almeno 12 caratteri o note vocali.'}</p>
@@ -267,9 +284,9 @@ function SplitBill({ chat, total, people, disabled }: { chat: Chat; total: numbe
   return (
     <div className="glass rounded-2xl">
       <button onClick={() => setOpen((o) => !o)} className="flex w-full items-center gap-2 p-3 text-left" aria-expanded={open}>
-        <Calculator size={16} className="text-coral" />
+        <Calculator size={16} className="text-brand" />
         <span className="flex-1 text-sm font-semibold">Split the Bill</span>
-        <span className="font-display text-base font-bold tabular-nums text-coral">{euro(per)}</span>
+        <span className="font-display text-base font-bold tabular-nums text-brand">{euro(per)}</span>
         <span className="text-xs text-cream/45">a testa</span>
       </button>
       <AnimatePresence>
@@ -283,7 +300,7 @@ function SplitBill({ chat, total, people, disabled }: { chat: Chat; total: numbe
                     inputMode="decimal"
                     value={amount}
                     onChange={(e) => setAmount(e.target.value.replace(/[^0-9.,]/g, ''))}
-                    className="mt-1 h-10 w-full rounded-xl border border-cream/10 bg-ink/60 px-3 tabular-nums focus:border-coral/60 focus:outline-none"
+                    className="mt-1 h-10 w-full rounded-xl border border-cream/10 bg-ink/60 px-3 tabular-nums focus:border-brand/60 focus:outline-none"
                   />
                 </label>
                 <div>
@@ -302,7 +319,7 @@ function SplitBill({ chat, total, people, disabled }: { chat: Chat; total: numbe
               <div className="flex items-center gap-2">
                 <span className="text-xs text-cream/50">Mancia</span>
                 {[0, 5, 10].map((t) => (
-                  <button key={t} onClick={() => setTip(t)} aria-pressed={tip === t} className={cn('h-8 rounded-full px-3 text-sm font-semibold', tip === t ? 'bg-coral text-ink' : 'bg-cream/5 text-cream/70')}>
+                  <button key={t} onClick={() => setTip(t)} aria-pressed={tip === t} className={cn('h-8 rounded-md px-3 text-sm font-semibold', tip === t ? 'bg-brand text-ink' : 'bg-cream/5 text-cream/70')}>
                     {t}%
                   </button>
                 ))}
@@ -329,9 +346,9 @@ function Bubble({ m, prev, author, blurred, group }: { m: Message; prev?: Messag
 
   if (m.kind === 'dilemma')
     return (
-      <motion.div initial={{ opacity: 0, scale: 0.96 }} animate={{ opacity: 1, scale: 1 }} className={cn('max-w-[86%] overflow-hidden rounded-3xl border border-coral/40', mine ? 'ml-auto' : '')}>
-        <div className="bg-coral/10 px-3.5 py-2">
-          <p className="serif text-sm flex items-center gap-1.5 text-coral">
+      <motion.div initial={{ opacity: 0, scale: 0.96 }} animate={{ opacity: 1, scale: 1 }} className={cn('max-w-[86%] overflow-hidden rounded-3xl border border-brand/40', mine ? 'ml-auto' : '')}>
+        <div className="bg-brand/10 px-3.5 py-2">
+          <p className="serif text-sm flex items-center gap-1.5 text-brand">
             <KeyRound size={12} /> Dilemma Gatekeeper
           </p>
           <p className="mt-0.5 text-sm text-cream/70">{m.question}</p>
@@ -342,6 +359,30 @@ function Bubble({ m, prev, author, blurred, group }: { m: Message; prev?: Messag
         </div>
       </motion.div>
     )
+
+  if (m.kind === 'proposal' && m.proposal) {
+    const ok = m.proposal.status === 'accepted'
+    return (
+      <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className={cn('max-w-[86%] overflow-hidden rounded-2xl border', mine ? 'ml-auto' : '', ok ? 'border-brand/50 bg-forest' : 'border-line bg-surface')}>
+        <div className="px-3.5 pb-2.5 pt-3">
+          <p className="text-xs font-semibold text-brand">{mine ? 'Hai proposto un’uscita' : `${author?.name} propone un’uscita`}</p>
+          <p className="mt-0.5 text-base font-bold leading-snug text-cream">{m.proposal.title}</p>
+          <p className="mt-1 flex flex-wrap gap-x-3 text-sm text-cream/75">
+            <span className="flex items-center gap-1">
+              <CalendarCheck size={13} /> {m.proposal.when}
+            </span>
+            <span className="flex items-center gap-1">
+              <MapPin size={13} /> {m.proposal.place}
+            </span>
+          </p>
+        </div>
+        <div className="flex items-center justify-between border-t border-dashed border-line px-3.5 py-2 text-sm">
+          <span className={ok ? 'font-semibold text-brand' : 'text-muted'}>{ok ? 'Confermata da entrambi' : 'In attesa di risposta'}</span>
+          {ok && <CheckCircle2 size={16} className="text-brand" />}
+        </div>
+      </motion.div>
+    )
+  }
 
   if (m.kind === 'farewell')
     return (
@@ -359,7 +400,7 @@ function Bubble({ m, prev, author, blurred, group }: { m: Message; prev?: Messag
         <div
           className={cn(
             'inline-block rounded-2xl px-3.5 py-2 text-left text-base leading-snug',
-            mine ? 'rounded-br-md bg-coral text-ink' : 'rounded-bl-md border border-cream/5 bg-slate-card/80 text-cream',
+            mine ? 'rounded-br-md bg-brand text-ink' : 'rounded-bl-md border border-cream/5 bg-slate-card/80 text-cream',
           )}
         >
           {m.kind === 'voice' ? (
@@ -441,11 +482,11 @@ function Composer({ chat }: { chat: Chat }) {
           value={text}
           onChange={(e) => setText(e.target.value)}
           placeholder={chat.mode === 'remote' ? 'Scrivi o lascia una capsula audio…' : 'Fissa dove e quando…'}
-          className="h-11 w-full rounded-2xl border border-cream/10 bg-ink/70 px-4 text-base placeholder:text-cream/30 focus:border-coral/50 focus:outline-none"
+          className="h-11 w-full rounded-2xl border border-cream/10 bg-ink/70 px-4 text-base placeholder:text-cream/30 focus:border-brand/50 focus:outline-none"
         />
       </label>
       {text.trim() ? (
-        <button type="submit" className="grid size-11 place-items-center rounded-2xl bg-coral text-ink" aria-label="Invia">
+        <button type="submit" className="grid size-11 place-items-center rounded-2xl bg-brand text-ink" aria-label="Invia">
           <Send size={18} />
         </button>
       ) : (
@@ -454,5 +495,33 @@ function Composer({ chat }: { chat: Chat }) {
         </button>
       )}
     </form>
+  )
+}
+
+function ProposalSheet({ open, onClose, initial, onSend }: { open: boolean; onClose: () => void; initial: { title: string; when: string; place: string }; onSend: (p: { title: string; when: string; place: string }) => void }) {
+  const [p, setP] = useState(initial)
+  useEffect(() => {
+    if (open) setP(initial)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open])
+  const field = (k: 'title' | 'when' | 'place', label: string) => (
+    <label className="block">
+      <span className="text-sm font-semibold text-muted">{label}</span>
+      <input value={p[k]} onChange={(e) => setP({ ...p, [k]: e.target.value })} className="mt-1 h-11 w-full rounded-xl border border-line bg-ink px-3.5 text-cream focus:border-brand focus:outline-none" />
+    </label>
+  )
+  const valid = p.title.trim() && p.when.trim() && p.place.trim()
+  return (
+    <Sheet open={open} onClose={onClose} title="Proponi un’uscita">
+      <p className="text-sm text-muted">Già compilata con il suo piano. Cambia quello che vuoi e invia: quando accetta, il timer si ferma.</p>
+      <div className="mt-4 space-y-3">
+        {field('title', 'Cosa')}
+        {field('when', 'Quando')}
+        {field('place', 'Dove')}
+      </div>
+      <Button className="mt-5 w-full rounded-full" size="lg" disabled={!valid} onClick={() => onSend({ title: p.title.trim(), when: p.when.trim(), place: p.place.trim() })}>
+        <CalendarCheck size={18} /> Invia proposta
+      </Button>
+    </Sheet>
   )
 }

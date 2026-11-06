@@ -1,20 +1,15 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { AnimatePresence, motion, useMotionValue, useTransform, type Variants } from 'motion/react'
-import { ArrowLeft, ArrowRight, Globe2, LayoutList, Info, KeyRound, Lock, Plane, Radio, RotateCcw, SlidersHorizontal } from 'lucide-react'
+import { ArrowLeft, Globe2, Info, KeyRound, LayoutList, Lock, Plane, Radio, RotateCcw, SlidersHorizontal, X } from 'lucide-react'
 import type { Mode, Plan, User } from '../types'
 import { useNav } from '../nav'
 import { useNow, useStore } from '../store/store'
 import { DAILY_LIMIT, todayKey } from '../data/mock'
-import { affinity, CATEGORY_META, cn, planStatus, planWhen, sharedInterests } from '../lib/utils'
+import { affinity, cn, planStatus, planWhen, sharedInterests } from '../lib/utils'
 import { Portrait } from '../components/Portrait'
 import { Button, Chip, Sheet } from '../components/ui'
 import { Explore, TravelBridge } from './Explore'
 
-const POSTER: Record<string, string> = {
-  food: 'var(--color-p-food)', drink: 'var(--color-p-drink)', sport: 'var(--color-p-sport)', cinema: 'var(--color-p-cinema)',
-  study: 'var(--color-p-study)', walk: 'var(--color-p-walk)', gaming: 'var(--color-p-gaming)', music: 'var(--color-p-music)',
-  books: 'var(--color-p-books)', talk: 'var(--color-p-talk)', travel: 'var(--color-p-travel)',
-}
 const PAGES = ['La locandina', 'In comune', 'Affidabilità'] as const
 
 const RELIABILITY = [
@@ -23,16 +18,12 @@ const RELIABILITY = [
   { key: 'zero' as const, emoji: '🛡️', label: 'Zero Ghosting', on: 'mai sparit*', off: 'non ancora' },
 ]
 
-/** Exit choreography: pass = poster torn off the wall, answer = ticket flying away. */
+/** Exit choreography: pass = card dropped away, answer = card flying off like a sent ticket. */
 const CARD_EXIT: Variants = {
   exit: (dir: 'left' | 'right') =>
     dir === 'right'
       ? { x: 380, y: -140, rotate: 18, scale: 0.85, opacity: 0, transition: { duration: 0.42, ease: [0.3, 0, 0.2, 1] as const } }
       : { x: -340, y: 220, rotate: -38, opacity: 0, transition: { duration: 0.5, ease: [0.55, 0, 0.75, 0.2] as const } },
-}
-
-function posterColor(plan?: Plan) {
-  return plan ? POSTER[plan.category] : 'var(--color-p-talk)'
 }
 
 function distanceLabel(u: User, me: User) {
@@ -45,7 +36,7 @@ export function Discover({ mode, setMode }: { mode: Mode; setMode: (m: Mode) => 
   if (view === 'plans')
     return (
       <div>
-        <button onClick={() => setView('people')} className="mb-3 inline-flex h-9 items-center gap-1.5 rounded-full bg-cream px-3.5 text-sm font-semibold text-ink">
+        <button onClick={() => setView('people')} className="mb-3 inline-flex h-9 items-center gap-1.5 rounded-md bg-cream px-3.5 text-sm font-semibold text-ink">
           <ArrowLeft size={15} /> Torna alle persone
         </button>
         <Explore mode={mode} setMode={setMode} />
@@ -107,7 +98,7 @@ function Deck({ mode, setMode, onPlans }: { mode: Mode; setMode: (m: Mode) => vo
               role="radio"
               aria-checked={prefs.intent === k}
               onClick={() => setPrefs({ intent: k })}
-              className={cn('h-9 rounded-xl text-sm font-semibold transition', prefs.intent === k ? (k === 'date' ? 'bg-coral text-ink' : 'bg-lime text-ink') : 'text-cream/60')}
+              className={cn('h-9 rounded-xl text-sm font-semibold transition', prefs.intent === k ? (k === 'date' ? 'bg-brand text-ink' : 'bg-brand text-ink') : 'text-cream/60')}
             >
               {l}
             </button>
@@ -135,7 +126,7 @@ function Deck({ mode, setMode, onPlans }: { mode: Mode; setMode: (m: Mode) => vo
           <span className="flex-1 text-cream/80">
             {state.travelDestinations.length ? (
               <>
-                Travel Bridge: <span className="font-semibold text-cream">{state.travelDestinations.join(', ')}</span> — le persone del posto appaiono in “Vicino”
+                Travel Bridge: <span className="font-semibold text-cream">{state.travelDestinations.join(', ')}</span>: le persone del posto appaiono in “Vicino”
               </>
             ) : (
               'Parti presto? Imposta una meta e conosci chi vive lì prima di arrivare'
@@ -146,9 +137,9 @@ function Deck({ mode, setMode, onPlans }: { mode: Mode; setMode: (m: Mode) => vo
 
       {/* daily selection meter */}
       <div className="flex items-center gap-3" aria-label={`Selezione di oggi: ${Math.min(daily.seen, DAILY_LIMIT)} su ${DAILY_LIMIT}`}>
-        <p className="serif shrink-0 text-base text-cream/60">selezione di oggi —</p>
+        <p className="serif shrink-0 text-base text-cream/60">selezione di oggi</p>
         <div className="h-[3px] flex-1 overflow-hidden rounded-full bg-line" aria-hidden>
-          <motion.div className="h-full bg-coral" animate={{ width: `${(Math.min(daily.seen, DAILY_LIMIT) / DAILY_LIMIT) * 100}%` }} />
+          <motion.div className="h-full bg-brand" animate={{ width: `${(Math.min(daily.seen, DAILY_LIMIT) / DAILY_LIMIT) * 100}%` }} />
         </div>
         <span className="shrink-0 font-display text-sm font-extrabold tabular-nums">
           {Math.min(daily.seen, DAILY_LIMIT)}/{DAILY_LIMIT}
@@ -295,19 +286,15 @@ function SwipeCard({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [behind, flipped])
 
-  const poster = posterColor(plan)
-
   if (behind)
     return (
-      <motion.div key="behind" className="absolute inset-x-0 top-0 bottom-[60px] z-0 rounded-md" style={{ background: posterColor(plan) }} initial={{ scale: 0.9, y: 18, opacity: 0 }} animate={{ scale: 0.95, y: 12, opacity: 0.35 }} exit={{ opacity: 0 }} aria-hidden />
+      <motion.div key="behind" className="absolute inset-x-0 top-0 bottom-[72px] z-0 overflow-hidden rounded-2xl bg-surface" initial={{ scale: 0.9, y: 18, opacity: 0 }} animate={{ scale: 0.95, y: 10, opacity: 0.6 }} exit={{ opacity: 0 }} aria-hidden>
+        <Portrait look={user.look} hue={user.hue} className="h-full w-full scale-125 blur-[26px] opacity-60" />
+      </motion.div>
     )
 
-  const meta = plan ? CATEGORY_META[plan.category] : null
-  const t = plan ? new Date(plan.when) : null
-  const bigTime = t ? `${String(t.getHours()).padStart(2, '0')}:${String(t.getMinutes()).padStart(2, '0')}` : '—'
-  const whenWord = plan ? (plan.whenLabel ? plan.whenLabel.split('·')[0].trim() : planWhen(plan).split('·')[0].trim()) : ''
+  const whenText = plan ? (plan.whenLabel ?? planWhen(plan).replace(' · ', ' alle ')).toLowerCase() : ''
   const place = plan ? plan.district ?? plan.habitat.split('·')[0].trim() : user.city
-  const sticker = plan?.vibes[0] ?? meta?.label
   const goPage = (d: 1 | -1) => setPage((p) => Math.max(0, Math.min(PAGES.length - 1, p + d)))
 
   return (
@@ -329,120 +316,81 @@ function SwipeCard({
     >
       <div className="relative min-h-0 flex-1 [perspective:1400px]">
         <motion.div className="relative h-full w-full [transform-style:preserve-3d]" animate={{ rotateY: flipped ? 180 : 0 }} transition={{ type: 'spring', stiffness: 160, damping: 22 }}>
-          {/* FRONT — poster with story pages */}
+          {/* FRONT — full-bleed photo card with story pages */}
           <article
-            className={cn('absolute inset-0 flex flex-col overflow-hidden rounded-md px-4 pb-4 pt-3 text-ink [backface-visibility:hidden]', flipped && 'pointer-events-none')}
-            style={{ background: poster }}
+            className={cn('absolute inset-0 overflow-hidden rounded-2xl bg-surface text-cream [backface-visibility:hidden]', flipped && 'pointer-events-none')}
             aria-label={`${user.name}, ${user.age}${plan ? `: ${plan.title}` : ''}`}
             aria-hidden={flipped}
           >
-            {/* story progress */}
-            <div className="mb-3 flex gap-1.5" aria-hidden>
+            <Portrait look={user.look} hue={user.hue} className="absolute inset-0 h-full w-full scale-[1.3] blur-[22px]" />
+            <div className="absolute inset-0 bg-[linear-gradient(180deg,rgb(28_22_18/0.15)_0%,transparent_30%,rgb(28_22_18/0.75)_55%,rgb(28_22_18/0.97)_100%)]" />
+
+            {/* story progress + lock */}
+            <div className="absolute inset-x-3 top-2.5 z-10 flex gap-1.5" aria-hidden>
               {PAGES.map((pg, i) => (
-                <span key={pg} className={cn('h-[3px] flex-1 rounded-full transition-colors', i <= page ? 'bg-ink' : 'bg-ink/20')} />
+                <span key={pg} className={cn('h-[3px] flex-1 rounded-full transition-colors', i === page ? 'bg-cream' : 'bg-cream/30')} />
               ))}
             </div>
+            <span className="absolute left-3 top-6 z-10 flex items-center gap-1 rounded-md bg-ink/50 px-2 py-1 text-xs font-semibold text-cream">
+              <Lock size={11} /> Foto visibile dopo il match
+            </span>
 
-            <div className="relative min-h-0 flex-1">
-              {/* tap zones */}
-              <button
-                className="absolute inset-y-0 left-0 z-0 w-2/5"
-                onClick={() => !dragged.current && goPage(-1)}
-                aria-label="Pagina precedente del profilo"
-                disabled={page === 0}
-              />
-              <button
-                className="absolute inset-y-0 right-0 z-0 w-3/5"
-                onClick={() => !dragged.current && goPage(1)}
-                aria-label="Pagina successiva del profilo"
-                disabled={page === PAGES.length - 1}
-              />
+            {/* tap zones */}
+            <button className="absolute left-0 top-0 bottom-[45%] z-0 w-2/5" onClick={() => !dragged.current && goPage(-1)} aria-label="Pagina precedente del profilo" disabled={page === 0} />
+            <button className="absolute right-0 top-0 bottom-[45%] z-0 w-3/5" onClick={() => !dragged.current && goPage(1)} aria-label="Pagina successiva del profilo" disabled={page === PAGES.length - 1} />
+
+            {/* stamps */}
+            <motion.span style={{ opacity: likeOpacity }} className="pointer-events-none absolute left-4 top-16 z-20 -rotate-12 rounded-md border-2 border-brand px-3 py-1 text-2xl font-extrabold tracking-wide text-brand">
+              RISPONDO
+            </motion.span>
+            <motion.span style={{ opacity: passOpacity }} className="pointer-events-none absolute right-4 top-16 z-20 rotate-12 rounded-md border-2 border-cream px-3 py-1 text-2xl font-extrabold tracking-wide text-cream">
+              PASSO
+            </motion.span>
+
+            {/* bottom info */}
+            <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 px-4 pb-4">
+              <button onClick={() => !dragged.current && onInfo?.()} className="pointer-events-auto flex w-full items-end justify-between gap-2 text-left" aria-label={`Profilo completo di ${user.name}`}>
+                <span className="min-w-0">
+                  <span className="block text-2xl font-extrabold leading-none tracking-[-0.03em]">
+                    {user.name} <span className="font-medium">{user.age}</span>
+                  </span>
+                  <span className="mt-1.5 block truncate text-sm text-cream/80">
+                    {distanceLabel(user, me)} · {aff}% di sintonia · {user.intent.map((i) => (i === 'date' ? 'Date' : 'Amici')).join(', ')}
+                  </span>
+                </span>
+                <Info size={20} className="mb-0.5 shrink-0 text-cream/80" />
+              </button>
+
               <AnimatePresence mode="wait" initial={false}>
-                <motion.div
-                  key={page}
-                  className="pointer-events-none relative h-full"
-                  initial={{ opacity: 0, x: 14 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -14 }}
-                  transition={{ duration: 0.16 }}
-                >
-                  {page === 0 && (
-                    <div className="flex h-full flex-col">
-                      <div className="flex items-start gap-3">
-                        <div className="min-w-0 flex-1">
-                          {meta && (
-                            <p className="font-display text-xs font-extrabold uppercase tracking-wide">
-                              <span aria-hidden>{meta.emoji}</span> {meta.label}
-                            </p>
-                          )}
-                          <p className="mt-1 font-display text-[clamp(36px,11.5vw,56px)] font-extrabold leading-[0.85] tracking-[-0.06em]">{bigTime}</p>
-                          <p className="serif mt-1 text-base leading-tight">
-                            {whenWord.toLowerCase()}, {place}
-                          </p>
-                          {sticker && (
-                            <span className="poster-shadow mt-3 inline-block max-w-full rotate-[-4deg] truncate rounded-sm bg-cream px-2 py-1 font-display text-[11px] font-extrabold uppercase tracking-wide">
-                              {sticker} ✦
-                            </span>
-                          )}
-                        </div>
-                        <div className="relative w-[28%] shrink-0">
-                          <div className="aspect-[4/5] overflow-hidden rounded-sm border-[3px] border-ink bg-ink">
-                            <Portrait look={user.look} hue={user.hue} className="h-full w-full scale-[1.25] blur-[14px]" />
-                            <span className="absolute inset-x-[3px] bottom-[3px] flex items-center justify-center gap-1 bg-ink/70 py-1 text-[10px] font-semibold text-cream">
-                              <Lock size={10} /> foto al match
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                      <h2 className="mt-auto line-clamp-2 pb-1 font-display text-[clamp(22px,6.8vw,30px)] font-extrabold leading-[1] tracking-[-0.04em]">
-                        {plan ? (
-                          <button onClick={() => !dragged.current && onPlan?.(plan.id)} className="pointer-events-auto relative z-10 text-left hover:underline hover:decoration-[3px] hover:underline-offset-4">
-                            {plan.title}
-                          </button>
-                        ) : (
-                          'Un caffè e due chiacchiere'
-                        )}
-                      </h2>
-                    </div>
-                  )}
-
+                <motion.div key={page} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -6 }} transition={{ duration: 0.15 }} className="mt-3">
+                  {page === 0 &&
+                    (plan ? (
+                      <button onClick={() => !dragged.current && onPlan?.(plan.id)} className="pointer-events-auto block text-left">
+                        <span className="block text-sm text-cream/70">
+                          Propone {whenText}, {place}
+                        </span>
+                        <span className="mt-0.5 block text-base font-semibold leading-snug">{plan.title}</span>
+                      </button>
+                    ) : (
+                      <p className="text-sm text-cream/70">Nessun piano proposto per ora.</p>
+                    ))}
                   {page === 1 && (
-                    <div className="flex h-full flex-col">
-                      <p className="serif text-lg">in comune con te —</p>
-                      <p className="font-display text-[clamp(48px,16vw,80px)] font-extrabold leading-[0.85] tracking-[-0.06em]">{aff}%</p>
-                      <p className="font-display text-sm font-extrabold uppercase tracking-wide">di sintonia</p>
-                      <div className="mt-3 flex flex-wrap gap-1.5">
-                        {(revealedCommon.length ? revealedCommon : user.interests.slice(0, 4)).map((i) => (
-                          <span key={i} className={cn('rounded-full border-2 border-ink px-2.5 py-0.5 text-sm font-bold', revealedCommon.length ? 'bg-ink text-cream' : '')}>
-                            {revealedCommon.length ? '✦ ' : ''}
-                            {i}
-                          </span>
-                        ))}
-                      </div>
-                      {!revealedCommon.length && <p className="mt-2 text-sm font-semibold">Niente in comune, per ora. A volte è proprio il bello.</p>}
-                      {commonHabitats.length > 0 && (
-                        <div className="mt-3">
-                          <p className="serif text-base">frequentate gli stessi posti —</p>
-                          <p className="mt-0.5 text-sm font-bold">{commonHabitats.join(' · ')}</p>
-                        </div>
-                      )}
+                    <div>
+                      <p className="text-sm text-cream/70">{revealedCommon.length ? 'Avete in comune' : 'Niente in comune, per ora. A volte è proprio il bello.'}</p>
+                      <p className="mt-1 text-base font-semibold leading-snug">{(revealedCommon.length ? revealedCommon : user.interests.slice(0, 4)).join(' · ')}</p>
+                      {commonHabitats.length > 0 && <p className="mt-1 text-sm text-cream/70">Frequentate {commonHabitats.join(' e ')}</p>}
                     </div>
                   )}
-
                   {page === 2 && (
-                    <div className="flex h-full flex-col">
-                      <p className="serif text-lg">affidabilità —</p>
-                      <p className="font-display text-[clamp(44px,14vw,76px)] font-extrabold leading-[0.85] tracking-[-0.06em]">{user.karma}</p>
-                      <p className="font-display text-sm font-extrabold uppercase tracking-wide">punti karma</p>
-                      <ul className="mt-3 space-y-1">
+                    <div>
+                      <p className="text-sm text-cream/70">{user.karma} punti karma</p>
+                      <ul className="mt-1 grid gap-0.5">
                         {RELIABILITY.map((r) => {
                           const on = user.badges.includes(r.key)
                           return (
-                            <li key={r.key} className={cn('flex items-center justify-between rounded-sm border-2 border-ink px-2 py-0.5 text-sm font-bold', on ? 'bg-ink text-cream' : 'opacity-45')}>
-                              <span>
-                                <span aria-hidden>{r.emoji}</span> {r.label}
-                              </span>
-                              <span className="text-xs font-semibold">{on ? r.on : r.off}</span>
+                            <li key={r.key} className={cn('flex justify-between text-sm', on ? 'font-semibold text-cream' : 'text-cream/40')}>
+                              <span>{r.label}</span>
+                              <span>{on ? r.on : r.off}</span>
                             </li>
                           )
                         })}
@@ -452,43 +400,15 @@ function SwipeCard({
                 </motion.div>
               </AnimatePresence>
 
-              {/* stamps */}
-              <motion.span style={{ opacity: likeOpacity }} className="pointer-events-none absolute left-0 top-16 z-20 -rotate-12 rounded-sm bg-ink px-3 py-1 font-display text-2xl font-extrabold tracking-wide text-coral">
-                RISPONDO
-              </motion.span>
-              <motion.span style={{ opacity: passOpacity }} className="pointer-events-none absolute right-0 top-16 z-20 rotate-12 rounded-sm bg-cream px-3 py-1 font-display text-2xl font-extrabold tracking-wide text-ink">
-                PASSO
-              </motion.span>
-            </div>
-
-            <div className="relative z-10 pt-3">
-              <button onClick={() => !dragged.current && onInfo?.()} className="flex w-full items-end justify-between gap-2 border-t-2 border-ink pt-2 text-left" aria-label={`Profilo completo di ${user.name}`}>
-                <span className="min-w-0">
-                  <span className="block font-display text-xl font-extrabold leading-none tracking-[-0.03em]">
-                    {user.name}, {user.age}
-                  </span>
-                  <span className="mt-1 block truncate text-xs font-semibold">
-                    {distanceLabel(user, me)} · {PAGES[page]}
-                  </span>
-                </span>
-                <span className="flex shrink-0 items-center gap-1">
-                  {user.intent.map((i) => (
-                    <span key={i} className="rounded-full border-2 border-ink px-1.5 py-px text-[10px] font-extrabold uppercase">
-                      {i === 'date' ? 'Date' : 'Amici'}
-                    </span>
-                  ))}
-                  <Info size={18} />
-                </span>
-              </button>
-              <div className="mt-2.5 rounded-sm bg-ink px-3 py-2 text-cream">
-                <p className="serif text-sm text-coral">il suo dilemma —</p>
+              <div className="mt-3 rounded-xl bg-cream/[0.12] px-3 py-2.5 backdrop-blur-sm">
+                <p className="text-xs font-semibold text-cream/70">Il suo dilemma</p>
                 <p className="line-clamp-2 text-base font-semibold leading-snug">{user.dilemma.question}</p>
               </div>
             </div>
           </article>
 
           {/* BACK — answer */}
-          <article className={cn('absolute inset-0 flex flex-col overflow-hidden rounded-md border-2 p-5 [backface-visibility:hidden] [transform:rotateY(180deg)]', !flipped && 'pointer-events-none')} style={{ background: '#161616', borderColor: poster }} aria-hidden={!flipped}>
+          <article className={cn('absolute inset-0 flex flex-col overflow-hidden rounded-2xl border p-5 [backface-visibility:hidden] [transform:rotateY(180deg)]', !flipped && 'pointer-events-none')} style={{ background: '#221b16', borderColor: 'var(--color-line)' }} aria-hidden={!flipped}>
             {flipped && (
               <AnswerForm
                 user={user}
@@ -502,16 +422,16 @@ function SwipeCard({
 
       {/* actions */}
       {!flipped && (
-        <div className="grid grid-cols-[48px_1fr_2fr] gap-2 pt-3">
-          <button onClick={onUndo} className="grid h-12 place-items-center rounded-md border border-line text-gold" aria-label="Annulla ultimo passo">
+        <div className="flex items-center justify-center gap-4 pt-3">
+          <button onClick={onUndo} className="grid size-11 place-items-center rounded-full border border-line text-muted hover:text-cream" aria-label="Annulla ultimo passo">
             <RotateCcw size={17} />
           </button>
-          <Button variant="outline" className="h-12" onClick={pass} aria-label={`Passa ${user.name}`}>
-            PASSO
-          </Button>
-          <Button className="h-12" onClick={() => setFlipped(true)} aria-label={`Rispondi al dilemma di ${user.name}`}>
-            RISPONDO <ArrowRight size={18} />
-          </Button>
+          <button onClick={pass} className="grid size-14 place-items-center rounded-full border border-line text-cream/80 hover:border-cream/40" aria-label={`Passa ${user.name}`}>
+            <X size={24} />
+          </button>
+          <button onClick={() => setFlipped(true)} className="h-14 rounded-full bg-brand px-9 text-base font-bold text-ink hover:brightness-105" aria-label={`Rispondi al dilemma di ${user.name}`}>
+            Rispondi
+          </button>
         </div>
       )}
     </motion.div>
@@ -535,13 +455,13 @@ function DayOver({ daily, onNewDay }: { daily: { seen: number; answered: number;
       initial={{ opacity: 0, y: 30, rotate: -2 }}
       animate={{ opacity: 1, y: 0, rotate: 0 }}
       transition={{ type: 'spring', stiffness: 200, damping: 20 }}
-      className="no-scrollbar absolute inset-0 flex flex-col overflow-y-auto rounded-md bg-cream p-4 text-ink"
+      className="no-scrollbar absolute inset-0 flex flex-col overflow-y-auto rounded-2xl border border-line bg-surface p-5 text-cream"
       aria-label="Selezione di oggi terminata"
     >
-      <p className="serif text-lg">fine della selezione —</p>
+      <p className="text-sm font-semibold text-muted">Selezione finita</p>
       <h2 className="mt-1 text-[clamp(32px,10vw,48px)] leading-[0.9]">Per oggi è tutto.</h2>
-      <p className="mt-2 text-sm font-semibold text-ink/70">Meno scroll, più vita. Domani altri {DAILY_LIMIT} profili scelti per sintonia.</p>
-      <dl className="mt-3 grid grid-cols-3 border-y-2 border-ink">
+      <p className="mt-2 text-sm font-semibold text-cream/70">Meno scroll, più vita. Domani altri {DAILY_LIMIT} profili scelti per sintonia.</p>
+      <dl className="mt-3 grid grid-cols-3 border-y border-line">
         {(
           [
             ['visti', daily.seen],
@@ -549,13 +469,13 @@ function DayOver({ daily, onNewDay }: { daily: { seen: number; answered: number;
             ['match', daily.matches],
           ] as const
         ).map(([k, v], i) => (
-          <div key={k} className={cn('py-1.5 text-center', i > 0 && 'border-l-2 border-ink')}>
+          <div key={k} className={cn('py-2 text-center', i > 0 && 'border-l border-line')}>
             <dd className="font-display text-2xl font-extrabold tabular-nums">{v}</dd>
             <dt className="text-xs font-bold uppercase">{k}</dt>
           </div>
         ))}
       </dl>
-      <p className="serif mt-3 text-base">prossimo turno tra —</p>
+      <p className="mt-4 text-sm font-semibold text-muted">Prossimo turno tra</p>
       <p className="font-display text-2xl font-extrabold tabular-nums tracking-[-0.04em]" aria-live="off">
         {hh}:{mm}:{ss}
       </p>
@@ -563,10 +483,10 @@ function DayOver({ daily, onNewDay }: { daily: { seen: number; answered: number;
         <Button onClick={() => nav.setTab('likes')} disabled={!newLikes}>
           {newLikes ? `Rispondi ai like (${newLikes})` : 'Nessun like in attesa'}
         </Button>
-        <button onClick={nav.openCreate} className="h-11 rounded-md border-2 border-ink font-display font-bold">
+        <button onClick={nav.openCreate} className="h-11 rounded-full border border-line font-semibold">
           Proponi un piano per stasera
         </button>
-        <button onClick={onNewDay} className="text-xs font-semibold text-ink/50 underline-offset-2 hover:underline">
+        <button onClick={onNewDay} className="text-xs font-semibold text-cream/50 underline-offset-2 hover:underline">
           Demo: inizia un nuovo giorno
         </button>
       </div>
@@ -586,7 +506,7 @@ function AnswerForm({ user, onCancel, onSend }: { user: User; onCancel: () => vo
         if (valid) onSend(answer.trim())
       }}
     >
-      <p className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-[0.2em] text-coral">
+      <p className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-[0.2em] text-brand">
         <KeyRound size={13} /> Rispondi a {user.name}
       </p>
       <h3 className="mt-2 font-display text-xl font-bold leading-tight">{user.dilemma.question}</h3>
@@ -594,7 +514,7 @@ function AnswerForm({ user, onCancel, onSend }: { user: User; onCancel: () => vo
       {user.dilemma.options && user.dilemma.options.length > 0 && (
         <div className="mt-4 flex flex-wrap gap-2">
           {user.dilemma.options.map((o) => (
-            <button type="button" key={o} onClick={() => setAnswer(o)} className={cn('rounded-full border px-3 py-1.5 text-sm', answer === o ? 'border-coral bg-coral text-ink' : 'border-cream/15 text-cream/80')}>
+            <button type="button" key={o} onClick={() => setAnswer(o)} className={cn('rounded-md border px-3 py-1.5 text-sm', answer === o ? 'border-brand bg-brand text-ink' : 'border-cream/15 text-cream/80')}>
               {o}
             </button>
           ))}
@@ -606,9 +526,9 @@ function AnswerForm({ user, onCancel, onSend }: { user: User; onCancel: () => vo
         onChange={(e) => setAnswer(e.target.value)}
         maxLength={200}
         placeholder="La tua risposta, con sincerità o con stile…"
-        className="mt-4 min-h-0 w-full flex-1 resize-none rounded-2xl border border-cream/10 bg-ink/70 p-3.5 text-base placeholder:text-cream/30 focus:border-coral/60 focus:outline-none"
+        className="mt-4 min-h-0 w-full flex-1 resize-none rounded-2xl border border-cream/10 bg-ink/70 p-3.5 text-base placeholder:text-cream/30 focus:border-brand/60 focus:outline-none"
       />
-      <p className={cn('mt-1.5 text-right text-xs', lowEffort ? 'text-coral' : 'text-cream/35')}>{lowEffort ? 'Un “ciao” non basta 🙂' : `${answer.length}/200`}</p>
+      <p className={cn('mt-1.5 text-right text-xs', lowEffort ? 'text-brand' : 'text-cream/35')}>{lowEffort ? 'Un “ciao” non basta 🙂' : `${answer.length}/200`}</p>
       <div className="mt-2 grid grid-cols-[auto_1fr] gap-2">
         <Button type="button" variant="ghost" onClick={onCancel}>
           Indietro

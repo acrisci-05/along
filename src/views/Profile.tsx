@@ -28,7 +28,7 @@ export function Profile() {
       {/* identity */}
       <section className="relative overflow-hidden rounded-3xl border border-cream/10 bg-surface p-5">
         <div className="flex items-start gap-4">
-          <div className={cn('rounded-full p-[3px]', state.lifetime ? 'bg-coral' : 'bg-cream/10')}>
+          <div className={cn('rounded-full p-[3px]', state.lifetime ? 'bg-brand' : 'bg-cream/10')}>
             <div className="rounded-full bg-ink p-[3px]">
               <Avatar user={me} size={78} />
             </div>
@@ -60,12 +60,12 @@ export function Profile() {
       </section>
 
       {/* gatekeeper */}
-      <section className="rounded-3xl bg-coral p-4 text-ink">
-        <p className="flex items-center gap-1.5 font-display text-xs font-bold uppercase tracking-[0.2em] text-ink/60">
+      <section className="rounded-3xl bg-forest p-4 text-cream">
+        <p className="flex items-center gap-1.5 font-display text-xs font-bold text-cream/60">
           <KeyRound size={13} /> Il tuo dilemma Gatekeeper
         </p>
         <p className="mt-1 font-display text-lg font-bold leading-tight">{me.dilemma.question}</p>
-        <p className="mt-2 text-sm text-ink/60">Chi vuole scriverti deve prima rispondere. Mai più “ciao” a vuoto.</p>
+        <p className="mt-2 text-sm text-cream/60">Chi vuole scriverti deve prima rispondere. Mai più “ciao” a vuoto.</p>
       </section>
 
       <section className="glass space-y-3 rounded-3xl p-4">
@@ -76,8 +76,8 @@ export function Profile() {
         <div className="grid grid-cols-2 gap-2">
           {(
             [
-              ['date', '💘 Date', 'bg-coral text-ink'],
-              ['friends', '🤝 Amici', 'bg-lime text-ink'],
+              ['date', '💘 Date', 'bg-brand text-ink'],
+              ['friends', '🤝 Amici', 'bg-brand text-ink'],
             ] as const
           ).map(([k, l, on]) => {
             const active = me.intent.includes(k)
@@ -101,7 +101,7 @@ export function Profile() {
             <span className="block text-sm font-semibold">I miei piani</span>
             <span className="block text-xs text-cream/50">Quello che proponi appare sulla tua card</span>
           </span>
-          <span className="text-sm font-semibold text-coral">Apri →</span>
+          <span className="text-sm font-semibold text-brand">Apri →</span>
         </button>
       </section>
 
@@ -120,7 +120,7 @@ export function Profile() {
                   role="radio"
                   aria-checked={finish === f}
                   onClick={() => (locked ? nav.openPaywall('Le finiture olografiche e neon dello sticker Bestie sono incluse in ALONG Forever.') : updateMe({ stickerFinish: f }))}
-                  className={cn('h-7 rounded-full px-2.5 text-xs font-semibold capitalize', finish === f ? 'bg-cream text-ink' : 'bg-cream/5 text-cream/60')}
+                  className={cn('h-7 rounded-md px-2.5 text-xs font-semibold capitalize', finish === f ? 'bg-cream text-ink' : 'bg-cream/5 text-cream/60')}
                 >
                   {locked && '🔒 '}
                   {f === 'paper' ? 'Carta' : f}
@@ -138,7 +138,7 @@ export function Profile() {
           <Eyebrow>Passioni</Eyebrow>
           <div className="mt-2 flex flex-wrap gap-1.5">
             {me.interests.map((i) => (
-              <span key={i} className="rounded-full border border-violet/30 bg-violet/10 px-2.5 py-1 text-sm text-violet">
+              <span key={i} className="rounded-md border border-violet/30 bg-violet/10 px-2.5 py-1 text-sm text-violet">
                 {i}
               </span>
             ))}
@@ -148,7 +148,7 @@ export function Profile() {
           <Eyebrow>Habitat dichiarati</Eyebrow>
           <div className="mt-2 flex flex-wrap gap-1.5">
             {me.habitats.map((h) => (
-              <span key={h} className="rounded-full border border-cyan/30 bg-cyan/10 px-2.5 py-1 text-sm text-cyan">
+              <span key={h} className="rounded-md border border-cyan/30 bg-cyan/10 px-2.5 py-1 text-sm text-cyan">
                 📍 {h}
               </span>
             ))}
@@ -158,18 +158,18 @@ export function Profile() {
 
       {/* forever */}
       {state.lifetime ? (
-        <section className="rounded-3xl border border-coral/25 bg-coral/5 p-4">
+        <section className="rounded-3xl border border-brand/25 bg-brand/5 p-4">
           <p className="flex items-center gap-2 font-display font-bold">
-            <Crown size={18} className="text-coral" /> ALONG Forever attivo
+            <Crown size={18} className="text-brand" /> ALONG Forever attivo
           </p>
           <p className="mt-1 text-sm text-cream/60">Piani illimitati, 5 slot chat, Travel Bridge illimitato e finiture sticker premium. Per sempre.</p>
         </section>
       ) : (
-        <motion.button whileTap={{ scale: 0.98 }} onClick={() => nav.openPaywall()} className="relative w-full overflow-hidden rounded-3xl bg-coral text-ink p-4 text-left">
-          <Sparkles className="absolute right-4 top-4 text-ink" size={20} />
-          <p className="serif text-base text-ink/70">pay once, forever —</p>
+        <motion.button whileTap={{ scale: 0.98 }} onClick={() => nav.openPaywall()} className="relative w-full overflow-hidden rounded-3xl bg-forest text-cream p-4 text-left">
+          <Sparkles className="absolute right-4 top-4 text-brand" size={20} />
+          <p className="text-sm font-semibold text-brand">Pay once, forever</p>
           <p className="mt-1 font-display text-xl font-extrabold">Sblocca ALONG Forever</p>
-          <p className="mt-1 text-sm text-ink/75">19,99 € una tantum (14,99 € al lancio). Niente abbonamenti, mai.</p>
+          <p className="mt-1 text-sm text-cream/75">19,99 € una tantum (14,99 € al lancio). Niente abbonamenti, mai.</p>
         </motion.button>
       )}
 
@@ -195,10 +195,10 @@ export function Profile() {
           </button>
           <button onClick={() => setConfirmReset(true)} className="flex w-full items-center justify-between gap-3 p-3.5 text-left hover:bg-cream/[0.03]">
             <div>
-              <p className="text-base font-semibold text-coral">Ripristina Dati Demo</p>
+              <p className="text-base font-semibold text-brand">Ripristina Dati Demo</p>
               <p className="text-sm text-cream/50">Riporta piani, chat e karma allo stato iniziale</p>
             </div>
-            <RotateCcw size={18} className="text-coral" />
+            <RotateCcw size={18} className="text-brand" />
           </button>
         </div>
         <p className="flex items-start gap-1.5 px-1 text-xs text-cream/40">
@@ -215,15 +215,15 @@ export function Profile() {
         <div className="space-y-3">
           <label className="block">
             <span className="text-sm font-semibold text-cream/60">Nome</span>
-            <input value={draft.name} maxLength={24} onChange={(e) => setDraft({ ...draft, name: e.target.value })} className="mt-1 h-11 w-full rounded-2xl border border-cream/10 bg-ink/70 px-3.5 focus:border-coral/60 focus:outline-none" />
+            <input value={draft.name} maxLength={24} onChange={(e) => setDraft({ ...draft, name: e.target.value })} className="mt-1 h-11 w-full rounded-2xl border border-cream/10 bg-ink/70 px-3.5 focus:border-brand/60 focus:outline-none" />
           </label>
           <label className="block">
             <span className="text-sm font-semibold text-cream/60">Bio</span>
-            <textarea value={draft.bio} rows={3} maxLength={160} onChange={(e) => setDraft({ ...draft, bio: e.target.value })} className="mt-1 w-full resize-none rounded-2xl border border-cream/10 bg-ink/70 p-3.5 focus:border-coral/60 focus:outline-none" />
+            <textarea value={draft.bio} rows={3} maxLength={160} onChange={(e) => setDraft({ ...draft, bio: e.target.value })} className="mt-1 w-full resize-none rounded-2xl border border-cream/10 bg-ink/70 p-3.5 focus:border-brand/60 focus:outline-none" />
           </label>
           <label className="block">
             <span className="text-sm font-semibold text-cream/60">Il tuo dilemma Gatekeeper</span>
-            <textarea value={draft.dilemma} rows={2} maxLength={140} onChange={(e) => setDraft({ ...draft, dilemma: e.target.value })} className="mt-1 w-full resize-none rounded-2xl border border-cream/10 bg-ink/70 p-3.5 focus:border-coral/60 focus:outline-none" />
+            <textarea value={draft.dilemma} rows={2} maxLength={140} onChange={(e) => setDraft({ ...draft, dilemma: e.target.value })} className="mt-1 w-full resize-none rounded-2xl border border-cream/10 bg-ink/70 p-3.5 focus:border-brand/60 focus:outline-none" />
           </label>
           <Button className="w-full" onClick={save}>
             <Check size={16} /> Salva
