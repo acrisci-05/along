@@ -11,6 +11,7 @@ import { ProfilePreview } from '../components/ProfilePreview'
 import { InfoRows } from '../components/ProfileInfo'
 import { VerifiedBadge } from '../components/Verify'
 import { verifyStatus } from '../lib/verify'
+import { backendConfigured, backendHost, checkBackend } from '../lib/supabase'
 import { BadgeRow, earnedBadges, KarmaMeter } from '../components/Karma'
 import { Avatar, Button, Eyebrow, LifetimeBadge, RevolutTip, Sheet, Toggle } from '../components/ui'
 
@@ -212,6 +213,8 @@ export function Profile() {
         )}
       </section>
 
+      <BackendStatus />
+
       {/* chat privacy */}
       <section className="space-y-2">
         <Eyebrow>Privacy in chat</Eyebrow>
@@ -362,6 +365,40 @@ function VerifySection() {
       <button onClick={() => nav.openVerify()} className="mt-3 h-10 rounded-full bg-brand px-4 text-sm font-bold text-ink">
         {status === 'suspended' ? 'Rifai il selfie' : 'Verifica ora'}
       </button>
+    </section>
+  )
+}
+
+function BackendStatus() {
+  const { toast } = useStore()
+  const [checking, setChecking] = useState(false)
+  const [result, setResult] = useState<{ ok: boolean; detail: string } | null>(null)
+  return (
+    <section className="space-y-2">
+      <Eyebrow>Backend</Eyebrow>
+      <div className="rounded-2xl border border-line bg-surface p-3.5">
+        <div className="flex items-center justify-between gap-3">
+          <div className="min-w-0">
+            <p className="text-base font-semibold">{backendConfigured ? 'Supabase configurato' : 'Modalità demo'}</p>
+            <p className="truncate text-sm text-muted">{result?.detail ?? (backendConfigured ? backendHost : 'Dati finti nel browser. Il collegamento a Supabase è pronto: vedi docs/SUPABASE.md')}</p>
+          </div>
+          {backendConfigured && (
+            <button
+              onClick={async () => {
+                setChecking(true)
+                const r = await checkBackend()
+                setResult(r)
+                setChecking(false)
+                toast({ tone: r.ok ? 'lime' : 'coral', title: r.ok ? 'Backend raggiungibile' : 'Backend non raggiungibile', body: r.detail })
+              }}
+              disabled={checking}
+              className="h-9 shrink-0 rounded-full border border-line px-3.5 text-sm font-semibold hover:border-cream/40 disabled:opacity-50"
+            >
+              {checking ? 'Controllo…' : 'Verifica'}
+            </button>
+          )}
+        </div>
+      </div>
     </section>
   )
 }

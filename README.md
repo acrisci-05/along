@@ -46,3 +46,8 @@ Su desktop l'app è mostrata in una cornice smartphone, con switch per la vista 
 - **Blocca / Segnala** dalla card di Scopri (⋯), dal profilo e dal menu della chat. Segnalare blocca anche; la verifica del team è simulata.
 - **Avvisi sui messaggi** (`src/lib/safety.ts`): prima di inviare numero, indirizzo o social; in arrivo su richieste di soldi, codici, foto intime o di spostarsi su altre app. Sono controlli locali, euristici.
 - **16-17 anni:** piani solo tra le 8 e le 20, solo negli Habitat pubblici, niente note vocali nelle chat 1:1.
+
+## Backend (Supabase)
+- Schema, regole di sicurezza e storage: `supabase/migrations/`. Test delle regole senza Supabase: `npm run db:test`.
+- Per collegare un progetto vero segui **[docs/SUPABASE.md](docs/SUPABASE.md)** (Supabase CLI: `login`, `link`, `db push`, poi `.env.local`).
+- Senza `.env.local` l’app resta in modalità demo; il codice di Supabase si scarica solo quando è configurato.
