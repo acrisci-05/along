@@ -54,10 +54,15 @@ export interface User {
   photo?: string
   /** 4:5 cropped JPEG data: URLs, first = main photo. 0 = avatar mode, otherwise 2..6 */
   photos?: string[]
+  work?: string
+  languages?: string[]
+  smoke?: Habit
+  drink?: Habit
   distanceKm?: number
 }
 
 export type Gender = 'f' | 'm' | 'nb'
+export type Habit = 'si' | 'a volte' | 'no'
 export type Intent = 'date' | 'friends'
 
 export interface Look {

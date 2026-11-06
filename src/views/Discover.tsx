@@ -242,7 +242,8 @@ function Deck({ mode, setMode, onPlans }: { mode: Mode; setMode: (m: Mode) => vo
   )
 }
 
-function SwipeCard({
+export function SwipeCard({
+  preview,
   user,
   plan,
   me,
@@ -259,6 +260,8 @@ function SwipeCard({
   plan?: Plan
   me: User
   behind?: boolean
+  /** read-only card for 'Come ti vedono gli altri' */
+  preview?: boolean
   onPass?: () => void
   onLike?: (answer: string) => void
   onInfo?: () => void
@@ -279,7 +282,7 @@ function SwipeCard({
   const pass = () => onPass?.()
 
   useEffect(() => {
-    if (behind || flipped) return
+    if (behind || flipped || preview) return
     const onKey = (e: KeyboardEvent) => {
       const t = e.target as HTMLElement
       if (t.closest('input, textarea, [role=dialog]')) return
@@ -311,7 +314,7 @@ function SwipeCard({
       style={{ x, rotate }}
       initial={{ scale: 0.95, y: 12, opacity: 0.6 }}
       animate={{ scale: 1, y: 0, opacity: 1 }}
-      drag={flipped ? false : 'x'}
+      drag={flipped || preview ? false : 'x'}
       dragSnapToOrigin
       dragElastic={0.9}
       onDragStart={() => (dragged.current = true)}
@@ -338,9 +341,11 @@ function SwipeCard({
                 <span key={pg} className={cn('h-[3px] flex-1 rounded-full transition-colors', i === page ? 'bg-cream' : 'bg-cream/30')} />
               ))}
             </div>
+            {onMore && (
             <button onClick={() => !dragged.current && onMore?.()} className="absolute right-2 top-5 z-10 grid size-9 place-items-center rounded-full bg-ink/40 text-cream hover:bg-ink/60" aria-label={`Altre opzioni per ${user.name}: blocca o segnala`}>
               <MoreHorizontal size={18} />
             </button>
+            )}
             <span className="absolute left-3 top-6 z-10 flex items-center gap-1 rounded-md bg-ink/50 px-2 py-1 text-xs font-semibold text-cream">
               <Lock size={11} /> Foto visibile dopo il match
             </span>
@@ -431,7 +436,7 @@ function SwipeCard({
       </div>
 
       {/* actions */}
-      {!flipped && (
+      {!flipped && !preview && (
         <div className="flex items-center justify-center gap-4 pt-3">
           <button onClick={onUndo} className="grid size-11 place-items-center rounded-full border border-line text-muted hover:text-cream" aria-label="Annulla ultimo passo">
             <RotateCcw size={17} />

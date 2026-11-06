@@ -5,6 +5,7 @@ import { affinity, CATEGORY_META, cn, planStatus, planWhen, sharedInterests, STA
 import { Avatar, Button, Eyebrow, LifetimeBadge, Sheet } from './ui'
 import { BadgeRow, BestieSticker } from './Bestie'
 import { PhotoCarousel } from './Portrait'
+import { InfoRows } from './ProfileInfo'
 import { LivingPlanCard } from './LivingPlanCard'
 
 export function PlanDetailSheet({ planId, onClose, onJoin }: { planId: string | null; onClose: () => void; onJoin: (planId: string) => void }) {
@@ -189,6 +190,7 @@ export function UserSheet({ userId, onClose }: { userId: string | null; onClose:
           {u.lifetime && <LifetimeBadge small />}
           <p className="text-base leading-snug text-cream/80">{u.bio}</p>
           <BadgeRow badges={u.badges} />
+          <InfoRows user={u} />
           <div>
             <Eyebrow>Passioni</Eyebrow>
             <div className="mt-2 flex flex-wrap gap-1.5">

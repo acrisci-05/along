@@ -35,6 +35,7 @@ const users: User[] = [
     dilemma: { question: 'Se prendiamo una pizza, cosa non deve MAI esserci sopra?', options: ['Ananas', 'Panna', 'Ketchup', 'Niente, sono anarchica'] },
     bestie: { worstFlaw: 'Ti fotografa il piatto per 4 minuti prima di farti mangiare.', whyGoOut: 'Conosce il posto giusto in ogni vicolo. E condivide sempre le gyoza.', redFlag: 'Ha opinioni MOLTO forti sullo spessore dei noodles.', by: 'Marta, bestie dal liceo' },
     karma: 214, badges: ['fast', 'zero'],
+    work: 'Food designer', languages: ['Italiano', 'Inglese', 'Napoletano'], smoke: 'no', drink: 'a volte',
     gender: 'f', intent: ['date', 'friends'], distanceKm: 1.2, look: { skin: 1, hair: 'long', hairColor: '#3b2416', shirt: '#FF806D', earring: true },
   },
   {
@@ -45,6 +46,7 @@ const users: User[] = [
     dilemma: { question: 'Perdi 6-0 6-0. Cosa dici al tuo compagno a fine partita?', options: ['Colpa del vento', 'Birra? Offro io', 'Rivincita. Ora.'] },
     bestie: { worstFlaw: 'Arriva 20 minuti prima e ti scrive “dove sei?”.', whyGoOut: 'Ti fa sentire un campione anche quando la palla va in tribuna.', redFlag: 'Ha un foglio Excel delle sue statistiche di padel.', by: 'Andrea, compagno di squadra' },
     karma: 188, badges: ['fast'],
+    work: 'Ingegnere', languages: ['Italiano', 'Inglese'], smoke: 'no', drink: 'a volte',
     gender: 'm', intent: ['friends'], distanceKm: 4.8, look: { skin: 2, hair: 'short', hairColor: '#1d1410', shirt: '#D7FF66', beard: true },
   },
   {
@@ -55,6 +57,7 @@ const users: User[] = [
     dilemma: { question: 'Hai 2 ore libere in una città sconosciuta senza telefono: cosa fai?', options: ['Mi perdo apposta', 'Cerco un cinema', 'Trovo un bar e parlo con chiunque'] },
     bestie: { worstFlaw: 'Ti spiega il finale del film durante i titoli di coda. Con i diagrammi.', whyGoOut: 'Ti fa vedere il mondo come un’inquadratura perfetta.', redFlag: 'Ha pianto a Interstellar. Tre volte. Al cinema.', by: 'Bea, coinquilina' },
     karma: 176, badges: ['voice', 'zero'],
+    work: 'Studio cinema al DAMS', languages: ['Italiano', 'Inglese', 'Francese'], smoke: 'no', drink: 'a volte',
     gender: 'f', intent: ['date', 'friends'], distanceKm: 2.1, look: { skin: 0, hair: 'bob', hairColor: '#7a2e1f', shirt: '#8B5CF6', glasses: true },
   },
   {
@@ -65,6 +68,7 @@ const users: User[] = [
     dilemma: { question: 'Il tuo compagno sbaglia l’ultimo round decisivo. Cosa scrivi in chat?', options: ['“ns try”', 'Silenzio stampa', '“GG, next”'] },
     bestie: { worstFlaw: 'Dice “ultima partita” alle 23 e sono le 2.', whyGoOut: 'Ti carica anche quando sei a 0-8. Pazienza infinita.', redFlag: 'Ha un nome per ogni sua tastiera meccanica.', by: 'Fede, duo storico' },
     karma: 201, badges: ['fast', 'voice'], travel: undefined,
+    work: 'Sviluppatore web', languages: ['Italiano', 'Inglese'], smoke: 'no', drink: 'a volte',
     gender: 'm', intent: ['friends'], distanceKm: 660, look: { skin: 1, hair: 'wavy', hairColor: '#2a1d14', shirt: '#22d3ee' },
   },
   {
@@ -75,6 +79,7 @@ const users: User[] = [
     dilemma: { question: 'Pausa studio ideale: 15 minuti per…', options: ['Caffè al volo', 'Camminata', 'Meme sul telefono'] },
     bestie: { worstFlaw: 'Ti fa la lezione di anatomia mentre mangi.', whyGoOut: 'Ti porta sempre uno snack anche se non l’hai chiesto.', redFlag: 'Evidenziatori in 9 colori. Codificati.', by: 'Ire, compagna di corso' },
     karma: 230, badges: ['zero', 'fast'],
+    work: 'Studio medicina', languages: ['Italiano', 'Inglese'], smoke: 'no', drink: 'a volte',
     gender: 'f', intent: ['friends'], distanceKm: 0.8, look: { skin: 2, hair: 'bun', hairColor: '#4a2a18', shirt: '#06B6D4', glasses: true },
   },
   {
@@ -85,6 +90,7 @@ const users: User[] = [
     dilemma: { question: 'In viaggio: piano dettagliato o zaino e improvvisazione?', options: ['Excel con orari', 'Zaino e via', 'Metà e metà'] },
     bestie: { worstFlaw: 'Prenota il volo prima di chiederti se puoi venire.', whyGoOut: 'Trova sempre il localino che non c’è su nessuna guida.', redFlag: 'Ha 14 app di viaggio sul telefono.', by: 'Gio, compagno di Erasmus' },
     karma: 165, badges: ['voice'], travel: 'Valencia',
+    work: 'Product manager', languages: ['Italiano', 'Inglese', 'Spagnolo'], smoke: 'no', drink: 'a volte',
     gender: 'm', intent: ['date', 'friends'], distanceKm: 190, look: { skin: 3, hair: 'curly', hairColor: '#120c08', shirt: '#F5C451', beard: true },
   },
   {
@@ -95,6 +101,7 @@ const users: User[] = [
     dilemma: { question: 'Una canzone che ascolti in loop quando nessuno ti guarda?', options: [] },
     bestie: { worstFlaw: 'Ti manda 40 canzoni alle 3 di notte e vuole un feedback.', whyGoOut: 'Ti fa scoprire la tua nuova canzone preferita ogni settimana.', redFlag: 'Giudica le persone dalla loro top 5 di Wrapped.', by: 'Ale, socio di consolle' },
     karma: 199, badges: ['voice', 'zero'],
+    work: 'DJ e grafica', languages: ['Italiano', 'Inglese'], smoke: 'no', drink: 'a volte',
     gender: 'f', intent: ['date', 'friends'], distanceKm: 480, look: { skin: 4, hair: 'curly', hairColor: '#0d0907', shirt: '#c084fc', earring: true },
   },
   {
@@ -105,6 +112,7 @@ const users: User[] = [
     dilemma: { question: 'Il libro che regaleresti a uno sconosciuto per capire chi sei?', options: [] },
     bestie: { worstFlaw: 'Risponde con citazioni. Sempre.', whyGoOut: 'Ascolta davvero, e si ricorda tutto quello che dici.', redFlag: 'Sottolinea i libri. A penna.', by: 'Yuki, sorella' },
     karma: 222, badges: ['voice', 'zero'],
+    work: 'Traduttore', languages: ['Italiano', 'Giapponese', 'Inglese'], smoke: 'no', drink: 'a volte',
     gender: 'm', intent: ['date'], distanceKm: 760, look: { skin: 1, hair: 'short', hairColor: '#0b0b0f', shirt: '#334155', glasses: true },
   },
   {
@@ -115,6 +123,7 @@ const users: User[] = [
     dilemma: { question: 'Prima sera in una città nuova: dove mi porti?', options: ['Tetto con vista', 'Bar di quartiere', 'Mercato notturno'] },
     bestie: { worstFlaw: 'Parla 4 lingue. Contemporaneamente.', whyGoOut: 'Ti fa sentire a casa in una città dove non conosci nessuno.', redFlag: 'Mette il peperoncino anche sul cornetto.', by: 'Paola, amica di Erasmus' },
     karma: 187, badges: ['fast', 'voice'],
+    work: 'Guida turistica', languages: ['Italiano', 'Spagnolo', 'Inglese', 'Napoletano'], smoke: 'no', drink: 'a volte',
     gender: 'f', intent: ['date', 'friends'], distanceKm: 1100, look: { skin: 2, hair: 'wavy', hairColor: '#24140c', shirt: '#ef4444', earring: true },
   },
   {
@@ -125,6 +134,7 @@ const users: User[] = [
     dilemma: { question: 'Scale o ascensore, se sono 300 gradini con vista mare?', options: ['Scale, ovvio', 'Ascensore e senso di colpa'] },
     bestie: { worstFlaw: 'Ti dice “è vicino” e sono 6 km.', whyGoOut: 'Ti mostra Napoli da angoli che non sapevi esistessero.', redFlag: 'Si ferma a commentare ogni balcone barocco.', by: 'Ste, collega' },
     karma: 205, badges: ['zero'],
+    work: 'Architetto', languages: ['Italiano', 'Inglese'], smoke: 'no', drink: 'a volte',
     gender: 'm', intent: ['date', 'friends'], distanceKm: 3.5, look: { skin: 1, hair: 'buzz', hairColor: '#6b4a2b', shirt: '#0ea5e9', beard: true },
   },
   {
@@ -135,6 +145,7 @@ const users: User[] = [
     dilemma: { question: 'Primo appuntamento: museo vuoto o mercato rumoroso?', options: ['Museo vuoto', 'Mercato rumoroso', 'Entrambi, in quest’ordine'] },
     bestie: { worstFlaw: 'Si ferma davanti a ogni chiesa. OGNI chiesa.', whyGoOut: 'Ti racconta Napoli come se fosse un romanzo.', redFlag: 'Ha litigato con una guida turistica. E ha vinto.', by: 'Fra, amica d’infanzia' },
     karma: 196, badges: ['zero', 'voice'],
+    work: 'Restauratrice', languages: ['Italiano', 'Napoletano', 'Francese'], smoke: 'no', drink: 'a volte',
     gender: 'f', intent: ['date'], distanceKm: 1.6, look: { skin: 1, hair: 'wavy', hairColor: '#5a2a14', shirt: '#F5C451', earring: true },
   },
   {
@@ -145,6 +156,7 @@ const users: User[] = [
     dilemma: { question: 'Concerto in prima fila o al bar in fondo a parlare?', options: ['Prima fila', 'Bar in fondo', 'Dipende dalla band'] },
     bestie: { worstFlaw: 'Ti fa sentire la demo nuova. In macchina. A tutto volume.', whyGoOut: 'Ti porta nei posti dove suonano i migliori, prima che diventino famosi.', redFlag: 'Accorda la chitarra durante le conversazioni serie.', by: 'Peppe, bassista' },
     karma: 172, badges: ['fast'],
+    work: 'Musicista e cuoco', languages: ['Italiano', 'Napoletano'], smoke: 'no', drink: 'a volte',
     gender: 'm', intent: ['date', 'friends'], distanceKm: 2.4, look: { skin: 2, hair: 'long', hairColor: '#1a120c', shirt: '#111827', beard: true },
   },
   {
@@ -155,6 +167,7 @@ const users: User[] = [
     dilemma: { question: 'Se potessi vivere in un’altra epoca per un giorno, quale?', options: [] },
     bestie: { worstFlaw: 'Guarda il cielo invece della strada. Abbiamo perso due bus.', whyGoOut: 'Ti fa sentire piccolo nel modo più bello possibile.', redFlag: 'Ha dato un nome a ogni pianta di casa. Sono 34.', by: 'Gaia, coinquilina' },
     karma: 210, badges: ['voice', 'zero'],
+    work: 'Studio astrofisica', languages: ['Italiano', 'Inglese'], smoke: 'no', drink: 'a volte',
     gender: 'f', intent: ['date', 'friends'], distanceKm: 3.1, look: { skin: 3, hair: 'long', hairColor: '#0f0a08', shirt: '#8B5CF6', glasses: true },
   },
   {
@@ -165,6 +178,7 @@ const users: User[] = [
     dilemma: { question: 'Alba in vetta o tramonto al mare?', options: ['Alba in vetta', 'Tramonto al mare'] },
     bestie: { worstFlaw: 'Ti sveglia alle 5 per “vedere l’alba”. Senza preavviso.', whyGoOut: 'Con lui anche una salita diventa una storia da raccontare.', redFlag: 'Ha 7 borracce. Tutte con un nome.', by: 'Ale, compagno di cordata' },
     karma: 204, badges: ['fast', 'zero'],
+    work: 'Istruttore di arrampicata', languages: ['Italiano', 'Inglese'], smoke: 'no', drink: 'a volte',
     gender: 'm', intent: ['friends', 'date'], distanceKm: 5.2, look: { skin: 4, hair: 'buzz', hairColor: '#0d0907', shirt: '#22c55e' },
   },
   {
@@ -175,6 +189,7 @@ const users: User[] = [
     dilemma: { question: 'Una foto che non hai mai scattato ma ricordi benissimo?', options: [] },
     bestie: { worstFlaw: 'Ti dice “fermo così” nel mezzo di una frase.', whyGoOut: 'Vede la bellezza nelle cose che tutti ignorano. Anche in te.', redFlag: 'Annusa i rullini nuovi.', by: 'Vale, sorella' },
     karma: 189, badges: ['voice'],
+    work: 'Fotografa', languages: ['Italiano', 'Inglese'], smoke: 'no', drink: 'a volte',
     gender: 'f', intent: ['friends', 'date'], distanceKm: 1.9, look: { skin: 0, hair: 'short', hairColor: '#d6a65c', shirt: '#f472b6', earring: true },
   },
   {
@@ -185,6 +200,7 @@ const users: User[] = [
     dilemma: { question: 'La città dove vivresti domani, senza pensarci?', options: ['Lisbona', 'Tokyo', 'Napoli, ovvio'] },
     bestie: { worstFlaw: 'Giudica il tuo caffè. In silenzio. Ma lo vedi.', whyGoOut: 'Ti scrive i vocali più belli che riceverai quest’anno.', redFlag: 'Pesa il caffè col bilancino anche in vacanza.', by: 'Sara, ex coinquilina' },
     karma: 215, badges: ['voice', 'zero'],
+    work: 'Barista specialty', languages: ['Italiano', 'Arabo', 'Inglese'], smoke: 'no', drink: 'a volte',
     gender: 'm', intent: ['date', 'friends'], distanceKm: 660, look: { skin: 3, hair: 'curly', hairColor: '#120c08', shirt: '#F6F4EF', beard: true },
   },
   {
@@ -195,6 +211,7 @@ const users: User[] = [
     dilemma: { question: 'Mi mandi una canzone che sa di estate senza dire il titolo?', options: [] },
     bestie: { worstFlaw: 'Risponde dopo tre giorni. Ma con un vocale di 9 minuti.', whyGoOut: 'Ti fa venire voglia di prenotare un volo. Subito.', redFlag: 'Ha una mappa con le spille di tutti i posti dove ha pianto.', by: 'Inès, amica di Erasmus' },
     karma: 198, badges: ['voice'],
+    work: 'Copywriter', languages: ['Italiano', 'Francese', 'Portoghese'], smoke: 'no', drink: 'a volte',
     gender: 'f', intent: ['friends', 'date'], distanceKm: 2200, look: { skin: 2, hair: 'wavy', hairColor: '#b07a3f', shirt: '#06B6D4' },
   },
   {
@@ -205,6 +222,7 @@ const users: User[] = [
     dilemma: { question: 'Rigore decisivo: tiri centrale o all’angolo?', options: ['Centrale', 'All’angolo', 'Lo lascio tirare a un altro'] },
     bestie: { worstFlaw: 'Commenta ogni partita come un telecronista.', whyGoOut: 'Ti coinvolge sempre, anche se non sai giocare.', redFlag: 'Ha un salvadanaio solo per le figurine.', by: 'Pietro, compagno di classe' },
     karma: 168, badges: ['fast'],
+    work: 'Liceo scientifico', languages: ['Italiano', 'Inglese'],
     gender: 'm', intent: ['friends'], distanceKm: 2.2, look: { skin: 1, hair: 'short', hairColor: '#3b2416', shirt: '#2f5d8a' },
   },
   {
@@ -215,6 +233,7 @@ const users: User[] = [
     dilemma: { question: 'Supereroe o cattivo dei fumetti: chi saresti?', options: ['Supereroe', 'Cattivo con buone ragioni'] },
     bestie: { worstFlaw: 'Ti disegna mentre parli. Senza dirtelo.', whyGoOut: 'Ha sempre un’idea nuova per il pomeriggio.', redFlag: 'Ha 40 matite e le chiama per nome.', by: 'Sara, migliore amica' },
     karma: 175, badges: ['zero'],
+    work: 'Liceo artistico', languages: ['Italiano', 'Inglese'],
     gender: 'f', intent: ['friends'], distanceKm: 1.4, look: { skin: 0, hair: 'bob', hairColor: '#6b3a1f', shirt: '#a3445e' },
   },
   {
@@ -225,6 +244,7 @@ const users: User[] = [
     dilemma: { question: 'Gelato: cono o coppetta?', options: ['Cono', 'Coppetta', 'Due gusti, due coni'] },
     bestie: { worstFlaw: 'Organizza tutto con tre settimane di anticipo.', whyGoOut: 'Con lei il gruppo non si perde mai nessuno.', redFlag: 'Ha una playlist per ogni stato d’animo.', by: 'Chiara, compagna di squadra' },
     karma: 190, badges: ['fast', 'zero'],
+    work: 'Liceo linguistico', languages: ['Italiano', 'Inglese', 'Spagnolo'],
     gender: 'f', intent: ['friends'], distanceKm: 3.0, look: { skin: 2, hair: 'long', hairColor: '#2a1d14', shirt: '#3f7d5e' },
   },
 ]
@@ -545,6 +565,16 @@ export const SAMPLE_ANSWERS: Record<string, string[]> = {
   'Colazione lunga o aperitivo al tramonto?': ['Aperitivo, con il mare davanti.', 'Colazione lunga, la domenica è sacra.'],
   'Concerto in prima fila o al bar in fondo a parlare?': ['Prima fila, voglio sentire il basso nello stomaco.', 'Al bar in fondo: le chiacchiere migliori.'],
 }
+
+export const PASSION_CATEGORIES: Array<{ name: string; items: string[] }> = [
+  { name: 'Cibo', items: ['ramen', 'pizza fritta', 'cucina', 'mercati', 'caffè', 'tapas', 'paella', 'birra artigianale', 'tè'] },
+  { name: 'Sport', items: ['padel', 'running', 'calcetto', 'pallavolo', 'arrampicata', 'yoga', 'surf', 'F1'] },
+  { name: 'Cultura', items: ['libri', 'cinema d’autore', 'Nolan', 'arte', 'fotografia analogica', 'fotografia', 'scrittura', 'Murakami', 'fumetti', 'architettura', 'stelle'] },
+  { name: 'Musica', items: ['vinili', 'city pop', 'synthwave', 'jazz', 'musica live', 'Valorant'] },
+  { name: 'Uscite', items: ['camminate', 'viaggi', 'serie tv', 'videogiochi', 'podcast', 'lingue', 'anime', 'studio'] },
+]
+
+export const LANGUAGES = ['Italiano', 'Napoletano', 'Inglese', 'Spagnolo', 'Francese', 'Tedesco', 'Portoghese', 'Giapponese', 'Arabo', 'Cinese']
 
 export const FAREWELL = 'È stato un piacere conoscerti, ma non sento la scintilla giusta. Ti auguro il meglio!'
 

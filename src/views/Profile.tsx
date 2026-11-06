@@ -1,12 +1,14 @@
 import { useState } from 'react'
 import { motion } from 'motion/react'
-import { BellRing, ShieldAlert, Check, Crown, Info, KeyRound, MapPin, Pencil, RotateCcw, Sparkles } from 'lucide-react'
+import { BellRing, Eye, ShieldAlert, Crown, Info, KeyRound, MapPin, Pencil, RotateCcw, Sparkles } from 'lucide-react'
 import { useNav } from '../nav'
 import { useStore } from '../store/store'
 import { cn } from '../lib/utils'
 import { isMinor } from '../lib/age'
-import { PHOTO_MAX, PHOTO_MIN } from '../lib/photos'
-import { PhotoGallery } from '../components/PhotoGallery'
+import { PHOTO_MIN } from '../lib/photos'
+import { EditProfile } from '../components/EditProfile'
+import { ProfilePreview } from '../components/ProfilePreview'
+import { InfoRows } from '../components/ProfileInfo'
 import { BadgeRow, BestieSticker, earnedBadges, KarmaMeter } from '../components/Bestie'
 import { Avatar, Button, Eyebrow, LifetimeBadge, RevolutTip, Sheet, Toggle } from '../components/ui'
 
@@ -16,16 +18,10 @@ export function Profile() {
   const me = state.me
   const minor = isMinor(me)
   const [editing, setEditing] = useState(false)
+  const [previewing, setPreviewing] = useState(false)
   const [confirmReset, setConfirmReset] = useState(false)
-  const [draft, setDraft] = useState({ name: me.name, bio: me.bio, dilemma: me.dilemma.question })
   const badges = earnedBadges(state.stats)
   const finish = me.stickerFinish ?? 'paper'
-
-  const save = () => {
-    updateMe({ name: draft.name.trim() || me.name, bio: draft.bio.trim(), dilemma: { question: draft.dilemma.trim() || me.dilemma.question, options: [] } })
-    setEditing(false)
-    toast({ tone: 'lime', title: 'Profilo aggiornato' })
-  }
 
   return (
     <div className="space-y-5 pb-8">
@@ -46,36 +42,34 @@ export function Profile() {
             </p>
             <div className="mt-2 flex flex-wrap gap-1.5">{state.lifetime && <LifetimeBadge small />}</div>
           </div>
-          <button
-            onClick={() => {
-              setDraft({ name: me.name, bio: me.bio, dilemma: me.dilemma.question })
-              setEditing(true)
-            }}
-            className="grid size-10 place-items-center rounded-full bg-cream/5 hover:bg-cream/10"
-            aria-label="Modifica profilo"
-          >
+          <button onClick={() => setEditing(true)} className="grid size-10 place-items-center rounded-full bg-cream/5 hover:bg-cream/10" aria-label="Modifica profilo">
             <Pencil size={16} />
           </button>
         </div>
         {me.bio ? (
           <p className="mt-3 text-base leading-snug text-cream/80">{me.bio}</p>
         ) : (
-          <button
-            onClick={() => {
-              setDraft({ name: me.name, bio: me.bio, dilemma: me.dilemma.question })
-              setEditing(true)
-            }}
-            className="mt-3 text-left text-sm text-muted underline-offset-2 hover:underline"
-          >
+          <button onClick={() => setEditing(true)} className="mt-3 text-left text-sm text-muted underline-offset-2 hover:underline">
             Aggiungi due righe su di te
           </button>
         )}
         <div className="mt-3">
           <BadgeRow badges={badges} />
         </div>
+        <div className="mt-4">
+          <InfoRows user={me} showHabitats={false} />
+        </div>
+        <div className="mt-4 grid grid-cols-2 gap-2">
+          <button onClick={() => setEditing(true)} className="h-11 rounded-full bg-brand text-sm font-bold text-ink">
+            Modifica profilo
+          </button>
+          <button onClick={() => setPreviewing(true)} className="flex h-11 items-center justify-center gap-1.5 rounded-full border border-line text-sm font-semibold hover:border-cream/40">
+            <Eye size={16} /> Come ti vedono
+          </button>
+        </div>
       </section>
 
-      <ProfilePhotos />
+      <PhotoStrip onEdit={() => setEditing(true)} />
 
       {/* gatekeeper */}
       <section className="rounded-3xl bg-forest p-4 text-cream">
@@ -179,9 +173,13 @@ export function Profile() {
         <div>
           <Eyebrow>Passioni</Eyebrow>
           <div className="mt-2 flex flex-wrap gap-1.5">
-            {!me.interests.length && <p className="text-sm text-muted">Nessuna passione ancora. Le aggiungerai presto dal profilo.</p>}
+            {!me.interests.length && (
+              <button onClick={() => setEditing(true)} className="text-sm text-muted underline-offset-2 hover:text-cream hover:underline">
+                Scegli da 3 a 8 passioni
+              </button>
+            )}
             {me.interests.map((i) => (
-              <span key={i} className="rounded-md border border-violet/30 bg-violet/10 px-2.5 py-1 text-sm text-violet">
+              <span key={i} className="rounded-md border border-line px-2.5 py-1 text-sm">
                 {i}
               </span>
             ))}
@@ -190,10 +188,14 @@ export function Profile() {
         <div>
           <Eyebrow>Habitat dichiarati</Eyebrow>
           <div className="mt-2 flex flex-wrap gap-1.5">
-            {!me.habitats.length && <p className="text-sm text-muted">Nessun Habitat ancora.</p>}
+            {!me.habitats.length && (
+              <button onClick={() => setEditing(true)} className="text-sm text-muted underline-offset-2 hover:text-cream hover:underline">
+                Scegli i posti che frequenti
+              </button>
+            )}
             {me.habitats.map((h) => (
-              <span key={h} className="rounded-md border border-cyan/30 bg-cyan/10 px-2.5 py-1 text-sm text-cyan">
-                📍 {h}
+              <span key={h} className="rounded-md border border-line px-2.5 py-1 text-sm">
+                {h}
               </span>
             ))}
           </div>
@@ -317,25 +319,8 @@ export function Profile() {
         <p className="text-xs text-cream/35">Less scrolling. More doing. Find your people.</p>
       </footer>
 
-      <Sheet open={editing} onClose={() => setEditing(false)} title="Modifica profilo">
-        <div className="space-y-3">
-          <label className="block">
-            <span className="text-sm font-semibold text-cream/60">Nome</span>
-            <input value={draft.name} maxLength={24} onChange={(e) => setDraft({ ...draft, name: e.target.value })} className="mt-1 h-11 w-full rounded-2xl border border-cream/10 bg-ink/70 px-3.5 focus:border-brand/60 focus:outline-none" />
-          </label>
-          <label className="block">
-            <span className="text-sm font-semibold text-cream/60">Bio</span>
-            <textarea value={draft.bio} rows={3} maxLength={160} onChange={(e) => setDraft({ ...draft, bio: e.target.value })} className="mt-1 w-full resize-none rounded-2xl border border-cream/10 bg-ink/70 p-3.5 focus:border-brand/60 focus:outline-none" />
-          </label>
-          <label className="block">
-            <span className="text-sm font-semibold text-cream/60">Il tuo dilemma Gatekeeper</span>
-            <textarea value={draft.dilemma} rows={2} maxLength={140} onChange={(e) => setDraft({ ...draft, dilemma: e.target.value })} className="mt-1 w-full resize-none rounded-2xl border border-cream/10 bg-ink/70 p-3.5 focus:border-brand/60 focus:outline-none" />
-          </label>
-          <Button className="w-full" onClick={save}>
-            <Check size={16} /> Salva
-          </Button>
-        </div>
-      </Sheet>
+      <EditProfile open={editing} onClose={() => setEditing(false)} />
+      <ProfilePreview open={previewing} onClose={() => setPreviewing(false)} />
 
       <Sheet open={confirmReset} onClose={() => setConfirmReset(false)} title="Ripristinare i dati demo?">
         <p className="text-sm text-cream/65">Piani creati, messaggi, karma e stato Lifetime verranno riportati allo stato iniziale. L’operazione non è reversibile.</p>
@@ -358,72 +343,33 @@ export function Profile() {
   )
 }
 
-function ProfilePhotos() {
-  const { state, updateMe, toast } = useStore()
-  const saved = state.me.photos ?? []
-  const [draft, setDraft] = useState<string[]>(saved)
-  const [open, setOpen] = useState(saved.length > 0)
-  const [confirmAvatar, setConfirmAvatar] = useState(false)
-
-  const change = (p: string[]) => {
-    setDraft(p)
-    if (p.length === 0 || p.length >= PHOTO_MIN) updateMe({ photos: p })
-  }
-
+function PhotoStrip({ onEdit }: { onEdit: () => void }) {
+  const { state } = useStore()
+  const photos = state.me.photos ?? []
   return (
     <section className="space-y-2">
       <div className="flex items-baseline justify-between">
         <Eyebrow>Le tue foto</Eyebrow>
-        {open && (
-          <span className="text-xs text-muted">
-            {draft.length}/{PHOTO_MAX} · minimo {PHOTO_MIN}
-          </span>
-        )}
+        <button onClick={onEdit} className="text-sm font-semibold text-brand hover:underline">
+          Modifica
+        </button>
       </div>
-      {!open ? (
+      {photos.length ? (
+        <div className="no-scrollbar -mx-4 flex gap-2 overflow-x-auto px-4">
+          {photos.map((src, i) => (
+            <img key={i} src={src} alt={i === 0 ? 'Foto principale' : `Foto ${i + 1}`} className="aspect-[4/5] w-24 shrink-0 rounded-xl object-cover" />
+          ))}
+        </div>
+      ) : (
         <div className="rounded-2xl border border-line bg-surface p-4">
           <p className="text-base font-semibold">Profilo senza foto</p>
-          <p className="mt-1 text-sm text-muted">Stai usando l’avatar illustrato: compari un po’ meno in Scopri. Con almeno {PHOTO_MIN} foto torni in prima fila. Restano sfocate fino al match.</p>
-          <button onClick={() => setOpen(true)} className="mt-3 h-10 rounded-full bg-brand px-4 text-sm font-bold text-ink">
+          <p className="mt-1 text-sm text-muted">Stai usando l’avatar illustrato: compari un po’ meno in Scopri. Con almeno {PHOTO_MIN} foto torni in prima fila.</p>
+          <button onClick={onEdit} className="mt-3 h-10 rounded-full bg-brand px-4 text-sm font-bold text-ink">
             Aggiungi foto
           </button>
         </div>
-      ) : (
-        <div className="rounded-2xl border border-line bg-surface p-3.5">
-          <PhotoGallery photos={draft} onChange={change} />
-          {draft.length === 1 && <p className="mt-2 text-sm text-gold">Aggiungine almeno un’altra per pubblicarle.</p>}
-          <p className="mt-2 text-xs text-muted">Prima del match gli altri vedono solo la principale, sfocata. Dopo il match vedono tutte le foto.</p>
-          {saved.length >= PHOTO_MIN && (
-            <button onClick={() => setConfirmAvatar(true)} className="mt-2 text-sm font-semibold text-muted underline-offset-2 hover:text-cream hover:underline">
-              Usa l’avatar invece delle foto
-            </button>
-          )}
-          {saved.length === 0 && draft.length === 0 && (
-            <button onClick={() => setOpen(false)} className="mt-2 text-sm font-semibold text-muted hover:text-cream">
-              Annulla
-            </button>
-          )}
-        </div>
       )}
-      <Sheet open={confirmAvatar} onClose={() => setConfirmAvatar(false)} title="Passare all’avatar?">
-        <p className="text-sm text-muted">Le tue foto verranno rimosse da questo dispositivo e userai l’avatar illustrato. Compari un po’ meno in Scopri.</p>
-        <div className="mt-4 grid grid-cols-2 gap-2">
-          <Button variant="ghost" onClick={() => setConfirmAvatar(false)}>
-            Annulla
-          </Button>
-          <Button
-            variant="danger"
-            onClick={() => {
-              change([])
-              setOpen(false)
-              setConfirmAvatar(false)
-              toast({ tone: 'cyan', title: 'Ora usi l’avatar', body: 'Puoi tornare alle foto quando vuoi.' })
-            }}
-          >
-            Rimuovi le foto
-          </Button>
-        </div>
-      </Sheet>
+      <p className="text-xs text-muted">Prima del match gli altri vedono solo la principale, sfocata. Dopo il match tutte.</p>
     </section>
   )
 }

@@ -35,8 +35,8 @@ Obiettivo: un'app che si può far provare a qualcuno e che "sembra vera".
 
 ## Fase 2 — Profilo reale
 - ✅ **2.1 Foto vere** — galleria da 2 a 6 foto (onboarding e profilo), ritaglio 4:5 con zoom, griglia riordinabile trascinando o con le frecce; prima del match solo la principale sfocata, dopo il match tutte sfogliabili; avatar illustrato come alternativa ("Senza foto")
-- 🔜 **2.2 Profilo ricco** — più dilemmi/prompt a scelta, modifica Habitat e interessi, anteprima "come ti vedono gli altri"
-- ⬜ **2.3 Bestie Vouching reale** — link che apre un modulo per il tuo amico, approvazione prima della pubblicazione
+- ✅ **2.2 Profilo ricco** — pagina unica "Modifica profilo" (foto/avatar, nome, bio 160, lavoro o studio, lingue, fumo e alcol, passioni a categorie 3–8 + personalizzate, Habitat 1–5 per quartiere, dilemma) con un solo Salva e avviso modifiche non salvate; anteprima "Come ti vedono gli altri" prima e dopo il match; info nei profili degli altri
+- 🔜 **2.3 Bestie Vouching reale** — link che apre un modulo per il tuo amico, approvazione prima della pubblicazione
 - ⬜ **2.4 Verifica profilo** — selfie di verifica (simulata) e badge "verificato"
 
 ## Fase 3 — Backend (diventa multi-utente)
