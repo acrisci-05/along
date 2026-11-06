@@ -1,6 +1,6 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import type { AppState, Chat, Like, Message, Plan, Prefs, Toast, User } from '../types'
-import { AUTO_REPLIES, createInitialState, DEMO_VERSION, FAREWELL, INCOMING_POOL } from '../data/mock'
+import { AUTO_REPLIES, createInitialState, DEMO_VERSION, FAREWELL, INCOMING_POOL, todayKey } from '../data/mock'
 import { affinity, H, planStatus, randomWave, uid } from '../lib/utils'
 
 const KEY = 'along:state'
@@ -10,7 +10,7 @@ function load(): AppState {
     const raw = localStorage.getItem(KEY)
     if (raw) {
       const parsed = JSON.parse(raw) as AppState
-      if (parsed.version === DEMO_VERSION) return parsed
+      if (parsed.version === DEMO_VERSION) return { ...createInitialState(), ...parsed }
     }
   } catch {
     /* storage unavailable */
@@ -73,6 +73,7 @@ interface Store {
   dismissMatch: () => void
   likeUser: (userId: string, answer: string) => void
   passUser: (userId: string) => void
+  newDay: () => void
   undoSwipe: () => string | null
   resetDeck: () => void
   acceptLike: (likeId: string) => void
@@ -90,6 +91,13 @@ export interface MatchEvent {
 }
 
 const Ctx = createContext<Store | null>(null)
+
+/** Daily selection counter, rolling over at midnight. */
+function bumpDaily(d: AppState['daily'], key: 'seen' | 'answered' | 'matches') {
+  const day = todayKey()
+  const base = d.day === day ? d : { day, seen: 0, answered: 0, matches: 0 }
+  return { ...base, [key]: base[key] + 1 }
+}
 
 const pick = <T,>(arr: T[]) => arr[Math.floor(Math.random() * arr.length)]
 
@@ -447,6 +455,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         swipeHistory: [...prev.swipeHistory, userId],
         likesOut: [...prev.likesOut.filter((l) => l.userId !== userId), { userId, answer, at: now, status: 'pending' }],
         stats: { ...prev.stats, textSent: prev.stats.textSent + 1 },
+        daily: bumpDaily(bumpDaily(prev.daily, 'seen'), 'answered'),
       }))
       const chance = Math.min(0.92, 0.5 + (affinity(s0.me, u) - 50) / 80)
       const matched = Math.random() < chance
@@ -461,6 +470,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
           ...s,
           chats: [chat, ...s.chats],
           likesOut: s.likesOut.map((l) => (l.userId === userId ? { ...l, status: 'matched' } : l)),
+          daily: bumpDaily(s.daily, 'matches'),
           plans: chat.planId ? s.plans.map((p) => (p.id === chat.planId && !p.participants.includes('me') ? { ...p, participants: [...p.participants, 'me'] } : p)) : s.plans,
         })
         setMatch({ userId, chatId: chat.id, waiting: full, answer, question: u.dilemma.question, fromMe: true })
@@ -476,7 +486,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       const like = s.likesIn.find((l) => l.id === likeId)
       if (!like) return
       const { chat, full } = openMatch(like.userId, { question: like.question, answer: like.answer, fromMe: false }, s)
-      setState({ ...s, chats: [chat, ...s.chats], likesIn: s.likesIn.map((l) => (l.id === likeId ? { ...l, status: 'accepted' } : l)), swipes: { ...s.swipes, [like.userId]: 'like' } })
+      setState({ ...s, chats: [chat, ...s.chats], likesIn: s.likesIn.map((l) => (l.id === likeId ? { ...l, status: 'accepted' } : l)), swipes: { ...s.swipes, [like.userId]: 'like' }, daily: bumpDaily(s.daily, 'matches') })
       setMatch({ userId: like.userId, chatId: chat.id, waiting: full, answer: like.answer, question: like.question, fromMe: false })
     },
     [openMatch],
@@ -575,7 +585,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       dismissMatch: () => setMatch(null),
       likeUser,
       passUser: (userId) =>
-        setState((prev) => ({ ...prev, swipes: { ...prev.swipes, [userId]: 'pass' }, swipeHistory: [...prev.swipeHistory, userId] })),
+        setState((prev) => ({ ...prev, swipes: { ...prev.swipes, [userId]: 'pass' }, swipeHistory: [...prev.swipeHistory, userId], daily: bumpDaily(prev.daily, 'seen') })),
+      newDay: () => setState((prev) => ({ ...prev, daily: { day: todayKey(), seen: 0, answered: 0, matches: 0 } })),
       undoSwipe: () => {
         const s = stateRef.current
         const last = s.swipeHistory[s.swipeHistory.length - 1]

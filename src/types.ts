@@ -188,4 +188,12 @@ export interface AppState {
   likesOut: OutgoingLike[]
   prefs: Prefs
   savedBy: string[]
+  daily: Daily
+}
+
+export interface Daily {
+  day: string
+  seen: number
+  answered: number
+  matches: number
 }

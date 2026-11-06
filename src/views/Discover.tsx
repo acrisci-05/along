@@ -1,10 +1,11 @@
-import { useEffect, useMemo, useState } from 'react'
-import { AnimatePresence, animate, motion, useMotionValue, useTransform } from 'motion/react'
+import { useEffect, useMemo, useRef, useState } from 'react'
+import { AnimatePresence, motion, useMotionValue, useTransform, type Variants } from 'motion/react'
 import { ArrowLeft, ArrowRight, Globe2, LayoutList, Info, KeyRound, Lock, Plane, Radio, RotateCcw, SlidersHorizontal } from 'lucide-react'
 import type { Mode, Plan, User } from '../types'
 import { useNav } from '../nav'
-import { useStore } from '../store/store'
-import { affinity, CATEGORY_META, cn, planStatus, planWhen } from '../lib/utils'
+import { useNow, useStore } from '../store/store'
+import { DAILY_LIMIT, todayKey } from '../data/mock'
+import { affinity, CATEGORY_META, cn, planStatus, planWhen, sharedInterests } from '../lib/utils'
 import { Portrait } from '../components/Portrait'
 import { Button, Chip, Sheet } from '../components/ui'
 import { Explore, TravelBridge } from './Explore'
@@ -14,6 +15,22 @@ const POSTER: Record<string, string> = {
   study: 'var(--color-p-study)', walk: 'var(--color-p-walk)', gaming: 'var(--color-p-gaming)', music: 'var(--color-p-music)',
   books: 'var(--color-p-books)', talk: 'var(--color-p-talk)', travel: 'var(--color-p-travel)',
 }
+const PAGES = ['La locandina', 'In comune', 'Affidabilità'] as const
+
+const RELIABILITY = [
+  { key: 'fast' as const, emoji: '⚡', label: 'Fast Replier', on: 'risponde in fretta', off: 'non ancora' },
+  { key: 'voice' as const, emoji: '🎙️', label: 'Voice Lover', on: 'ama i vocali', off: 'non ancora' },
+  { key: 'zero' as const, emoji: '🛡️', label: 'Zero Ghosting', on: 'mai sparit*', off: 'non ancora' },
+]
+
+/** Exit choreography: pass = poster torn off the wall, answer = ticket flying away. */
+const CARD_EXIT: Variants = {
+  exit: (dir: 'left' | 'right') =>
+    dir === 'right'
+      ? { x: 380, y: -140, rotate: 18, scale: 0.85, opacity: 0, transition: { duration: 0.42, ease: [0.3, 0, 0.2, 1] as const } }
+      : { x: -340, y: 220, rotate: -38, opacity: 0, transition: { duration: 0.5, ease: [0.55, 0, 0.75, 0.2] as const } },
+}
+
 function posterColor(plan?: Plan) {
   return plan ? POSTER[plan.category] : 'var(--color-p-talk)'
 }
@@ -39,7 +56,10 @@ export function Discover({ mode, setMode }: { mode: Mode; setMode: (m: Mode) => 
 
 function Deck({ mode, setMode, onPlans }: { mode: Mode; setMode: (m: Mode) => void; onPlans: () => void }) {
   const store = useStore()
-  const { state, setPrefs, passUser, likeUser, undoSwipe, resetDeck, toast } = store
+  const { state, setPrefs, passUser, likeUser, undoSwipe, resetDeck, toast, newDay } = store
+  const [dir, setDir] = useState<'left' | 'right'>('left')
+  const daily = state.daily.day === todayKey() ? state.daily : { day: todayKey(), seen: 0, answered: 0, matches: 0 }
+  const dayOver = daily.seen >= DAILY_LIMIT
   const nav = useNav()
   const [filters, setFilters] = useState(false)
   const [travel, setTravel] = useState(false)
@@ -61,8 +81,8 @@ function Deck({ mode, setMode, onPlans }: { mode: Mode; setMode: (m: Mode) => vo
       .sort((a, b) => affinity(me, b) - affinity(me, a))
   }, [state.users, state.swipes, state.chats, state.likesIn, state.travelDestinations, prefs, me, mode])
 
-  const top = deck[0]
-  const next = deck[1]
+  const top = dayOver ? undefined : deck[0]
+  const next = dayOver ? undefined : deck[1]
   const planOf = (u?: User) => (u ? state.plans.find((p) => p.hostId === u.id && planStatus(p) !== 'EXPIRED') : undefined)
 
   const undo = () => {
@@ -124,9 +144,20 @@ function Deck({ mode, setMode, onPlans }: { mode: Mode; setMode: (m: Mode) => vo
         </button>
       )}
 
+      {/* daily selection meter */}
+      <div className="flex items-center gap-3" aria-label={`Selezione di oggi: ${Math.min(daily.seen, DAILY_LIMIT)} su ${DAILY_LIMIT}`}>
+        <p className="serif shrink-0 text-base text-cream/60">selezione di oggi —</p>
+        <div className="h-[3px] flex-1 overflow-hidden rounded-full bg-line" aria-hidden>
+          <motion.div className="h-full bg-coral" animate={{ width: `${(Math.min(daily.seen, DAILY_LIMIT) / DAILY_LIMIT) * 100}%` }} />
+        </div>
+        <span className="shrink-0 font-display text-sm font-extrabold tabular-nums">
+          {Math.min(daily.seen, DAILY_LIMIT)}/{DAILY_LIMIT}
+        </span>
+      </div>
+
       {/* stack */}
       <div className="relative min-h-[360px] flex-1">
-        <AnimatePresence>
+        <AnimatePresence custom={dir}>
           {next && <SwipeCard key={next.id} user={next} plan={planOf(next)} me={me} behind />}
           {top && (
             <SwipeCard
@@ -134,8 +165,12 @@ function Deck({ mode, setMode, onPlans }: { mode: Mode; setMode: (m: Mode) => vo
               user={top}
               plan={planOf(top)}
               me={me}
-              onPass={() => passUser(top.id)}
+              onPass={() => {
+                setDir('left')
+                passUser(top.id)
+              }}
               onLike={(answer) => {
+                setDir('right')
                 likeUser(top.id, answer)
                 toast({ tone: 'coral', title: `Risposta inviata a ${top.name} 💌`, body: 'Se le/gli piace, è match e le foto si svelano.' })
               }}
@@ -145,8 +180,9 @@ function Deck({ mode, setMode, onPlans }: { mode: Mode; setMode: (m: Mode) => vo
             />
           )}
         </AnimatePresence>
-        {!top && (
-          <div className="absolute inset-0 grid place-items-center rounded-3xl border border-dashed border-cream/15 p-6 text-center">
+        {dayOver && <DayOver daily={daily} onNewDay={newDay} />}
+        {!top && !dayOver && (
+          <div className="absolute inset-0 grid place-items-center rounded-md border border-dashed border-line p-6 text-center">
             <div>
               <p className="text-3xl" aria-hidden>
                 🌙
@@ -236,14 +272,13 @@ function SwipeCard({
   const passOpacity = useTransform(x, [-120, -30], [1, 0])
   const likeOpacity = useTransform(x, [30, 120], [0, 1])
   const [flipped, setFlipped] = useState(false)
-  const [exit, setExit] = useState<'left' | 'right'>('left')
+  const [page, setPage] = useState(0)
+  const dragged = useRef(false)
   const aff = affinity(me, user)
+  const revealedCommon = sharedInterests(me, user)
+  const commonHabitats = user.habitats.filter((h) => me.habitats.includes(h))
 
-  const pass = () => {
-    setExit('left')
-    animate(x, -520, { duration: 0.28 })
-    window.setTimeout(() => onPass?.(), 180)
-  }
+  const pass = () => onPass?.()
 
   useEffect(() => {
     if (behind || flipped) return
@@ -252,6 +287,8 @@ function SwipeCard({
       if (t.closest('input, textarea, [role=dialog]')) return
       if (e.key === 'ArrowLeft') pass()
       if (e.key === 'ArrowRight') setFlipped(true)
+      if (e.key === 'ArrowDown') setPage((p) => Math.min(PAGES.length - 1, p + 1))
+      if (e.key === 'ArrowUp') setPage((p) => Math.max(0, p - 1))
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
@@ -262,7 +299,7 @@ function SwipeCard({
 
   if (behind)
     return (
-      <motion.div className="absolute inset-x-0 top-0 bottom-[60px] rounded-md" style={{ background: posterColor(plan) }} initial={{ scale: 0.9, y: 18, opacity: 0 }} animate={{ scale: 0.95, y: 12, opacity: 0.35 }} exit={{ opacity: 0 }} aria-hidden />
+      <motion.div key="behind" className="absolute inset-x-0 top-0 bottom-[60px] z-0 rounded-md" style={{ background: posterColor(plan) }} initial={{ scale: 0.9, y: 18, opacity: 0 }} animate={{ scale: 0.95, y: 12, opacity: 0.35 }} exit={{ opacity: 0 }} aria-hidden />
     )
 
   const meta = plan ? CATEGORY_META[plan.category] : null
@@ -271,84 +308,167 @@ function SwipeCard({
   const whenWord = plan ? (plan.whenLabel ? plan.whenLabel.split('·')[0].trim() : planWhen(plan).split('·')[0].trim()) : ''
   const place = plan ? plan.district ?? plan.habitat.split('·')[0].trim() : user.city
   const sticker = plan?.vibes[0] ?? meta?.label
+  const goPage = (d: 1 | -1) => setPage((p) => Math.max(0, Math.min(PAGES.length - 1, p + d)))
 
   return (
+    <motion.div key="front" className="absolute inset-0 z-10" variants={CARD_EXIT} initial={false} exit="exit">
     <motion.div
       className="absolute inset-0 flex flex-col"
       style={{ x, rotate }}
       initial={{ scale: 0.95, y: 12, opacity: 0.6 }}
       animate={{ scale: 1, y: 0, opacity: 1 }}
-      exit={exit === 'left' ? { x: -520, opacity: 0, transition: { duration: 0.25 } } : { x: 520, opacity: 0, rotate: 14, transition: { duration: 0.3 } }}
       drag={flipped ? false : 'x'}
       dragSnapToOrigin
       dragElastic={0.9}
+      onDragStart={() => (dragged.current = true)}
       onDragEnd={(_, info) => {
+        window.setTimeout(() => (dragged.current = false), 60)
         if (info.offset.x < -110 || info.velocity.x < -700) pass()
         else if (info.offset.x > 110 || info.velocity.x > 700) setFlipped(true)
       }}
     >
       <div className="relative min-h-0 flex-1 [perspective:1400px]">
         <motion.div className="relative h-full w-full [transform-style:preserve-3d]" animate={{ rotateY: flipped ? 180 : 0 }} transition={{ type: 'spring', stiffness: 160, damping: 22 }}>
-          {/* FRONT — poster */}
+          {/* FRONT — poster with story pages */}
           <article
-            className="absolute inset-0 flex flex-col overflow-hidden rounded-md p-4 text-ink [backface-visibility:hidden]"
+            className={cn('absolute inset-0 flex flex-col overflow-hidden rounded-md px-4 pb-4 pt-3 text-ink [backface-visibility:hidden]', flipped && 'pointer-events-none')}
             style={{ background: poster }}
             aria-label={`${user.name}, ${user.age}${plan ? `: ${plan.title}` : ''}`}
             aria-hidden={flipped}
           >
-            <div className="flex items-start gap-3">
-              <div className="min-w-0 flex-1">
-                {meta && (
-                  <p className="font-display text-xs font-extrabold uppercase tracking-wide">
-                    <span aria-hidden>{meta.emoji}</span> {meta.label}
-                  </p>
-                )}
-                <p className="mt-1 font-display text-[clamp(40px,13vw,58px)] font-extrabold leading-[0.85] tracking-[-0.06em]">{bigTime}</p>
-                <p className="serif mt-1 text-base leading-tight">
-                  {whenWord.toLowerCase()}, {place}
-                </p>
-              </div>
-              <div className="relative w-[31%] shrink-0">
-                <div className="aspect-[4/5] overflow-hidden rounded-sm border-[3px] border-ink bg-ink">
-                  <Portrait look={user.look} hue={user.hue} className="h-full w-full scale-[1.25] blur-[14px]" />
-                  <span className="absolute inset-x-[3px] bottom-[3px] flex items-center justify-center gap-1 bg-ink/70 py-1 text-[10px] font-semibold text-cream">
-                    <Lock size={10} /> foto al match
-                  </span>
-                </div>
-                {sticker && (
-                  <span className="poster-shadow absolute -bottom-3 -left-4 max-w-[130%] rotate-[-6deg] truncate rounded-sm bg-cream px-2 py-1 font-display text-[11px] font-extrabold uppercase tracking-wide">
-                    {sticker} ✦
-                  </span>
-                )}
-              </div>
+            {/* story progress */}
+            <div className="mb-3 flex gap-1.5" aria-hidden>
+              {PAGES.map((pg, i) => (
+                <span key={pg} className={cn('h-[3px] flex-1 rounded-full transition-colors', i <= page ? 'bg-ink' : 'bg-ink/20')} />
+              ))}
             </div>
 
-            <h2 className="mt-4 line-clamp-2 font-display text-[clamp(24px,7.6vw,32px)] font-extrabold leading-[1] tracking-[-0.04em]">
-              {plan ? (
-                <button onClick={() => onPlan?.(plan.id)} className="text-left hover:underline hover:decoration-[3px] hover:underline-offset-4">
-                  {plan.title}
-                </button>
-              ) : (
-                'Un caffè e due chiacchiere'
-              )}
-            </h2>
+            <div className="relative min-h-0 flex-1">
+              {/* tap zones */}
+              <button
+                className="absolute inset-y-0 left-0 z-0 w-2/5"
+                onClick={() => !dragged.current && goPage(-1)}
+                aria-label="Pagina precedente del profilo"
+                disabled={page === 0}
+              />
+              <button
+                className="absolute inset-y-0 right-0 z-0 w-3/5"
+                onClick={() => !dragged.current && goPage(1)}
+                aria-label="Pagina successiva del profilo"
+                disabled={page === PAGES.length - 1}
+              />
+              <AnimatePresence mode="wait" initial={false}>
+                <motion.div
+                  key={page}
+                  className="pointer-events-none relative h-full"
+                  initial={{ opacity: 0, x: 14 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -14 }}
+                  transition={{ duration: 0.16 }}
+                >
+                  {page === 0 && (
+                    <div className="flex h-full flex-col">
+                      <div className="flex items-start gap-3">
+                        <div className="min-w-0 flex-1">
+                          {meta && (
+                            <p className="font-display text-xs font-extrabold uppercase tracking-wide">
+                              <span aria-hidden>{meta.emoji}</span> {meta.label}
+                            </p>
+                          )}
+                          <p className="mt-1 font-display text-[clamp(36px,11.5vw,56px)] font-extrabold leading-[0.85] tracking-[-0.06em]">{bigTime}</p>
+                          <p className="serif mt-1 text-base leading-tight">
+                            {whenWord.toLowerCase()}, {place}
+                          </p>
+                          {sticker && (
+                            <span className="poster-shadow mt-3 inline-block max-w-full rotate-[-4deg] truncate rounded-sm bg-cream px-2 py-1 font-display text-[11px] font-extrabold uppercase tracking-wide">
+                              {sticker} ✦
+                            </span>
+                          )}
+                        </div>
+                        <div className="relative w-[28%] shrink-0">
+                          <div className="aspect-[4/5] overflow-hidden rounded-sm border-[3px] border-ink bg-ink">
+                            <Portrait look={user.look} hue={user.hue} className="h-full w-full scale-[1.25] blur-[14px]" />
+                            <span className="absolute inset-x-[3px] bottom-[3px] flex items-center justify-center gap-1 bg-ink/70 py-1 text-[10px] font-semibold text-cream">
+                              <Lock size={10} /> foto al match
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                      <h2 className="mt-auto line-clamp-2 pb-1 font-display text-[clamp(22px,6.8vw,30px)] font-extrabold leading-[1] tracking-[-0.04em]">
+                        {plan ? (
+                          <button onClick={() => !dragged.current && onPlan?.(plan.id)} className="pointer-events-auto relative z-10 text-left hover:underline hover:decoration-[3px] hover:underline-offset-4">
+                            {plan.title}
+                          </button>
+                        ) : (
+                          'Un caffè e due chiacchiere'
+                        )}
+                      </h2>
+                    </div>
+                  )}
 
-            {/* stamps */}
-            <motion.span style={{ opacity: likeOpacity }} className="pointer-events-none absolute left-4 top-24 -rotate-12 rounded-sm bg-ink px-3 py-1 font-display text-2xl font-extrabold tracking-wide text-coral">
-              RISPONDO
-            </motion.span>
-            <motion.span style={{ opacity: passOpacity }} className="pointer-events-none absolute right-4 top-24 rotate-12 rounded-sm bg-cream px-3 py-1 font-display text-2xl font-extrabold tracking-wide text-ink">
-              PASSO
-            </motion.span>
+                  {page === 1 && (
+                    <div className="flex h-full flex-col">
+                      <p className="serif text-lg">in comune con te —</p>
+                      <p className="font-display text-[clamp(48px,16vw,80px)] font-extrabold leading-[0.85] tracking-[-0.06em]">{aff}%</p>
+                      <p className="font-display text-sm font-extrabold uppercase tracking-wide">di sintonia</p>
+                      <div className="mt-3 flex flex-wrap gap-1.5">
+                        {(revealedCommon.length ? revealedCommon : user.interests.slice(0, 4)).map((i) => (
+                          <span key={i} className={cn('rounded-full border-2 border-ink px-2.5 py-0.5 text-sm font-bold', revealedCommon.length ? 'bg-ink text-cream' : '')}>
+                            {revealedCommon.length ? '✦ ' : ''}
+                            {i}
+                          </span>
+                        ))}
+                      </div>
+                      {!revealedCommon.length && <p className="mt-2 text-sm font-semibold">Niente in comune, per ora. A volte è proprio il bello.</p>}
+                      {commonHabitats.length > 0 && (
+                        <div className="mt-3">
+                          <p className="serif text-base">frequentate gli stessi posti —</p>
+                          <p className="mt-0.5 text-sm font-bold">{commonHabitats.join(' · ')}</p>
+                        </div>
+                      )}
+                    </div>
+                  )}
 
-            <div className="mt-auto pt-3">
-              <button onClick={onInfo} className="flex w-full items-end justify-between gap-2 border-t-2 border-ink pt-2 text-left" aria-label={`Profilo completo di ${user.name}`}>
+                  {page === 2 && (
+                    <div className="flex h-full flex-col">
+                      <p className="serif text-lg">affidabilità —</p>
+                      <p className="font-display text-[clamp(44px,14vw,76px)] font-extrabold leading-[0.85] tracking-[-0.06em]">{user.karma}</p>
+                      <p className="font-display text-sm font-extrabold uppercase tracking-wide">punti karma</p>
+                      <ul className="mt-3 space-y-1">
+                        {RELIABILITY.map((r) => {
+                          const on = user.badges.includes(r.key)
+                          return (
+                            <li key={r.key} className={cn('flex items-center justify-between rounded-sm border-2 border-ink px-2 py-0.5 text-sm font-bold', on ? 'bg-ink text-cream' : 'opacity-45')}>
+                              <span>
+                                <span aria-hidden>{r.emoji}</span> {r.label}
+                              </span>
+                              <span className="text-xs font-semibold">{on ? r.on : r.off}</span>
+                            </li>
+                          )
+                        })}
+                      </ul>
+                    </div>
+                  )}
+                </motion.div>
+              </AnimatePresence>
+
+              {/* stamps */}
+              <motion.span style={{ opacity: likeOpacity }} className="pointer-events-none absolute left-0 top-16 z-20 -rotate-12 rounded-sm bg-ink px-3 py-1 font-display text-2xl font-extrabold tracking-wide text-coral">
+                RISPONDO
+              </motion.span>
+              <motion.span style={{ opacity: passOpacity }} className="pointer-events-none absolute right-0 top-16 z-20 rotate-12 rounded-sm bg-cream px-3 py-1 font-display text-2xl font-extrabold tracking-wide text-ink">
+                PASSO
+              </motion.span>
+            </div>
+
+            <div className="relative z-10 pt-3">
+              <button onClick={() => !dragged.current && onInfo?.()} className="flex w-full items-end justify-between gap-2 border-t-2 border-ink pt-2 text-left" aria-label={`Profilo completo di ${user.name}`}>
                 <span className="min-w-0">
                   <span className="block font-display text-xl font-extrabold leading-none tracking-[-0.03em]">
                     {user.name}, {user.age}
                   </span>
                   <span className="mt-1 block truncate text-xs font-semibold">
-                    {distanceLabel(user, me)} · {aff}% sintonia
+                    {distanceLabel(user, me)} · {PAGES[page]}
                   </span>
                 </span>
                 <span className="flex shrink-0 items-center gap-1">
@@ -368,15 +488,12 @@ function SwipeCard({
           </article>
 
           {/* BACK — answer */}
-          <article className="absolute inset-0 flex flex-col overflow-hidden rounded-md border-2 p-5 [backface-visibility:hidden] [transform:rotateY(180deg)]" style={{ background: '#161616', borderColor: poster }} aria-hidden={!flipped}>
+          <article className={cn('absolute inset-0 flex flex-col overflow-hidden rounded-md border-2 p-5 [backface-visibility:hidden] [transform:rotateY(180deg)]', !flipped && 'pointer-events-none')} style={{ background: '#161616', borderColor: poster }} aria-hidden={!flipped}>
             {flipped && (
               <AnswerForm
                 user={user}
                 onCancel={() => setFlipped(false)}
-                onSend={(a) => {
-                  setExit('right')
-                  onLike?.(a)
-                }}
+                onSend={(a) => onLike?.(a)}
               />
             )}
           </article>
@@ -398,6 +515,62 @@ function SwipeCard({
         </div>
       )}
     </motion.div>
+    </motion.div>
+  )
+}
+
+function DayOver({ daily, onNewDay }: { daily: { seen: number; answered: number; matches: number }; onNewDay: () => void }) {
+  const { state } = useStore()
+  const nav = useNav()
+  const now = useNow(1000)
+  const midnight = new Date(now)
+  midnight.setHours(24, 0, 0, 0)
+  const left = midnight.getTime() - now
+  const hh = String(Math.floor(left / 3_600_000)).padStart(2, '0')
+  const mm = String(Math.floor((left % 3_600_000) / 60_000)).padStart(2, '0')
+  const ss = String(Math.floor((left % 60_000) / 1000)).padStart(2, '0')
+  const newLikes = state.likesIn.filter((l) => l.status === 'new').length
+  return (
+    <motion.section
+      initial={{ opacity: 0, y: 30, rotate: -2 }}
+      animate={{ opacity: 1, y: 0, rotate: 0 }}
+      transition={{ type: 'spring', stiffness: 200, damping: 20 }}
+      className="no-scrollbar absolute inset-0 flex flex-col overflow-y-auto rounded-md bg-cream p-4 text-ink"
+      aria-label="Selezione di oggi terminata"
+    >
+      <p className="serif text-lg">fine della selezione —</p>
+      <h2 className="mt-1 text-[clamp(32px,10vw,48px)] leading-[0.9]">Per oggi è tutto.</h2>
+      <p className="mt-2 text-sm font-semibold text-ink/70">Meno scroll, più vita. Domani altri {DAILY_LIMIT} profili scelti per sintonia.</p>
+      <dl className="mt-3 grid grid-cols-3 border-y-2 border-ink">
+        {(
+          [
+            ['visti', daily.seen],
+            ['risposte', daily.answered],
+            ['match', daily.matches],
+          ] as const
+        ).map(([k, v], i) => (
+          <div key={k} className={cn('py-1.5 text-center', i > 0 && 'border-l-2 border-ink')}>
+            <dd className="font-display text-2xl font-extrabold tabular-nums">{v}</dd>
+            <dt className="text-xs font-bold uppercase">{k}</dt>
+          </div>
+        ))}
+      </dl>
+      <p className="serif mt-3 text-base">prossimo turno tra —</p>
+      <p className="font-display text-2xl font-extrabold tabular-nums tracking-[-0.04em]" aria-live="off">
+        {hh}:{mm}:{ss}
+      </p>
+      <div className="mt-auto grid gap-2 pt-3">
+        <Button onClick={() => nav.setTab('likes')} disabled={!newLikes}>
+          {newLikes ? `Rispondi ai like (${newLikes})` : 'Nessun like in attesa'}
+        </Button>
+        <button onClick={nav.openCreate} className="h-11 rounded-md border-2 border-ink font-display font-bold">
+          Proponi un piano per stasera
+        </button>
+        <button onClick={onNewDay} className="text-xs font-semibold text-ink/50 underline-offset-2 hover:underline">
+          Demo: inizia un nuovo giorno
+        </button>
+      </div>
+    </motion.section>
   )
 }
 

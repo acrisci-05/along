@@ -41,7 +41,9 @@ Regola: **un solo colore d'azione per schermata (corallo)**. Gli altri colori ha
 - `Button`: primary corallo, outline crema 2px, ghost su `surface-2`; disabilitato = superficie piena (mai trasparente).
 - `Chip`: inattivo con bordo `line`; attivo crema (o corallo per l'intento Date).
 - `Eyebrow`: serif corsivo.
-- Card di Scopri = **locandina**: colore pieno della categoria, orario gigante, foto sfocata incorniciata, sticker inclinato, dilemma su riquadro nero.
+- Card di Scopri = **locandina** a 3 pagine-storia (tocca a destra/sinistra, frecce ↑/↓): *Locandina* (orario gigante, foto sfocata incorniciata, sticker inclinato), *In comune* (% sintonia, passioni e Habitat condivisi), *Affidabilità* (karma e badge). Nome e dilemma restano fissi in basso.
+- Animazioni firma: passo = il poster si stacca e cade ruotando; rispondo = la card si gira come un biglietto e vola via.
+- Fine selezione giornaliera (20 profili): locandina crema "Per oggi è tutto." con riepilogo e conto alla rovescia.
 - Bottom nav: barra piatta con bordo superiore, etichette maiuscole Bricolage, "+" corallo quadrato.
 
 ## Emoji

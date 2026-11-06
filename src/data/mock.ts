@@ -396,6 +396,9 @@ const MY_DILEMMA = 'Sei su un’isola deserta con un solo album: quale porti?'
 
 export const DEMO_VERSION = 5
 
+export const todayKey = () => new Date().toLocaleDateString('sv-SE')
+export const DAILY_LIMIT = 20
+
 export function createInitialState(): AppState {
   const now = Date.now()
   return {
@@ -419,6 +422,7 @@ export function createInitialState(): AppState {
     likesOut: [],
     prefs: { intent: 'date', show: 'all', ageMin: 20, ageMax: 35 },
     savedBy: ['u-irene', 'u-samuele', 'u-lea'],
+    daily: { day: todayKey(), seen: 0, answered: 0, matches: 0 },
   }
 }
 

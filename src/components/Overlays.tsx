@@ -1,6 +1,6 @@
 import { Bookmark, Clock, Globe2, KeyRound, Lock, MapPin, MessageCircle, Plane } from 'lucide-react'
 import { useNav } from '../nav'
-import { useNow, useStore } from '../store/store'
+import { useNow, useRevealed, useStore } from '../store/store'
 import { affinity, CATEGORY_META, cn, planStatus, planWhen, sharedInterests, STATUS_STYLE } from '../lib/utils'
 import { Avatar, Button, Eyebrow, LifetimeBadge, Sheet } from './ui'
 import { BadgeRow, BestieSticker } from './Bestie'
@@ -154,6 +154,7 @@ export function PlanDetailSheet({ planId, onClose, onJoin }: { planId: string | 
 
 export function UserSheet({ userId, onClose }: { userId: string | null; onClose: () => void }) {
   const { state, user, toggleSave } = useStore()
+  const revealed = useRevealed()
   const nav = useNav()
   const u = userId ? user(userId) : null
   const dm = u && state.chats.find((c) => c.peerIds.length === 1 && c.peerIds[0] === u.id && (c.status === 'active' || c.status === 'waiting'))
@@ -199,7 +200,17 @@ export function UserSheet({ userId, onClose }: { userId: string | null; onClose:
               })}
             </div>
           </div>
-          {u.bestie && <BestieSticker vouch={u.bestie} name={u.name} />}
+          {u.bestie &&
+            (revealed(u.id) ? (
+              <BestieSticker vouch={u.bestie} name={u.name} />
+            ) : (
+              <div className="flex items-center gap-3 rounded-md border border-dashed border-line p-4">
+                <Lock size={18} className="shrink-0 text-cream/50" />
+                <p className="text-sm text-cream/60">
+                  <span className="font-semibold text-cream">Lo sticker Bestie si sblocca al match.</span> Cosa dice di {u.name} il suo migliore amico? Lo scoprirai insieme alla foto.
+                </p>
+              </div>
+            ))}
 
           {state.plans.filter((p) => p.hostId === u.id).length > 0 && (
             <div className="space-y-2">
