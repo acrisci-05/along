@@ -1,0 +1,338 @@
+import type { AppState, Chat, Plan, User } from '../types'
+
+const H = 3_600_000
+const M = 60_000
+
+export const HABITATS: Record<string, { district: string; x: number; y: number; kind: string }> = {
+  'Ramen bar · Decumani': { district: 'Centro Storico', x: 58, y: 38, kind: 'food' },
+  'Biblioteca Nazionale': { district: 'San Ferdinando', x: 47, y: 58, kind: 'study' },
+  'Padel Club Fuorigrotta': { district: 'Fuorigrotta', x: 14, y: 62, kind: 'sport' },
+  'Cinema d’essai Chiaia': { district: 'Chiaia', x: 34, y: 63, kind: 'cinema' },
+  'Lungomare Caracciolo': { district: 'Chiaia', x: 30, y: 78, kind: 'walk' },
+  'Belvedere di Posillipo': { district: 'Posillipo', x: 16, y: 86, kind: 'walk' },
+  'Bar storico · Piazza Bellini': { district: 'Centro Storico', x: 54, y: 30, kind: 'drink' },
+  'Parco della Floridiana': { district: 'Vomero', x: 32, y: 44, kind: 'walk' },
+  'Palestra Vomero Fit': { district: 'Vomero', x: 38, y: 32, kind: 'sport' },
+  'Mercato di Porta Nolana': { district: 'Porta Nolana', x: 76, y: 46, kind: 'food' },
+}
+
+export const DISTRICTS = [
+  { name: 'Vomero', x: 34, y: 38 },
+  { name: 'Centro Storico', x: 58, y: 34 },
+  { name: 'Chiaia', x: 32, y: 68 },
+  { name: 'San Ferdinando', x: 48, y: 62 },
+  { name: 'Fuorigrotta', x: 13, y: 56 },
+  { name: 'Posillipo', x: 14, y: 82 },
+  { name: 'Porta Nolana', x: 78, y: 52 },
+]
+
+const users: User[] = [
+  {
+    id: 'u-giulia', name: 'Giulia', age: 24, city: 'Napoli', hue: 12, emoji: '🍜',
+    bio: 'Food designer di giorno, cacciatrice di brodi tonkotsu di sera. Parlo con le mani.',
+    interests: ['ramen', 'fotografia analogica', 'city pop', 'cucina', 'mercati'],
+    habitats: ['Ramen bar · Decumani', 'Mercato di Porta Nolana'],
+    dilemma: { question: 'Se prendiamo una pizza, cosa non deve MAI esserci sopra?', options: ['Ananas', 'Panna', 'Ketchup', 'Niente, sono anarchica'] },
+    bestie: { worstFlaw: 'Ti fotografa il piatto per 4 minuti prima di farti mangiare.', whyGoOut: 'Conosce il posto giusto in ogni vicolo. E condivide sempre le gyoza.', redFlag: 'Ha opinioni MOLTO forti sullo spessore dei noodles.', by: 'Marta, bestie dal liceo' },
+    karma: 214, badges: ['fast', 'zero'],
+  },
+  {
+    id: 'u-marco', name: 'Marco', age: 27, city: 'Napoli', hue: 88, emoji: '🎾',
+    bio: 'Ingegnere, padel 4 volte a settimana, cerco sempre il quarto. Rovescio discutibile.',
+    interests: ['padel', 'running', 'podcast', 'birra artigianale', 'F1'],
+    habitats: ['Padel Club Fuorigrotta', 'Palestra Vomero Fit'],
+    dilemma: { question: 'Perdi 6-0 6-0. Cosa dici al tuo compagno a fine partita?', options: ['Colpa del vento', 'Birra? Offro io', 'Rivincita. Ora.'] },
+    bestie: { worstFlaw: 'Arriva 20 minuti prima e ti scrive “dove sei?”.', whyGoOut: 'Ti fa sentire un campione anche quando la palla va in tribuna.', redFlag: 'Ha un foglio Excel delle sue statistiche di padel.', by: 'Andrea, compagno di squadra' },
+    karma: 188, badges: ['fast'],
+  },
+  {
+    id: 'u-sofia', name: 'Sofia', age: 22, city: 'Napoli', hue: 330, emoji: '🎬',
+    bio: 'Studio cinema. Guardo tutto in lingua originale, sì anche i cartoni. Popcorn salati, mai dolci.',
+    interests: ['Nolan', 'cinema d’autore', 'vinili', 'scrittura', 'serie tv'],
+    habitats: ['Cinema d’essai Chiaia', 'Bar storico · Piazza Bellini'],
+    dilemma: { question: 'Hai 2 ore libere in una città sconosciuta senza telefono: cosa fai?', options: ['Mi perdo apposta', 'Cerco un cinema', 'Trovo un bar e parlo con chiunque'] },
+    bestie: { worstFlaw: 'Ti spiega il finale del film durante i titoli di coda. Con i diagrammi.', whyGoOut: 'Ti fa vedere il mondo come un’inquadratura perfetta.', redFlag: 'Ha pianto a Interstellar. Tre volte. Al cinema.', by: 'Bea, coinquilina' },
+    karma: 176, badges: ['voice', 'zero'],
+  },
+  {
+    id: 'u-luca', name: 'Luca', age: 25, city: 'Milano', hue: 265, emoji: '🎮',
+    bio: 'Main Sage su Valorant, Diamond su Rocket League. Cerco un duo serale chill, no tossici.',
+    interests: ['Valorant', 'Rocket League', 'synthwave', 'anime', 'streaming'],
+    habitats: [],
+    dilemma: { question: 'Il tuo compagno sbaglia l’ultimo round decisivo. Cosa scrivi in chat?', options: ['“ns try”', 'Silenzio stampa', '“GG, next”'] },
+    bestie: { worstFlaw: 'Dice “ultima partita” alle 23 e sono le 2.', whyGoOut: 'Ti carica anche quando sei a 0-8. Pazienza infinita.', redFlag: 'Ha un nome per ogni sua tastiera meccanica.', by: 'Fede, duo storico' },
+    karma: 201, badges: ['fast', 'voice'], travel: undefined,
+  },
+  {
+    id: 'u-chiara', name: 'Chiara', age: 23, city: 'Napoli', hue: 190, emoji: '📚',
+    bio: 'Medicina, quinto anno. Pomodoro technique e tisane. Cerco compagni di studio silenziosi ma presenti.',
+    interests: ['studio', 'yoga', 'libri', 'podcast', 'tè'],
+    habitats: ['Biblioteca Nazionale', 'Parco della Floridiana'],
+    dilemma: { question: 'Pausa studio ideale: 15 minuti per…', options: ['Caffè al volo', 'Camminata', 'Meme sul telefono'] },
+    bestie: { worstFlaw: 'Ti fa la lezione di anatomia mentre mangi.', whyGoOut: 'Ti porta sempre uno snack anche se non l’hai chiesto.', redFlag: 'Evidenziatori in 9 colori. Codificati.', by: 'Ire, compagna di corso' },
+    karma: 230, badges: ['zero', 'fast'],
+  },
+  {
+    id: 'u-davide', name: 'Davide', age: 26, city: 'Roma', hue: 35, emoji: '✈️',
+    bio: 'Product manager nomade. A fine mese vado a Valencia: cerco crew per paella e tramonti alla Malvarrosa.',
+    interests: ['viaggi', 'surf', 'paella', 'fotografia', 'lingue'],
+    habitats: [],
+    dilemma: { question: 'In viaggio: piano dettagliato o zaino e improvvisazione?', options: ['Excel con orari', 'Zaino e via', 'Metà e metà'] },
+    bestie: { worstFlaw: 'Prenota il volo prima di chiederti se puoi venire.', whyGoOut: 'Trova sempre il localino che non c’è su nessuna guida.', redFlag: 'Ha 14 app di viaggio sul telefono.', by: 'Gio, compagno di Erasmus' },
+    karma: 165, badges: ['voice'], travel: 'Valencia',
+  },
+  {
+    id: 'u-nina', name: 'Nina', age: 29, city: 'Bologna', hue: 280, emoji: '🎧',
+    bio: 'DJ amatoriale e collezionista di vinili. Scambio playlist notturne con chiunque abbia gusto (o coraggio).',
+    interests: ['vinili', 'city pop', 'synthwave', 'jazz', 'serie tv'],
+    habitats: [],
+    dilemma: { question: 'Una canzone che ascolti in loop quando nessuno ti guarda?', options: [] },
+    bestie: { worstFlaw: 'Ti manda 40 canzoni alle 3 di notte e vuole un feedback.', whyGoOut: 'Ti fa scoprire la tua nuova canzone preferita ogni settimana.', redFlag: 'Giudica le persone dalla loro top 5 di Wrapped.', by: 'Ale, socio di consolle' },
+    karma: 199, badges: ['voice', 'zero'],
+  },
+  {
+    id: 'u-kenji', name: 'Kenji', age: 28, city: 'Torino', hue: 150, emoji: '🌙',
+    bio: 'Traduttore, nottambulo. Chiacchiere su libri, Murakami e domande esistenziali dopo mezzanotte.',
+    interests: ['libri', 'Murakami', 'jazz', 'scrittura', 'anime'],
+    habitats: [],
+    dilemma: { question: 'Il libro che regaleresti a uno sconosciuto per capire chi sei?', options: [] },
+    bestie: { worstFlaw: 'Risponde con citazioni. Sempre.', whyGoOut: 'Ascolta davvero, e si ricorda tutto quello che dici.', redFlag: 'Sottolinea i libri. A penna.', by: 'Yuki, sorella' },
+    karma: 222, badges: ['voice', 'zero'],
+  },
+  {
+    id: 'u-elena', name: 'Elena', age: 24, city: 'Barcellona', hue: 0, emoji: '🌶️',
+    bio: 'Napoletana a Barcellona da 3 anni. Ti porto nei bar de tapas dove vanno i locali, non i turisti.',
+    interests: ['tapas', 'viaggi', 'lingue', 'mercati', 'fotografia analogica'],
+    habitats: [],
+    dilemma: { question: 'Prima sera in una città nuova: dove mi porti?', options: ['Tetto con vista', 'Bar di quartiere', 'Mercato notturno'] },
+    bestie: { worstFlaw: 'Parla 4 lingue. Contemporaneamente.', whyGoOut: 'Ti fa sentire a casa in una città dove non conosci nessuno.', redFlag: 'Mette il peperoncino anche sul cornetto.', by: 'Paola, amica di Erasmus' },
+    karma: 187, badges: ['fast', 'voice'],
+  },
+  {
+    id: 'u-tommaso', name: 'Tommaso', age: 30, city: 'Napoli', hue: 210, emoji: '🌅',
+    bio: 'Architetto, camminatore seriale. Tramonti, scalinate e conversazioni lente.',
+    interests: ['camminate', 'architettura', 'fotografia', 'running', 'podcast'],
+    habitats: ['Belvedere di Posillipo', 'Lungomare Caracciolo'],
+    dilemma: { question: 'Scale o ascensore, se sono 300 gradini con vista mare?', options: ['Scale, ovvio', 'Ascensore e senso di colpa'] },
+    bestie: { worstFlaw: 'Ti dice “è vicino” e sono 6 km.', whyGoOut: 'Ti mostra Napoli da angoli che non sapevi esistessero.', redFlag: 'Si ferma a commentare ogni balcone barocco.', by: 'Ste, collega' },
+    karma: 205, badges: ['zero'],
+  },
+]
+
+export function createMe(): User {
+  return {
+    id: 'me', name: 'Alex', age: 25, city: 'Napoli', hue: 72, emoji: '⚡',
+    bio: 'Nuovo in città, voglia di fare cose vere con persone vere. Ramen, cinema VO e camminate lunghe.',
+    interests: ['ramen', 'Nolan', 'synthwave', 'camminate', 'libri', 'padel'],
+    habitats: ['Ramen bar · Decumani', 'Cinema d’essai Chiaia', 'Lungomare Caracciolo'],
+    dilemma: { question: 'Sei su un’isola deserta con un solo album: quale porti?', options: [] },
+    bestie: { worstFlaw: 'Dice sempre “5 minuti e arrivo” mentre è ancora sotto la doccia.', whyGoOut: 'Ti fa ridere fino alle lacrime e si ricorda il tuo ordine al bar.', redFlag: 'Salva i meme in cartelle tematiche. Con sottocartelle.', by: 'Il tuo bestie (in attesa di revisione)' },
+    karma: 120, badges: [],
+  }
+}
+
+const day = (offsetDays: number, hour: number, min = 0) => {
+  const d = new Date()
+  d.setDate(d.getDate() + offsetDays)
+  d.setHours(hour, min, 0, 0)
+  return d.getTime()
+}
+
+const plans = (now: number): Plan[] => [
+  {
+    id: 'p-ramen', hostId: 'u-giulia', title: 'Ramen tonkotsu ai Decumani', category: 'food', mode: 'local', city: 'Napoli',
+    habitat: 'Ramen bar · Decumani', district: 'Centro Storico', when: day(0, 20, 30), capacity: 4,
+    participants: ['u-giulia', 'me'], vibes: ['Chiacchiere vere', 'Niente telefoni a tavola', 'Si divide tutto'],
+    dilemma: users[0].dilemma, details: { cuisine: 'Giapponese', budget: '15–20 €' }, privacy: false, cost: 68, interested: ['u-chiara'], createdAt: now - 18 * H,
+  },
+  {
+    id: 'p-nolan', hostId: 'u-sofia', title: 'Maratona Nolan in lingua originale', category: 'cinema', mode: 'local', city: 'Napoli',
+    habitat: 'Cinema d’essai Chiaia', district: 'Chiaia', when: day(0, 21, 0), capacity: 5,
+    participants: ['u-sofia', 'me', 'u-tommaso'], vibes: ['VO sottotitolata', 'Analisi post-film', 'Popcorn salati'],
+    dilemma: users[2].dilemma, details: { film: 'Interstellar + Inception', language: 'Inglese · sub ITA' }, privacy: true, cost: 18, interested: [], createdAt: now - 45 * H,
+  },
+  {
+    id: 'p-padel', hostId: 'u-marco', title: 'Manca il quarto a padel', category: 'sport', mode: 'local', city: 'Napoli',
+    habitat: 'Padel Club Fuorigrotta', district: 'Fuorigrotta', when: day(1, 19, 0), capacity: 4,
+    participants: ['u-marco', 'me', 'u-tommaso'], vibes: ['Competitivo ma chill', 'Birra post-partita'],
+    dilemma: users[1].dilemma, details: { level: 'Intermedio (3.0–3.5)', missing: 1 }, privacy: false, cost: 40, interested: ['u-chiara', 'u-giulia'], createdAt: now - 39 * H,
+  },
+  {
+    id: 'p-valorant', hostId: 'u-luca', title: 'Duo serale Valorant / Rocket League', category: 'gaming', mode: 'remote', city: 'Milano',
+    habitat: 'Discord · PC', when: day(0, 22, 0), whenLabel: 'Ogni sera · 22:00', capacity: 2,
+    participants: ['u-luca'], vibes: ['Zero tossicità', 'Mic on', 'Si ride anche perdendo'],
+    dilemma: users[3].dilemma, details: { platform: 'PC · Discord', timezone: 'CET (UTC+1)' }, privacy: false, interested: [], createdAt: now - 6 * H,
+  },
+  {
+    id: 'p-study', hostId: 'u-chiara', title: 'Coworking silenzioso in biblioteca', category: 'study', mode: 'local', city: 'Napoli',
+    habitat: 'Biblioteca Nazionale', district: 'San Ferdinando', when: day(1, 15, 0), capacity: 6,
+    participants: ['u-chiara', 'u-giulia'], vibes: ['Pomodoro 50/10', 'Caffè alle 17', 'Cuffie ok'],
+    dilemma: users[4].dilemma, details: { studyMode: 'silenzioso' }, privacy: false, interested: [], createdAt: now - 3 * H,
+  },
+  {
+    id: 'p-valencia', hostId: 'u-davide', title: 'Viaggio a Valencia a fine mese', category: 'travel', mode: 'remote', city: 'Roma',
+    habitat: 'Valencia · 27–30 del mese', when: day(21, 9, 0), whenLabel: 'Fine mese · 4 giorni', capacity: 4,
+    participants: ['u-davide', 'u-elena'], vibes: ['Paella vera', 'Tramonti alla Malvarrosa', 'Budget smart'],
+    dilemma: users[5].dilemma, details: { destination: 'Valencia', budget: '350 € tutto incluso', timezone: 'CET' }, privacy: false, interested: [], createdAt: now - 26 * H,
+  },
+  {
+    id: 'p-playlist', hostId: 'u-nina', title: 'Scambio playlist notturne · city pop & synth', category: 'music', mode: 'remote', city: 'Bologna',
+    habitat: 'Spotify · vocali', when: day(0, 23, 30), whenLabel: 'Ogni notte dopo le 23', capacity: 6,
+    participants: ['u-nina', 'u-luca', 'u-kenji'], vibes: ['Una canzone a testa', 'Note vocali', 'Niente giudizi (forse)'],
+    dilemma: users[6].dilemma, details: { track: { title: 'Plastic Love', artist: 'Mariya Takeuchi', length: '7:54' }, platform: 'Spotify' }, privacy: false, interested: [], createdAt: now - 10 * H,
+  },
+  {
+    id: 'p-books', hostId: 'u-kenji', title: 'Book club di mezzanotte: Murakami', category: 'books', mode: 'remote', city: 'Torino',
+    habitat: 'Audio-capsule · asincrono', when: day(2, 0, 0), whenLabel: 'Domenica · 00:00', capacity: 5,
+    participants: ['u-kenji', 'u-sofia'], vibes: ['Lento e profondo', 'Spoiler ammessi dal cap. 10'],
+    dilemma: users[7].dilemma, details: { platform: 'Audio-capsule', timezone: 'CET' }, privacy: true, interested: [], createdAt: now - 30 * H,
+  },
+  {
+    id: 'p-tapas', hostId: 'u-elena', title: 'Tour di tapas dove vanno i locali', category: 'food', mode: 'local', city: 'Barcellona',
+    habitat: 'Gràcia · Plaça del Sol', district: 'Gràcia', when: day(30, 20, 0), whenLabel: 'Settembre · su richiesta', capacity: 6,
+    participants: ['u-elena'], vibes: ['Napoletani benvenuti', 'Vermut alle 13', 'Spagnolo maccheronico ok'],
+    dilemma: users[8].dilemma, details: { cuisine: 'Tapas', budget: '20–25 €', destination: 'Barcellona' }, privacy: false, interested: [], createdAt: now - 50 * H,
+  },
+  {
+    id: 'p-sunset', hostId: 'u-tommaso', title: 'Camminata al tramonto a Posillipo', category: 'walk', mode: 'local', city: 'Napoli',
+    habitat: 'Belvedere di Posillipo', district: 'Posillipo', when: day(1, 17, 45), capacity: 4,
+    participants: ['u-tommaso', 'u-chiara', 'u-sofia', 'u-giulia'], vibes: ['Passo lento', 'Foto al belvedere', 'Gelato finale'],
+    dilemma: users[9].dilemma, details: {}, privacy: false, confirmed: true, interested: [], createdAt: now - 20 * H,
+  },
+  {
+    id: 'p-spritz', hostId: 'u-giulia', title: 'Spritz in Piazza Bellini', category: 'drink', mode: 'local', city: 'Napoli',
+    habitat: 'Bar storico · Piazza Bellini', district: 'Centro Storico', when: day(-1, 19, 0), capacity: 5,
+    participants: ['u-giulia', 'u-marco'], vibes: ['After work', 'Musica dal vivo'],
+    dilemma: users[0].dilemma, details: { budget: '8 €' }, privacy: false, interested: [], createdAt: now - 70 * H,
+  },
+  {
+    id: 'p-mine', hostId: 'me', title: 'Aperitivo vista mare sul Lungomare', category: 'drink', mode: 'local', city: 'Napoli',
+    habitat: 'Lungomare Caracciolo', district: 'Chiaia', when: day(2, 19, 30), capacity: 4,
+    participants: ['me'], vibes: ['Tramonto', 'Taralli e chiacchiere'],
+    dilemma: { question: 'Sei su un’isola deserta con un solo album: quale porti?', options: [] }, details: { budget: '10 €' }, privacy: false, interested: ['u-sofia', 'u-tommaso', 'u-kenji'], createdAt: now - 2 * H,
+  },
+]
+
+const msg = (from: string, text: string, at: number, extra: Partial<Chat['messages'][number]> = {}) => ({
+  id: `m-${Math.random().toString(36).slice(2, 9)}`, from, kind: 'text' as const, text, at, ...extra,
+})
+
+const chats = (now: number): Chat[] => [
+  {
+    id: 'c-ramen', planId: 'p-ramen', peerIds: ['u-giulia'], mode: 'local', title: 'Ramen tonkotsu ai Decumani', status: 'active',
+    createdAt: now - 18 * H, deadline: now - 18 * H + 48 * H, unread: 1,
+    messages: [
+      { id: 'm1', from: 'me', kind: 'dilemma', question: users[0].dilemma.question, text: 'Panna. Non si discute.', at: now - 18 * H },
+      msg('u-giulia', 'Risposta corretta, sei dentro 😂 Ramen stasera alle 20:30?', now - 17.8 * H),
+      msg('me', 'Perfetto! Tonkotsu o shoyu per te?', now - 17.6 * H),
+      msg('u-giulia', 'Tonkotsu, sempre. Ho prenotato per 4, mancano ancora due persone ✨', now - 2 * H),
+    ],
+  },
+  {
+    id: 'c-padel', planId: 'p-padel', peerIds: ['u-marco', 'u-tommaso'], mode: 'local', title: 'Manca il quarto a padel', status: 'active',
+    createdAt: now - 39 * H, deadline: now - 39 * H + 48 * H, unread: 2,
+    messages: [
+      { id: 'm2', from: 'me', kind: 'dilemma', question: users[1].dilemma.question, text: 'Birra? Offro io', at: now - 39 * H },
+      msg('u-marco', 'Questo è lo spirito giusto 🍻 Campo prenotato domani alle 19.', now - 38.5 * H),
+      msg('u-tommaso', 'Io porto le palline nuove. Livello? Io sono un 3.0 generoso', now - 38 * H),
+      { id: 'm3', from: 'u-marco', kind: 'voice', duration: 14, wave: [3, 6, 9, 5, 8, 10, 7, 4, 6, 9, 5, 3, 7, 8, 4, 6, 9, 7, 5, 3], at: now - 2.5 * H },
+      msg('u-marco', 'Il campo costa 40€, dividiamo. Manca ancora il quarto!', now - 2.4 * H),
+    ],
+  },
+  {
+    id: 'c-nolan', planId: 'p-nolan', peerIds: ['u-sofia', 'u-tommaso'], mode: 'local', title: 'Maratona Nolan in lingua originale', status: 'active',
+    createdAt: now - 45 * H, deadline: now - 45 * H + 48 * H, unread: 0,
+    messages: [
+      { id: 'm4', from: 'me', kind: 'dilemma', question: users[2].dilemma.question, text: 'Mi perdo apposta e cerco il cinema più vecchio della città', at: now - 45 * H },
+      msg('u-sofia', 'Ok questa risposta mi piace troppo. Interstellar o Inception per primo?', now - 44 * H),
+      msg('me', 'Inception, così Interstellar ci distrugge per ultimo', now - 43.5 * H),
+    ],
+  },
+  {
+    id: 'c-luca', peerIds: ['u-luca'], mode: 'remote', title: 'Ha risposto al tuo dilemma del profilo', status: 'waiting',
+    createdAt: now - 3 * H, unread: 0, incoming: { question: 'Sei su un’isola deserta con un solo album: quale porti?', answer: 'Random Access Memories. Ma solo se c’è un Wi-Fi per Valorant.' },
+    messages: [],
+  },
+  {
+    id: 'c-tommaso', planId: 'p-mine', peerIds: ['u-tommaso'], mode: 'local', title: 'Aperitivo vista mare sul Lungomare', status: 'waiting',
+    createdAt: now - 1 * H, unread: 0, incoming: { question: 'Sei su un’isola deserta con un solo album: quale porti?', answer: 'Terra mia di Pino Daniele. Per non sentire mai nostalgia di casa.' },
+    messages: [],
+  },
+  {
+    id: 'c-old', planId: 'p-spritz', peerIds: ['u-marco'], mode: 'local', title: 'Spritz in Piazza Bellini', status: 'closed', closedReason: 'Chiusura con eleganza',
+    createdAt: now - 70 * H, deadline: now - 22 * H, unread: 0,
+    messages: [
+      msg('u-marco', 'Ehi! Ci sei per lo spritz?', now - 69 * H),
+      { id: 'm5', from: 'me', kind: 'farewell', text: 'È stato un piacere, ma non sento la scintilla giusta. Buona fortuna! ✨', at: now - 60 * H },
+    ],
+  },
+]
+
+export const DEMO_VERSION = 3
+
+export function createInitialState(): AppState {
+  const now = Date.now()
+  return {
+    version: DEMO_VERSION,
+    me: createMe(),
+    users: Object.fromEntries(users.map((u) => [u.id, u])),
+    plans: plans(now),
+    chats: chats(now),
+    saved: ['p-valencia'],
+    lifetime: false,
+    stats: { replyTimes: [42, 95, 60, 30], voiceSent: 2, textSent: 7, elegantCloses: 1, ghosted: 0, clocksStopped: 0 },
+    travelDestinations: [],
+    onboarded: false,
+  }
+}
+
+export const TEMPLATES: Array<{ label: string; title: string; category: Plan['category']; mode: Plan['mode']; capacity: number; emoji: string }> = [
+  { label: 'Un caffè', title: 'Un caffè e due chiacchiere', category: 'drink', mode: 'local', capacity: 2, emoji: '☕' },
+  { label: 'Manca il quarto a padel', title: 'Manca il quarto a padel', category: 'sport', mode: 'local', capacity: 4, emoji: '🎾' },
+  { label: 'Studio insieme', title: 'Studio insieme in biblioteca', category: 'study', mode: 'local', capacity: 4, emoji: '📚' },
+  { label: 'Cinema in VO', title: 'Cinema in lingua originale', category: 'cinema', mode: 'local', capacity: 4, emoji: '🎬' },
+  { label: 'Duo gaming', title: 'Duo gaming serale', category: 'gaming', mode: 'remote', capacity: 2, emoji: '🎮' },
+  { label: 'Cena fuori', title: 'Cena in trattoria', category: 'food', mode: 'local', capacity: 6, emoji: '🍝' },
+]
+
+export const PRESET_DILEMMAS = [
+  'Hai 2 ore libere in una città sconosciuta senza telefono: cosa fai?',
+  'Se prendiamo una pizza, cosa non deve MAI esserci sopra?',
+  'Il film che hai visto più volte senza vergognarti?',
+  'Alba o tramonto? E perché proprio quello?',
+  'Una cosa che sai fare benissimo e nessuno se lo aspetta?',
+]
+
+export const FAREWELL = 'È stato un piacere, ma non sento la scintilla giusta. Buona fortuna! ✨'
+
+export const AUTO_REPLIES: Record<string, string[]> = {
+  generic: [
+    'Ahah mi piace come ragioni 😄',
+    'Ok, segnato! Dimmi tu l’orario che ti torna meglio.',
+    'Top. Ci vediamo lì direttamente o ci becchiamo prima?',
+    'Vero! Io intanto avviso gli altri della crew.',
+    'Ti mando un vocale appena esco da lavoro 🎙️',
+    'Per me perfetto, fermiamo il timer quando siamo tutti d’accordo?',
+  ],
+  remote: [
+    'Ti lascio una capsula audio stanotte 🌙',
+    'Questa me la salvo. Tu cosa stai ascoltando adesso?',
+    'Domanda seria: qual è la tua ora preferita della giornata?',
+    'Ok ora mi hai incuriosito, raccontami di più.',
+  ],
+  dilemma: [
+    'Risposta approvata ✅ Benvenut* nella crew!',
+    'Ahah questa non me l’aspettavo. Sei dentro!',
+    'Ok mi hai convinto in una riga. Parliamone!',
+  ],
+}
+
+export const INCOMING_POOL: Array<{ userId: string; answer: string }> = [
+  { userId: 'u-kenji', answer: 'Kind of Blue di Miles Davis. Per le notti lunghe sull’isola.' },
+  { userId: 'u-nina', answer: 'Un best of di city pop giapponese, così il tramonto ha la colonna sonora.' },
+  { userId: 'u-chiara', answer: 'Folklore di Taylor Swift. Non giudicatemi, è per studiare.' },
+  { userId: 'u-davide', answer: 'Buena Vista Social Club, così mi sembra di essere a Cuba.' },
+  { userId: 'u-tommaso', answer: 'Lucio Dalla, live. Per cantare da solo senza vergogna.' },
+]
+
+export { H, M }

@@ -1,0 +1,414 @@
+import { useCallback, useEffect, useMemo, useRef, useState, type ReactElement } from 'react'
+import { AnimatePresence, MotionConfig, motion } from 'motion/react'
+import { Compass, MessagesSquare, Monitor, Plus, Radar as RadarIcon, Smartphone, Sparkles, Ticket, X } from 'lucide-react'
+import type { Mode } from './types'
+import { NavCtx, type Nav, type Tab } from './nav'
+import { useStore } from './store/store'
+import { cn } from './lib/utils'
+import { Explore } from './views/Explore'
+import { Radar } from './views/Radar'
+import { MyPlans } from './views/MyPlans'
+import { Crew } from './views/Crew'
+import { Profile } from './views/Profile'
+import { ChatRoom } from './views/ChatRoom'
+import { PlanDetailSheet, UserSheet } from './components/Overlays'
+import { GatekeeperSheet } from './components/Gatekeeper'
+import { QuickCreate } from './components/QuickCreate'
+import { Paywall } from './components/Paywall'
+import { Avatar, Button, RevolutTip, Sheet } from './components/ui'
+
+const TABS: Array<{ id: Tab | 'create'; label: string; icon: typeof Compass }> = [
+  { id: 'explore', label: 'Esplora', icon: Compass },
+  { id: 'radar', label: 'Radar', icon: RadarIcon },
+  { id: 'create', label: 'Crea', icon: Plus },
+  { id: 'plans', label: 'I Miei Piani', icon: Ticket },
+  { id: 'crew', label: 'Crew', icon: MessagesSquare },
+]
+
+function readPref<T extends string>(key: string, fallback: T): T {
+  try {
+    return (localStorage.getItem(key) as T) || fallback
+  } catch {
+    return fallback
+  }
+}
+
+export default function App() {
+  const store = useStore()
+  const { state, activeChats, waitingChats, user, joinPlan, messageUser, limits, toasts, dismissToast } = store
+  const [tab, setTabState] = useState<Tab>(() => readPref<Tab>('along:tab', 'explore'))
+  const [mode, setMode] = useState<Mode>('local')
+  const [planId, setPlanId] = useState<string | null>(null)
+  const [userId, setUserId] = useState<string | null>(null)
+  const [chatId, setChatId] = useState<string | null>(null)
+  const [gate, setGate] = useState<{ kind: 'plan' | 'user'; id: string } | null>(null)
+  const [creating, setCreating] = useState(false)
+  const [paywall, setPaywall] = useState<{ open: boolean; reason?: string }>({ open: false })
+  const [frame, setFrame] = useState<'phone' | 'wide'>(() => readPref('along:frame', 'phone'))
+  const scrollRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('along:tab', tab)
+      localStorage.setItem('along:frame', frame)
+    } catch {
+      /* ignore */
+    }
+  }, [tab, frame])
+
+  const closeSheets = () => {
+    setPlanId(null)
+    setUserId(null)
+    setGate(null)
+  }
+
+  const setTab = useCallback((t: Tab) => {
+    setTabState(t)
+    setChatId(null)
+    setPlanId(null)
+    setUserId(null)
+    scrollRef.current?.scrollTo({ top: 0 })
+  }, [])
+
+  const nav: Nav = useMemo(
+    () => ({
+      tab,
+      setTab,
+      openPlan: (id) => {
+        setUserId(null)
+        setPlanId(id)
+      },
+      openUser: (id) => {
+        if (id === 'me') return setTab('profile')
+        setPlanId(null)
+        setUserId(id)
+      },
+      openChat: (id) => {
+        setPlanId(null)
+        setUserId(null)
+        setGate(null)
+        setChatId(id)
+      },
+      openCreate: () => setCreating(true),
+      openPaywall: (reason) => setPaywall({ open: true, reason }),
+      openGatekeeperForUser: (id) => {
+        setUserId(null)
+        setGate({ kind: 'user', id })
+      },
+    }),
+    [tab, setTab],
+  )
+
+  const gatePlan = gate?.kind === 'plan' ? state.plans.find((p) => p.id === gate.id) : undefined
+  const gateUser = gate ? (gate.kind === 'plan' ? (gatePlan ? user(gatePlan.hostId) : undefined) : user(gate.id)) : undefined
+  const crewBadge = activeChats.reduce((n, c) => n + (c.unread ? 1 : 0), 0) + waitingChats.length
+
+  const views: Record<Tab, ReactElement> = {
+    explore: <Explore mode={mode} setMode={setMode} />,
+    radar: <Radar />,
+    plans: <MyPlans />,
+    crew: <Crew />,
+    profile: <Profile />,
+  }
+
+  const wide = frame === 'wide'
+  const overlayOpen = !!(planId || userId || gate || creating || paywall.open || chatId || !state.onboarded)
+
+  return (
+    <MotionConfig reducedMotion="user">
+      <NavCtx.Provider value={nav}>
+        <div className="relative min-h-dvh overflow-hidden bg-[#06080f] md:flex md:items-center md:justify-center md:gap-14 md:p-6">
+          {/* desktop ambient */}
+          <div className="pointer-events-none fixed inset-0 hidden md:block" aria-hidden>
+            <div className="absolute -left-40 top-10 size-[520px] rounded-full bg-violet/20 blur-3xl" />
+            <div className="absolute -right-32 bottom-0 size-[480px] rounded-full bg-lime/10 blur-3xl" />
+          </div>
+
+          {/* desktop side panel */}
+          <aside className={cn('relative z-10 hidden max-w-sm flex-col gap-6 lg:flex', wide && 'lg:hidden')}>
+            <Logo big />
+            <p className="font-display text-[44px] font-bold leading-[0.98] text-cream">
+              Less scrolling.
+              <br />
+              <span className="text-lime">More doing.</span>
+              <br />
+              <span className="text-gradient-neon">Find your people.</span>
+            </p>
+            <p className="text-[15px] leading-relaxed text-cream/60">
+              ALONG trasforma idee in piani reali. Dilemmi al posto dei “ciao”, 3 slot chat per restare presenti, un timer di 48 ore contro il ghosting.
+            </p>
+            <FrameSwitch frame={frame} setFrame={setFrame} />
+            <div className="w-fit">
+              <RevolutTip compact />
+            </div>
+          </aside>
+
+          {/* device */}
+          <div
+            className={cn(
+              'relative z-10 mx-auto flex h-dvh w-full flex-col overflow-hidden bg-ink',
+              !wide && 'md:h-[min(880px,calc(100dvh-48px))] md:w-[402px] md:rounded-[54px] md:border-[11px] md:border-[#1a1e29] md:shadow-[0_0_0_1px_rgb(255_255_255/0.06),0_40px_120px_-20px_rgb(0_0_0/0.9),0_0_80px_-30px_rgb(139_92_246/0.5)]',
+              wide && 'md:h-dvh md:max-w-[720px] md:border-x md:border-cream/5',
+            )}
+          >
+            {/* aurora mesh */}
+            <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden>
+              <div className="absolute -left-1/4 -top-1/4 size-[85%] animate-aurora-1 rounded-full bg-violet/25 blur-3xl will-change-transform" />
+              <div className="absolute -right-1/3 top-1/4 size-[70%] animate-aurora-2 rounded-full bg-cyan/12 blur-3xl will-change-transform" />
+              <div className="absolute -bottom-1/4 left-0 size-[75%] animate-aurora-3 rounded-full bg-coral/12 blur-3xl will-change-transform" />
+              <div className="absolute inset-0 bg-[radial-gradient(transparent_0,rgb(11_15_25/0.5)_70%)]" />
+            </div>
+
+            {!wide && <div className="absolute left-1/2 top-2 z-[60] hidden h-[26px] w-[110px] -translate-x-1/2 rounded-full bg-black md:block" aria-hidden />}
+
+            {/* top bar */}
+            <header inert={overlayOpen} className={cn('relative z-20 flex items-center justify-between px-4 pb-2', !wide ? 'pt-[max(12px,env(safe-area-inset-top))] md:pt-11' : 'pt-4')}>
+              <button onClick={() => setTab('explore')} aria-label="ALONG home">
+                <Logo />
+              </button>
+              {wide && (
+                <nav className="hidden items-center gap-1 md:flex" aria-label="Navigazione principale">
+                  {TABS.map((t) =>
+                    t.id === 'create' ? (
+                      <button key={t.id} onClick={() => setCreating(true)} className="ml-1 inline-flex h-9 items-center gap-1 rounded-full bg-lime px-3 text-[13px] font-semibold text-ink">
+                        <Plus size={15} /> Crea
+                      </button>
+                    ) : (
+                      <button
+                        key={t.id}
+                        onClick={() => setTab(t.id as Tab)}
+                        aria-current={tab === t.id ? 'page' : undefined}
+                        className={cn('h-9 rounded-full px-3 text-[13px] font-medium', tab === t.id ? 'bg-cream/10 text-cream' : 'text-cream/55 hover:text-cream')}
+                      >
+                        {t.label}
+                      </button>
+                    ),
+                  )}
+                </nav>
+              )}
+              <div className="flex items-center gap-2">
+                <span className="rounded-full border border-lime/25 bg-lime/10 px-2.5 py-1 font-display text-[12px] font-bold tabular-nums text-lime" aria-label={`Karma ${state.me.karma}`}>
+                  ⚡ {state.me.karma}
+                </span>
+                {!state.lifetime && (
+                  <button onClick={() => setPaywall({ open: true })} className="grid size-9 place-items-center rounded-full border border-violet/40 bg-violet/15 text-violet-200" aria-label="ALONG Forever">
+                    <Sparkles size={15} />
+                  </button>
+                )}
+                <button
+                  onClick={() => setTab('profile')}
+                  className={cn('rounded-full p-[2px]', state.lifetime ? 'bg-[conic-gradient(var(--color-lime),var(--color-cyan),var(--color-violet),var(--color-coral),var(--color-lime))]' : tab === 'profile' ? 'bg-lime' : 'bg-cream/15')}
+                  aria-label="Il mio profilo"
+                >
+                  <span className="block rounded-full bg-ink p-[2px]">
+                    <Avatar user={state.me} size={30} />
+                  </span>
+                </button>
+              </div>
+            </header>
+
+            {/* content */}
+            <main ref={scrollRef} inert={overlayOpen} className="no-scrollbar relative z-10 min-h-0 flex-1 overflow-y-auto px-4 pt-2">
+              <AnimatePresence mode="wait">
+                <motion.div key={tab} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -6 }} transition={{ duration: 0.2 }} className={cn(!wide && 'pb-24', wide && 'pb-24 md:pb-8')}>
+                  {views[tab]}
+                </motion.div>
+              </AnimatePresence>
+            </main>
+
+            {/* bottom nav */}
+            <nav
+              inert={overlayOpen}
+              className={cn('absolute inset-x-0 bottom-0 z-30 bg-gradient-to-t from-ink via-ink/85 to-transparent px-3 pt-8 pb-[max(10px,env(safe-area-inset-bottom))]', wide && 'md:hidden', !wide && 'md:pb-4')}
+              aria-label="Navigazione principale"
+            >
+              <div className="flex items-center justify-between rounded-[26px] border border-cream/10 bg-[#111115]/95 px-2 py-1.5 backdrop-blur-xl">
+                {TABS.map((t) => {
+                  if (t.id === 'create')
+                    return (
+                      <motion.button
+                        key={t.id}
+                        whileTap={{ scale: 0.9 }}
+                        onClick={() => setCreating(true)}
+                        className="-mt-7 grid size-[58px] place-items-center rounded-[20px] bg-lime text-ink glow-lime"
+                        aria-label="Crea un piano"
+                      >
+                        <Plus size={28} strokeWidth={2.6} />
+                      </motion.button>
+                    )
+                  const active = tab === t.id
+                  const Icon = t.icon
+                  return (
+                    <button
+                      key={t.id}
+                      onClick={() => setTab(t.id as Tab)}
+                      className="relative flex w-16 flex-col items-center gap-0.5 py-1.5"
+                      aria-current={active ? 'page' : undefined}
+                      aria-label={t.id === 'crew' && crewBadge > 0 ? `${t.label} (${crewBadge} novità)` : t.label}
+                    >
+                      {active && <motion.span layoutId="nav-dot" className="absolute -top-1 h-1 w-6 rounded-full bg-lime" />}
+                      <span className="relative">
+                        <Icon size={21} className={active ? 'text-lime' : 'text-cream/55'} />
+                        {t.id === 'crew' && crewBadge > 0 && (
+                          <span className="absolute -right-2 -top-1.5 grid min-w-4 place-items-center rounded-full bg-coral px-1 text-[9.5px] font-bold text-ink">{crewBadge}</span>
+                        )}
+                      </span>
+                      <span className={cn('text-[10px] font-medium', active ? 'text-cream' : 'text-cream/45')}>{t.label}</span>
+                    </button>
+                  )
+                })}
+              </div>
+            </nav>
+
+            {/* toasts */}
+            <div className={cn('pointer-events-none absolute inset-x-0 z-[70] flex flex-col items-center gap-2 px-4', !wide ? 'top-14 md:top-20' : 'top-16')} aria-live="polite">
+              <AnimatePresence>
+                {toasts.map((t) => (
+                  <motion.div
+                    key={t.id}
+                    layout
+                    initial={{ opacity: 0, y: -16, scale: 0.95 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: -10, scale: 0.95 }}
+                    className={cn(
+                      'glass-strong pointer-events-auto flex w-full max-w-sm items-start gap-3 rounded-2xl p-3 shadow-2xl',
+                      { lime: 'border-lime/40', coral: 'border-coral/40', violet: 'border-violet/50', cyan: 'border-cyan/40', gold: 'border-gold/50' }[t.tone],
+                    )}
+                  >
+                    <span className={cn('mt-1 size-2.5 shrink-0 rounded-full', { lime: 'bg-lime', coral: 'bg-coral', violet: 'bg-violet', cyan: 'bg-cyan', gold: 'bg-gold' }[t.tone])} />
+                    <div className="min-w-0 flex-1">
+                      <p className="text-[13.5px] font-semibold">{t.title}</p>
+                      {t.body && <p className="text-[12px] text-cream/60">{t.body}</p>}
+                    </div>
+                    <button onClick={() => dismissToast(t.id)} aria-label="Chiudi notifica" className="text-cream/40 hover:text-cream">
+                      <X size={14} />
+                    </button>
+                  </motion.div>
+                ))}
+              </AnimatePresence>
+            </div>
+
+            {/* overlays */}
+            <AnimatePresence>{chatId && <ChatRoom key={chatId} chatId={chatId} onClose={() => setChatId(null)} />}</AnimatePresence>
+
+            <PlanDetailSheet
+              planId={planId}
+              onClose={() => setPlanId(null)}
+              onJoin={(id) => {
+                setPlanId(null)
+                setGate({ kind: 'plan', id })
+              }}
+            />
+            <UserSheet userId={userId} onClose={() => setUserId(null)} />
+            <GatekeeperSheet
+              open={!!gate}
+              onClose={() => setGate(null)}
+              dilemma={gate?.kind === 'plan' ? gatePlan?.dilemma : gateUser?.dilemma}
+              host={gateUser}
+              context={gate?.kind === 'plan' ? `“${gatePlan?.title}”` : `una chat con ${gateUser?.name}`}
+              onSubmit={(answer) => (gate!.kind === 'plan' ? joinPlan(gate!.id, answer) : messageUser(gate!.id, answer))}
+              onGoChat={(id) => nav.openChat(id)}
+              onManageSlots={() => {
+                closeSheets()
+                setTab('crew')
+              }}
+              onUpgrade={() => {
+                setGate(null)
+                setPaywall({ open: true, reason: 'Espandi a 5 slot chat attivi in contemporanea. Una volta, per sempre.' })
+              }}
+              slotLimit={limits.slots}
+              lifetime={state.lifetime}
+            />
+            <QuickCreate
+              open={creating}
+              onClose={() => setCreating(false)}
+              onPaywall={(reason) => {
+                setCreating(false)
+                setPaywall({ open: true, reason })
+              }}
+              onCreated={() => setTab('plans')}
+            />
+            <Paywall open={paywall.open} reason={paywall.reason} onClose={() => setPaywall({ open: false })} />
+            <Onboarding />
+          </div>
+
+          {/* tablet/desktop frame switch when side panel hidden */}
+          <div className={cn('fixed bottom-4 right-4 z-20 hidden md:block', !wide && 'lg:hidden')}>
+            <FrameSwitch frame={frame} setFrame={setFrame} />
+          </div>
+        </div>
+      </NavCtx.Provider>
+    </MotionConfig>
+  )
+}
+
+function Logo({ big }: { big?: boolean }) {
+  return (
+    <span className="inline-flex items-center gap-2">
+      <svg viewBox="0 0 64 64" className={big ? 'size-11' : 'size-8'} aria-hidden>
+        <rect width="64" height="64" rx="18" fill="#D7FF66" />
+        <path d="M18 46 32 16l14 30" fill="none" stroke="#0B0F19" strokeWidth="7" strokeLinecap="round" strokeLinejoin="round" />
+        <circle cx="32" cy="38" r="4.5" fill="#FF806D" />
+      </svg>
+      <span className={cn('font-display font-bold tracking-[0.22em]', big ? 'text-2xl' : 'text-[17px]')}>ALONG</span>
+    </span>
+  )
+}
+
+function FrameSwitch({ frame, setFrame }: { frame: 'phone' | 'wide'; setFrame: (f: 'phone' | 'wide') => void }) {
+  return (
+    <div className="glass inline-flex w-fit rounded-2xl p-1" role="radiogroup" aria-label="Modalità di visualizzazione">
+      {(
+        [
+          ['phone', Smartphone, 'Cornice smartphone'],
+          ['wide', Monitor, 'Vista estesa'],
+        ] as const
+      ).map(([k, Icon, l]) => (
+        <button key={k} role="radio" aria-checked={frame === k} onClick={() => setFrame(k)} className={cn('flex h-9 items-center gap-1.5 rounded-xl px-3 text-[12.5px] font-semibold', frame === k ? 'bg-cream text-ink' : 'text-cream/60')}>
+          <Icon size={15} /> {l}
+        </button>
+      ))}
+    </div>
+  )
+}
+
+const RULES = [
+  { emoji: '🔑', title: 'Il Gatekeeper', body: 'Ogni piano ha un dilemma. Per entrare rispondi: la chat non parte mai con un “ciao”.' },
+  { emoji: '🎯', title: '3 slot, Focus Mode', body: 'Massimo 3 chat attive. Le altre aspettano in Sala d’Attesa. Chiudi con eleganza: +15 Karma.' },
+  { emoji: '⏳', title: '48 ore anti-ghosting', body: 'Ogni connessione locale ha 48h per fissare il ritrovo. Poi “Stop the Clock” e si esce davvero.' },
+]
+
+function Onboarding() {
+  const { state, setOnboarded } = useStore()
+  return (
+    <Sheet open={!state.onboarded} onClose={setOnboarded}>
+      <div className="space-y-5">
+        <div>
+          <p className="font-display text-[11px] font-bold uppercase tracking-[0.22em] text-lime">Benvenut* su ALONG</p>
+          <h2 className="mt-1 text-[30px] font-bold leading-[1.02]">
+            Non è una dating app.
+            <br />
+            <span className="text-gradient-neon">È un playground.</span>
+          </h2>
+          <p className="mt-2 text-[14px] text-cream/65">Le persone si incontrano attraverso cose concrete da fare. Tre regole semplici:</p>
+        </div>
+        <ul className="space-y-2">
+          {RULES.map((r, i) => (
+            <motion.li key={r.title} initial={{ opacity: 0, x: -12 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.15 + i * 0.08 }} className="glass flex gap-3 rounded-2xl p-3">
+              <span className="text-2xl" aria-hidden>
+                {r.emoji}
+              </span>
+              <div>
+                <p className="font-display font-bold">{r.title}</p>
+                <p className="text-[13px] text-cream/60">{r.body}</p>
+              </div>
+            </motion.li>
+          ))}
+        </ul>
+        <Button className="w-full" size="lg" onClick={setOnboarded}>
+          Iniziamo a fare cose
+        </Button>
+      </div>
+    </Sheet>
+  )
+}
