@@ -140,11 +140,6 @@
 @utility poster-shadow {
   box-shadow: none;
 }
-@utility holo {
-  background: linear-gradient(115deg, #ffd1f5 0%, #c6f6ff 20%, #e8ffb5 40%, #ffd9b0 60%, #d9c7ff 80%, #ffd1f5 100%);
-  background-size: 200% 100%;
-  animation: var(--animate-shimmer);
-}
 
 /* ---------- Border Beam ---------- */
 .beam {
@@ -178,32 +173,6 @@
 .beam[data-tone="lime"] { --beam-color: var(--color-lime); }
 .beam[data-tone="lime"]::before { animation: none; background: var(--color-lime); }
 .beam[data-tone="violet"] { --beam-color: var(--color-violet); }
-
-/* ---------- Bestie Sticker ---------- */
-.sticker {
-  position: relative;
-  transform: rotate(-3deg);
-  transition: transform 0.35s cubic-bezier(0.2, 0.9, 0.3, 1.3), box-shadow 0.35s ease;
-  clip-path: polygon(0 0, 100% 0, 100% calc(100% - 22px), calc(100% - 22px) 100%, 0 100%);
-}
-.sticker-peel {
-  position: absolute;
-  right: 0;
-  bottom: 0;
-  width: 22px;
-  height: 22px;
-  background: linear-gradient(135deg, rgb(0 0 0 / 0.0) 45%, rgb(0 0 0 / 0.25) 50%, #e9e6dc 52%, #fff 100%);
-  border-top-left-radius: 6px;
-  transition: width 0.35s ease, height 0.35s ease;
-  box-shadow: -2px -2px 6px rgb(0 0 0 / 0.2);
-}
-.sticker-wrap:hover .sticker,
-.sticker-wrap:focus-within .sticker {
-  transform: rotate(-1deg) scale(1.02) translateY(-2px);
-  clip-path: polygon(0 0, 100% 0, 100% calc(100% - 40px), calc(100% - 40px) 100%, 0 100%);
-}
-.sticker-wrap:hover .sticker-peel,
-.sticker-wrap:focus-within .sticker-peel { width: 40px; height: 40px; }
 
 /* Radar sweep */
 .radar-sweep {

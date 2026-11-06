@@ -740,7 +740,6 @@ export function StoreProvider({ children }: { children: ReactNode }) {
           bio: '',
           interests: [],
           habitats: [],
-          bestie: undefined,
           karma: 100,
           badges: [],
         }

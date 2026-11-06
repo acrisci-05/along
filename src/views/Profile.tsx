@@ -9,7 +9,7 @@ import { PHOTO_MIN } from '../lib/photos'
 import { EditProfile } from '../components/EditProfile'
 import { ProfilePreview } from '../components/ProfilePreview'
 import { InfoRows } from '../components/ProfileInfo'
-import { BadgeRow, BestieSticker, earnedBadges, KarmaMeter } from '../components/Bestie'
+import { BadgeRow, earnedBadges, KarmaMeter } from '../components/Karma'
 import { Avatar, Button, Eyebrow, LifetimeBadge, RevolutTip, Sheet, Toggle } from '../components/ui'
 
 export function Profile() {
@@ -21,7 +21,6 @@ export function Profile() {
   const [previewing, setPreviewing] = useState(false)
   const [confirmReset, setConfirmReset] = useState(false)
   const badges = earnedBadges(state.stats)
-  const finish = me.stickerFinish ?? 'paper'
 
   return (
     <div className="space-y-5 pb-8">
@@ -121,52 +120,6 @@ export function Profile() {
 
       <KarmaMeter karma={me.karma} stats={state.stats} />
 
-      {/* bestie */}
-      <section>
-        <div className="flex items-center justify-between">
-          <Eyebrow>Bestie Vouching</Eyebrow>
-          <div className="flex gap-1" role="radiogroup" aria-label="Finitura sticker">
-            {(['paper', 'holo', 'neon'] as const).map((f) => {
-              const locked = f !== 'paper' && !state.lifetime
-              return (
-                <button
-                  key={f}
-                  role="radio"
-                  aria-checked={finish === f}
-                  onClick={() => (locked ? nav.openPaywall('Le finiture olografiche e neon dello sticker Bestie sono incluse in ALONG Forever.') : updateMe({ stickerFinish: f }))}
-                  className={cn('h-7 rounded-md px-2.5 text-xs font-semibold capitalize', finish === f ? 'bg-cream text-ink' : 'bg-cream/5 text-cream/60')}
-                >
-                  {locked && '🔒 '}
-                  {f === 'paper' ? 'Carta' : f}
-                </button>
-              )
-            })}
-          </div>
-        </div>
-        {me.bestie ? (
-          <BestieSticker vouch={me.bestie} name={me.name} finish={finish} onShare={() => toast({ tone: 'violet', title: 'Link per il bestie pronto', body: 'Incollalo nella chat col tuo migliore amico.' })} />
-        ) : (
-          <div className="mt-2 rounded-2xl border border-dashed border-line p-4">
-            <p className="text-base font-semibold">Il tuo sticker è ancora vuoto</p>
-            <p className="mt-1 text-sm text-muted">Chiedi al tuo migliore amico di scrivere il tuo peggior difetto al primo incontro, perché uscirci comunque e la tua red flag innocua. Si vede solo dopo il match.</p>
-            <button
-              onClick={async () => {
-                const url = `${location.origin}${location.pathname}#vouch/${encodeURIComponent(me.name.toLowerCase())}`
-                try {
-                  if (navigator.share) await navigator.share({ title: 'Recensiscimi su ALONG', url })
-                  else await navigator.clipboard.writeText(url)
-                } catch {
-                  /* cancelled */
-                }
-                toast({ tone: 'violet', title: 'Link per il bestie pronto', body: 'Mandalo al tuo migliore amico.' })
-              }}
-              className="mt-3 h-10 rounded-full border border-line px-4 text-sm font-semibold hover:border-cream/40"
-            >
-              Chiedi al tuo bestie
-            </button>
-          </div>
-        )}
-      </section>
 
       {/* interests */}
       <section className="space-y-3">

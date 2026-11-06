@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { AnimatePresence, motion } from 'motion/react'
-import { Check, Eye, Undo2, Infinity as InfinityIcon, Loader2, MessagesSquare, Plane, ShieldCheck, Sparkles, Sticker } from 'lucide-react'
+import { Check, Eye, Undo2, Infinity as InfinityIcon, Loader2, MessagesSquare, Plane, ShieldCheck, Sparkles } from 'lucide-react'
 import { Button, LifetimeBadge, RevolutTip, Sheet, Toggle } from './ui'
 import { useStore } from '../store/store'
 
@@ -9,7 +9,6 @@ const FEATURES = [
   { icon: MessagesSquare, title: '5 slot chat attivi', sub: 'Free: 3 slot in Focus Mode' },
   { icon: Plane, title: 'Travel Bridge illimitato', sub: 'Tutte le città future che vuoi' },
   { icon: Sparkles, title: 'Badge Founding Member', sub: 'Bordo gradiente neon permanente' },
-  { icon: Sticker, title: 'Sticker Bestie olografico', sub: 'Finiture holo e neon' },
   { icon: Eye, title: 'Vedi chi ti ha salvato', sub: 'Chi ha salvato il tuo profilo e i tuoi piani' },
   { icon: Undo2, title: 'Annulla l’ultimo “passo”', sub: 'Quando il dito è più veloce del cuore' },
 ]

@@ -12,7 +12,7 @@ Stato: ✅ fatto · 🔜 prossimo · ⬜ da fare
 |---|---|---|
 | A | **Scopri & Match** | Mazzo di card, swipe, risposta al dilemma, match, like ricevuti, filtri |
 | B | **Chat** | Slot (3/5), Sala d'Attesa, timer 48h, Stop the Clock, note vocali, chiusura con eleganza |
-| C | **Profilo & identità** | Onboarding, foto, dilemma, sticker Bestie, karma e badge, preferenze |
+| C | **Profilo & identità** | Onboarding, foto, dilemma, karma e badge, preferenze |
 | D | **Piani & Mappa** | Proporre un piano, elenco piani, mappa della città, crew di gruppo, Split the Bill |
 | E | **Sicurezza & fiducia** | Blocca/segnala, verifica profilo, consigli per il primo incontro, 18+ |
 | F | **Design system** | Colori, tipografia, componenti, animazioni, accessibilità |
@@ -25,7 +25,7 @@ Stato: ✅ fatto · 🔜 prossimo · ⬜ da fare
 Obiettivo: un'app che si può far provare a qualcuno e che "sembra vera".
 
 - ✅ **1.1 Design system (F)** — direzione Editorial Poster, brand corallo, Bricolage + Inter, 7 dimensioni di testo, 4 raggi, niente vetro/glow, card di Scopri a locandina → vedi `DESIGN.md`
-- ✅ **1.2 Scopri (A)** — card-locandina a 3 pagine-storia (Locandina · In comune · Affidabilità), Bestie solo dopo il match, selezione di 20 profili al giorno con locandina "Per oggi è tutto", animazione "poster che si stacca"
+- ✅ **1.2 Scopri (A)** — card-locandina a 3 pagine-storia (Locandina · In comune · Affidabilità), selezione di 20 profili al giorno con locandina "Per oggi è tutto", animazione "poster che si stacca"
 - ✅ **1.3 Match & Like (A)** — nuovo stile scuro marrone + salvia (solo Work Sans), card a foto intera, like ricevuti a mazzo, match "biglietto doppio", proposta di uscita in 1 tap che ferma il timer
 - ✅ **1.4 Chat (B)** — intestazione pulita con biglietto dell'uscita fissato e barra del timer, azioni nel "+", fumetti verde scuro / marrone, note vocali dal microfono vero, congedo con 3 modelli + frase personale, visualizzato e "sta scrivendo" disattivabili (reciproci, come WhatsApp)
 - ✅ **1.5 Onboarding vero (C)** — benvenuto + 3 passi (chi sei con data di nascita e foto/avatar · cosa cerchi · dilemma dalla lista). Età minima 16 anni; 16-17 solo modalità Amici e in un gruppo separato: maggiorenni e minorenni non si vedono né si incontrano mai
@@ -36,8 +36,8 @@ Obiettivo: un'app che si può far provare a qualcuno e che "sembra vera".
 ## Fase 2 — Profilo reale
 - ✅ **2.1 Foto vere** — galleria da 2 a 6 foto (onboarding e profilo), ritaglio 4:5 con zoom, griglia riordinabile trascinando o con le frecce; prima del match solo la principale sfocata, dopo il match tutte sfogliabili; avatar illustrato come alternativa ("Senza foto")
 - ✅ **2.2 Profilo ricco** — pagina unica "Modifica profilo" (foto/avatar, nome, bio 160, lavoro o studio, lingue, fumo e alcol, passioni a categorie 3–8 + personalizzate, Habitat 1–5 per quartiere, dilemma) con un solo Salva e avviso modifiche non salvate; anteprima "Come ti vedono gli altri" prima e dopo il match; info nei profili degli altri
-- 🔜 **2.3 Bestie Vouching reale** — link che apre un modulo per il tuo amico, approvazione prima della pubblicazione
-- ⬜ **2.4 Verifica profilo** — selfie di verifica (simulata) e badge "verificato"
+- ❌ **2.3 Bestie Vouching** — tolto: lo sticker scritto dal migliore amico è stato rimosso dall'app
+- 🔜 **2.4 Verifica profilo** — selfie di verifica (simulata) e badge "verificato"
 
 ## Fase 3 — Backend (diventa multi-utente)
 - ⬜ **3.1 Scelta e setup** — es. Supabase: progetto, schema dati, regole di sicurezza
@@ -50,7 +50,7 @@ Obiettivo: un'app che si può far provare a qualcuno e che "sembra vera".
 - ⬜ **4.1 Notifiche** — nuovo like, match, timer in scadenza
 - ⬜ **4.2 Piani di gruppo reali (D)** — crew, partecipanti, Split the Bill condiviso
 - ⬜ **4.3 Mappa vera (D)** — mappa della città con gli Habitat, senza tracciamento GPS continuo
-- ⬜ **4.4 Dopo l'uscita** — "Com'è andata?", ri-proporre un piano, recensione Bestie reciproca
+- ⬜ **4.4 Dopo l'uscita** — "Com'è andata?", ri-proporre un piano
 - ⬜ **4.5 Moderazione** — gestione segnalazioni, filtri contenuti
 
 ## Fase 5 — Lancio
@@ -67,7 +67,7 @@ Obiettivo: un'app che si può far provare a qualcuno e che "sembra vera".
 - ✅ Match simulato con foto svelata e timer 48h
 - ✅ Like ricevuti (Match / Non stavolta)
 - ✅ Chat con 3 slot, Sala d'Attesa, Stop the Clock, chiusura con eleganza, note vocali simulate, Split the Bill
-- ✅ Profilo con sticker Bestie, Karma Meter, badge
+- ✅ Profilo con Karma Meter e badge
 - ✅ Piani, Quick Create, Mappa stilizzata, Travel Bridge
 - ✅ Paywall ALONG Forever simulato, link Revolut
 - ✅ Dati salvati nel browser (localStorage), reset demo

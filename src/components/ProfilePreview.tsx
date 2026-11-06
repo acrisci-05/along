@@ -7,7 +7,7 @@ import { planStatus, cn } from '../lib/utils'
 import { SwipeCard } from '../views/Discover'
 import { PhotoCarousel } from './Portrait'
 import { InfoRows } from './ProfileInfo'
-import { BadgeRow, BestieSticker, earnedBadges } from './Bestie'
+import { BadgeRow, earnedBadges } from './Karma'
 
 /** "Come ti vedono gli altri": your Discover card before a match, your full profile after. */
 export function ProfilePreview({ open, onClose }: { open: boolean; onClose: () => void }) {
@@ -80,7 +80,6 @@ function Preview({ onClose }: { onClose: () => void }) {
                 ))}
               </div>
             )}
-            {me.bestie ? <BestieSticker vouch={me.bestie} name={me.name} finish={me.stickerFinish ?? 'paper'} /> : <p className="text-sm text-muted">Il tuo sticker Bestie è ancora vuoto.</p>}
           </div>
         )}
       </div>

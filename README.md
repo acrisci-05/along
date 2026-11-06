@@ -27,7 +27,7 @@ npm run preview    # serve la build
 | `src/components/QuickCreate.tsx` | Creazione in 5 passi con live preview e cronometro < 60s |
 | `src/components/Gatekeeper.tsx` | Dilemma obbligatorio prima di entrare/scrivere |
 | `src/components/Paywall.tsx` | ALONG Forever pay-once (19,99 € / lancio 14,99 €) con simulatore |
-| `src/components/Bestie.tsx` | Sticker Bestie Vouching, Karma Meter, badge comportamentali |
+| `src/components/Karma.tsx` | Karma Meter e badge comportamentali |
 | `src/views/Discover.tsx` | Mazzo di card da sfogliare (drag o frecce ←/→): PASSO / RISPONDO, la card si gira per rispondere al dilemma |
 | `src/views/Likes.tsx` | Risposte ricevute al tuo dilemma: “Non stavolta” o Match; chi ha salvato il profilo (Forever) |
 | `src/components/MatchOverlay.tsx` | Schermata “È una scintilla ⚡” con foto che si svela |

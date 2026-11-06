@@ -3,7 +3,7 @@ import { useNav } from '../nav'
 import { useNow, useRevealed, useStore } from '../store/store'
 import { affinity, CATEGORY_META, cn, planStatus, planWhen, sharedInterests, STATUS_STYLE } from '../lib/utils'
 import { Avatar, Button, Eyebrow, LifetimeBadge, Sheet } from './ui'
-import { BadgeRow, BestieSticker } from './Bestie'
+import { BadgeRow } from './Karma'
 import { PhotoCarousel } from './Portrait'
 import { InfoRows } from './ProfileInfo'
 import { LivingPlanCard } from './LivingPlanCard'
@@ -205,17 +205,7 @@ export function UserSheet({ userId, onClose }: { userId: string | null; onClose:
               })}
             </div>
           </div>
-          {u.bestie &&
-            (revealed(u.id) ? (
-              <BestieSticker vouch={u.bestie} name={u.name} />
-            ) : (
-              <div className="flex items-center gap-3 rounded-md border border-dashed border-line p-4">
-                <Lock size={18} className="shrink-0 text-cream/50" />
-                <p className="text-sm text-cream/60">
-                  <span className="font-semibold text-cream">Lo sticker Bestie si sblocca al match.</span> Cosa dice di {u.name} il suo migliore amico? Lo scoprirai insieme alla foto.
-                </p>
-              </div>
-            ))}
+
 
           {state.plans.filter((p) => p.hostId === u.id && planVisible(p)).length > 0 && (
             <div className="space-y-2">

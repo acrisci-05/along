@@ -7,7 +7,7 @@ import { useNow, useStore } from '../store/store'
 import { affinity, CATEGORY_META, cn, LOCAL_CATEGORIES, planStatus, REMOTE_CATEGORIES, sharedInterests } from '../lib/utils'
 import { LivingPlanCard } from '../components/LivingPlanCard'
 import { Avatar, Chip, Eyebrow } from '../components/ui'
-import { BadgeRow } from '../components/Bestie'
+import { BadgeRow } from '../components/Karma'
 
 export function FrequencySwitch({ mode, onChange }: { mode: Mode; onChange: (m: Mode) => void }) {
   return (

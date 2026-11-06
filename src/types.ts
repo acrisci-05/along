@@ -20,13 +20,6 @@ export interface Dilemma {
   options?: string[]
 }
 
-export interface BestieVouch {
-  worstFlaw: string
-  whyGoOut: string
-  redFlag: string
-  by: string
-}
-
 export interface User {
   id: string
   name: string
@@ -39,12 +32,10 @@ export interface User {
   interests: string[]
   habitats: string[]
   dilemma: Dilemma
-  bestie?: BestieVouch
   karma: number
   badges: Array<'fast' | 'voice' | 'zero'>
   lifetime?: boolean
   travel?: string
-  stickerFinish?: 'paper' | 'holo' | 'neon'
   gender: Gender
   intent: Intent[]
   look: Look
