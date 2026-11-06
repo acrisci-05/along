@@ -102,6 +102,32 @@ Senza `.env.local` l’app torna la demo con persone finte (utile per mostrarla 
 
 ---
 
+## 8 · Mittente email con Gmail (per la seconda persona e il codice in italiano)
+
+1. Account Google → **Sicurezza** → attiva la **Verifica in due passaggi**.
+2. Apri <https://myaccount.google.com/apppasswords>, nome `ALONG Supabase` → **Crea**. Copia la password di 16 lettere: è **segreta**, va solo nel passo 3 (mai in chat, nel codice o su GitHub).
+3. Supabase → **Authentication → Emails → SMTP Settings** → **Enable custom SMTP**:
+   - Sender email: il tuo indirizzo Gmail · Sender name: `ALONG`
+   - Host: `smtp.gmail.com` · Port: `465`
+   - Username: il tuo indirizzo Gmail · Password: la password per le app
+   - **Save**
+4. Nel terminale, dalla cartella del progetto:
+   ```bash
+   git pull
+   ```
+   ```bash
+   npx supabase config diff
+   ```
+   Devono comparire solo: conferma email, durata e lunghezza del codice (600 s, 6 cifre) e i due modelli email. Poi:
+   ```bash
+   npx supabase config push
+   ```
+5. Prova: esci dall’app, rientra con la tua email → arriva “Il tuo codice ALONG: 123456”. Poi una finestra in incognito con un’altra email per la seconda persona.
+
+Gmail va benissimo per i test (circa 500 email al giorno). Per il lancio passeremo a un servizio dedicato con un dominio tuo.
+
+---
+
 ### Cosa fa già il database (provato con `npm run db:test`, 70 controlli)
 - Età minima **16 anni**; **16-17 e 18+ non si vedono mai** (profili, piani, foto, like, chat).
 - 16-17: solo **Amici**, **verifica obbligatoria** prima di rispondere, unirsi a piani o scrivere; piani solo **8–20** e in **luoghi pubblici**; niente vocali nelle chat 1:1.
