@@ -138,12 +138,12 @@ export function QuickCreate({ open, onClose, onPaywall, onCreated }: { open: boo
         <h2 id="qc-title" className="text-xl font-bold">
           Quick Create
         </h2>
-        <span className={cn('inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[12px] font-semibold tabular-nums', elapsed < 60 ? 'bg-cyan/15 text-cyan' : 'bg-coral/15 text-coral')}>
+        <span className={cn('inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-sm font-semibold tabular-nums', elapsed < 60 ? 'bg-cyan/15 text-cyan' : 'bg-coral/15 text-coral')}>
           <Timer size={13} /> {mm} / 1:00
         </span>
       </div>
       {atLimit && (
-        <p className="mt-2 rounded-xl bg-gold/10 px-3 py-2 text-[12px] text-gold">
+        <p className="mt-2 rounded-xl bg-gold/10 px-3 py-2 text-sm text-gold">
           Hai {hostedActivePlans.length}/{limits.plans} piani attivi. Per pubblicarne un altro serve ALONG Forever.
         </p>
       )}
@@ -153,8 +153,8 @@ export function QuickCreate({ open, onClose, onPaywall, onCreated }: { open: boo
         {STEPS.map((s, i) => (
           <li key={s} className="flex-1">
             <button type="button" onClick={() => i < step && setStep(i)} className="block w-full text-left" aria-current={i === step ? 'step' : undefined} disabled={i > step}>
-              <span className={cn('block h-1 rounded-full transition-colors', i <= step ? 'bg-lime' : 'bg-cream/10')} />
-              <span className={cn('mt-1 block text-[10.5px] font-semibold', i === step ? 'text-lime' : 'text-cream/35')}>
+              <span className={cn('block h-1 rounded-full transition-colors', i <= step ? 'bg-coral' : 'bg-cream/10')} />
+              <span className={cn('mt-1 block text-xs font-semibold', i === step ? 'text-coral' : 'text-cream/35')}>
                 {i + 1}. {s}
               </span>
             </button>
@@ -164,7 +164,7 @@ export function QuickCreate({ open, onClose, onPaywall, onCreated }: { open: boo
 
       {/* live preview */}
       <div className="mt-4" aria-live="polite">
-        <p className="mb-1.5 text-[10.5px] font-semibold uppercase tracking-[0.18em] text-cream/40">Live preview</p>
+        <p className="serif text-sm mb-1.5 text-cream/40">Live preview</p>
         <LivingPlanCard plan={draft} users={[state.me]} preview />
       </div>
 
@@ -181,11 +181,11 @@ export function QuickCreate({ open, onClose, onPaywall, onCreated }: { open: boo
                     onChange={(e) => setTitle(e.target.value)}
                     maxLength={60}
                     placeholder="Es. Pizza fritta e passeggiata"
-                    className="mt-2 h-12 w-full rounded-2xl border border-cream/10 bg-ink/70 px-4 text-[15px] placeholder:text-cream/30 focus:border-lime/60 focus:outline-none"
+                    className="mt-2 h-12 w-full rounded-2xl border border-cream/10 bg-ink/70 px-4 text-base placeholder:text-cream/30 focus:border-coral/60 focus:outline-none"
                   />
                 </label>
                 <div>
-                  <p className="mb-2 text-[12px] font-semibold text-cream/50">Template a 1 tap</p>
+                  <p className="mb-2 text-sm font-semibold text-cream/50">Template a 1 tap</p>
                   <div className="flex flex-wrap gap-2">
                     {TEMPLATES.map((t) => (
                       <Chip
@@ -205,7 +205,7 @@ export function QuickCreate({ open, onClose, onPaywall, onCreated }: { open: boo
                   </div>
                 </div>
                 <div>
-                  <p className="mb-2 text-[12px] font-semibold text-cream/50">Categoria</p>
+                  <p className="mb-2 text-sm font-semibold text-cream/50">Categoria</p>
                   <div className="no-scrollbar -mx-5 flex gap-2 overflow-x-auto px-5">
                     {[...LOCAL_CATEGORIES, ...REMOTE_CATEGORIES].map((c) => (
                       <Chip
@@ -247,9 +247,9 @@ export function QuickCreate({ open, onClose, onPaywall, onCreated }: { open: boo
                         mode === m ? (m === 'local' ? 'border-cyan bg-cyan/10' : 'border-violet bg-violet/15') : 'border-cream/10 hover:border-cream/25',
                       )}
                     >
-                      {m === 'local' ? <MapPin size={18} className="text-cyan" /> : <Globe2 size={18} className="text-violet-300" />}
-                      <p className="mt-1.5 text-[14px] font-semibold">{m === 'local' ? 'Habitat locale' : 'Senza Confini'}</p>
-                      <p className="text-[11.5px] text-cream/50">{m === 'local' ? `Dal vivo a ${state.me.city}` : 'Da remoto, ovunque'}</p>
+                      {m === 'local' ? <MapPin size={18} className="text-cyan" /> : <Globe2 size={18} className="text-violet" />}
+                      <p className="mt-1.5 text-base font-semibold">{m === 'local' ? 'Habitat locale' : 'Senza Confini'}</p>
+                      <p className="text-xs text-cream/50">{m === 'local' ? `Dal vivo a ${state.me.city}` : 'Da remoto, ovunque'}</p>
                     </button>
                   ))}
                 </div>
@@ -280,7 +280,7 @@ export function QuickCreate({ open, onClose, onPaywall, onCreated }: { open: boo
                       type="button"
                       onClick={() => setWhenKey(k)}
                       aria-pressed={whenKey === k}
-                      className={cn('h-11 rounded-2xl border text-[13px] font-semibold transition', whenKey === k ? 'border-lime bg-lime text-ink' : 'border-cream/10 hover:border-cream/25')}
+                      className={cn('h-11 rounded-2xl border text-sm font-semibold transition', whenKey === k ? 'border-coral bg-coral text-ink' : 'border-cream/10 hover:border-cream/25')}
                     >
                       {l}
                     </button>
@@ -289,23 +289,23 @@ export function QuickCreate({ open, onClose, onPaywall, onCreated }: { open: boo
                 <div className="flex gap-2">
                   {whenKey === 'custom' && (
                     <label className="flex-1">
-                      <span className="text-[12px] text-cream/50">Data</span>
+                      <span className="text-sm text-cream/50">Data</span>
                       <input
                         type="date"
                         value={custom}
                         min={new Date().toISOString().slice(0, 10)}
                         onChange={(e) => setCustom(e.target.value)}
-                        className="mt-1 h-11 w-full rounded-2xl border border-cream/10 bg-ink/70 px-3 text-cream [color-scheme:dark] focus:border-lime/60 focus:outline-none"
+                        className="mt-1 h-11 w-full rounded-2xl border border-cream/10 bg-ink/70 px-3 text-cream [color-scheme:dark] focus:border-coral/60 focus:outline-none"
                       />
                     </label>
                   )}
                   <label className="flex-1">
-                    <span className="text-[12px] text-cream/50">Ora</span>
+                    <span className="text-sm text-cream/50">Ora</span>
                     <input
                       type="time"
                       value={time}
                       onChange={(e) => setTime(e.target.value)}
-                      className="mt-1 h-11 w-full rounded-2xl border border-cream/10 bg-ink/70 px-3 text-cream [color-scheme:dark] focus:border-lime/60 focus:outline-none"
+                      className="mt-1 h-11 w-full rounded-2xl border border-cream/10 bg-ink/70 px-3 text-cream [color-scheme:dark] focus:border-coral/60 focus:outline-none"
                     />
                   </label>
                 </div>
@@ -321,8 +321,8 @@ export function QuickCreate({ open, onClose, onPaywall, onCreated }: { open: boo
                       <Minus size={18} />
                     </button>
                     <div className="text-center">
-                      <p className="font-display text-4xl font-bold tabular-nums text-lime">{capacity}</p>
-                      <p className="text-[11px] text-cream/45">persone, te compres*</p>
+                      <p className="font-display text-3xl font-bold tabular-nums text-coral">{capacity}</p>
+                      <p className="text-xs text-cream/45">persone, te compres*</p>
                     </div>
                     <button type="button" onClick={() => setCapacity((c) => Math.min(8, c + 1))} className="grid size-11 place-items-center rounded-xl bg-cream/5 hover:bg-cream/10" aria-label="Più posti">
                       <Plus size={18} />
@@ -331,18 +331,18 @@ export function QuickCreate({ open, onClose, onPaywall, onCreated }: { open: boo
                 </div>
                 {(category === 'food' || category === 'drink' || category === 'sport') && (
                   <label className="block">
-                    <span className="text-[13px] font-semibold">Spesa stimata a testa (€) · per Split the Bill</span>
+                    <span className="text-sm font-semibold">Spesa stimata a testa (€) · per Split the Bill</span>
                     <input
                       inputMode="decimal"
                       value={cost}
                       onChange={(e) => setCost(e.target.value.replace(/[^0-9]/g, '').slice(0, 3))}
                       placeholder="Es. 15"
-                      className="mt-2 h-11 w-full rounded-2xl border border-cream/10 bg-ink/70 px-4 placeholder:text-cream/30 focus:border-lime/60 focus:outline-none"
+                      className="mt-2 h-11 w-full rounded-2xl border border-cream/10 bg-ink/70 px-4 placeholder:text-cream/30 focus:border-coral/60 focus:outline-none"
                     />
                   </label>
                 )}
                 <div>
-                  <p className="mb-2 text-[13px] font-semibold">Instant Vibe</p>
+                  <p className="mb-2 text-sm font-semibold">Instant Vibe</p>
                   <div className="flex flex-wrap gap-2">
                     {VIBES.map((v) => (
                       <Chip key={v} active={vibes.includes(v)} onClick={() => setVibes((p) => (p.includes(v) ? p.filter((x) => x !== v) : p.length < 3 ? [...p, v] : p))}>
@@ -358,7 +358,7 @@ export function QuickCreate({ open, onClose, onPaywall, onCreated }: { open: boo
               <div className="space-y-4">
                 <div>
                   <p className="text-sm font-semibold">Imposta il tuo dilemma Gatekeeper</p>
-                  <p className="text-[12.5px] text-cream/50">Chi vuole unirsi deve rispondere. Niente “ciao”, solo personalità.</p>
+                  <p className="text-sm text-cream/50">Chi vuole unirsi deve rispondere. Niente “ciao”, solo personalità.</p>
                 </div>
                 <textarea
                   value={dilemma}
@@ -366,21 +366,21 @@ export function QuickCreate({ open, onClose, onPaywall, onCreated }: { open: boo
                   rows={3}
                   maxLength={140}
                   placeholder="Es. Alba o tramonto? E perché?"
-                  className="w-full resize-none rounded-2xl border border-cream/10 bg-ink/70 p-3.5 text-[15px] placeholder:text-cream/30 focus:border-lime/60 focus:outline-none"
+                  className="w-full resize-none rounded-2xl border border-cream/10 bg-ink/70 p-3.5 text-base placeholder:text-cream/30 focus:border-coral/60 focus:outline-none"
                 />
                 <div className="flex flex-wrap gap-2">
                   {PRESET_DILEMMAS.map((d) => (
-                    <button key={d} type="button" onClick={() => setDilemma(d)} className="rounded-2xl border border-cream/10 px-3 py-2 text-left text-[12.5px] text-cream/75 hover:border-lime/40">
+                    <button key={d} type="button" onClick={() => setDilemma(d)} className="rounded-2xl border border-cream/10 px-3 py-2 text-left text-sm text-cream/75 hover:border-coral/40">
                       {d}
                     </button>
                   ))}
                 </div>
                 <div className="flex items-center justify-between rounded-2xl border border-violet/25 bg-violet/10 p-3">
                   <div className="pr-3">
-                    <p className="flex items-center gap-1.5 text-[13.5px] font-semibold">
-                      <Lock size={14} className="text-violet-300" /> Progressive Unblur
+                    <p className="flex items-center gap-1.5 text-sm font-semibold">
+                      <Lock size={14} className="text-violet" /> Progressive Unblur
                     </p>
-                    <p className="text-[12px] text-cream/55">Foto sfocate finché la crew non scambia 5 messaggi significativi.</p>
+                    <p className="text-sm text-cream/55">Foto sfocate finché la crew non scambia 5 messaggi significativi.</p>
                   </div>
                   <Toggle checked={privacy} onChange={setPrivacy} label="Progressive Unblur" tone="violet" />
                 </div>
@@ -390,7 +390,7 @@ export function QuickCreate({ open, onClose, onPaywall, onCreated }: { open: boo
         </AnimatePresence>
       </div>
 
-      <div className="sticky bottom-0 -mx-5 -mb-8 mt-4 flex gap-2 bg-gradient-to-t from-ink via-ink/95 to-transparent px-5 pb-6 pt-5">
+      <div className="sticky bottom-0 -mx-5 -mb-8 mt-4 flex gap-2 bg-gradient-to-t from-[#161616] via-[#161616] to-transparent px-5 pb-6 pt-5">
         {step > 0 && (
           <Button variant="ghost" onClick={() => setStep((s) => s - 1)} aria-label="Indietro">
             <ArrowLeft size={18} />

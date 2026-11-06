@@ -11,14 +11,14 @@ import { BadgeRow } from '../components/Bestie'
 
 export function FrequencySwitch({ mode, onChange }: { mode: Mode; onChange: (m: Mode) => void }) {
   return (
-    <div className="glass relative grid grid-cols-2 rounded-[20px] p-1" role="tablist" aria-label="Frequenza di scoperta">
+    <div className="glass relative grid grid-cols-2 rounded-2xl p-1" role="tablist" aria-label="Frequenza di scoperta">
       {(['local', 'remote'] as const).map((m) => (
         <button
           key={m}
           role="tab"
           aria-selected={mode === m}
           onClick={() => onChange(m)}
-          className={cn('relative z-10 flex h-12 items-center justify-center gap-2 rounded-2xl text-[14px] font-semibold transition-colors', mode === m ? 'text-ink' : 'text-cream/65 hover:text-cream')}
+          className={cn('relative z-10 flex h-12 items-center justify-center gap-2 rounded-2xl text-base font-semibold transition-colors', mode === m ? 'text-ink' : 'text-cream/65 hover:text-cream')}
         >
           {mode === m && (
             <motion.span
@@ -77,10 +77,10 @@ export function Explore({ mode, setMode }: { mode: Mode; setMode: (m: Mode) => v
     <div className="space-y-5 pb-6">
       <header>
         <Eyebrow>Ciao {state.me.name} · {state.me.city}</Eyebrow>
-        <h1 className="mt-1 text-[30px] font-bold leading-[1.02]">
+        <h1 className="mt-1 text-2xl font-bold leading-[1.02]">
           Less scrolling.
           <br />
-          <span className={mode === 'local' ? 'text-lime' : 'text-violet-300'}>More doing.</span>
+          <span className={mode === 'local' ? 'text-coral' : 'text-violet'}>More doing.</span>
         </h1>
       </header>
 
@@ -98,7 +98,7 @@ export function Explore({ mode, setMode }: { mode: Mode; setMode: (m: Mode) => v
             <div>
               <div className="flex items-baseline justify-between">
                 <Eyebrow>I tuoi Habitat</Eyebrow>
-                <span className="text-[11px] text-cream/40">niente GPS, solo posti che frequenti</span>
+                <span className="text-xs text-cream/40">niente GPS, solo posti che frequenti</span>
               </div>
               <div className="no-scrollbar -mx-4 mt-2 flex gap-2 overflow-x-auto px-4">
                 <Chip active={habitat === 'all'} tone="cyan" onClick={() => setHabitat('all')}>
@@ -134,20 +134,20 @@ export function Explore({ mode, setMode }: { mode: Mode; setMode: (m: Mode) => v
             <div>
               <div className="flex items-baseline justify-between">
                 <Eyebrow>Sintonie per affinità</Eyebrow>
-                <span className="text-[11px] text-cream/40">filtro km disattivato</span>
+                <span className="text-xs text-cream/40">filtro km disattivato</span>
               </div>
               <div className="no-scrollbar -mx-4 mt-2 flex gap-3 overflow-x-auto px-4 pb-1">
                 {people.map(({ u, a }) => (
                   <button key={u.id} onClick={() => nav.openUser(u.id)} className="glass w-[150px] shrink-0 rounded-3xl p-3 text-left transition hover:border-violet/40">
                     <div className="flex items-start justify-between">
                       <Avatar user={u} size={46} />
-                      <span className="font-display text-[15px] font-bold text-violet-300">{a}%</span>
+                      <span className="font-display text-base font-bold text-violet">{a}%</span>
                     </div>
-                    <p className="mt-2 font-display text-[15px] font-bold">
+                    <p className="mt-2 font-display text-base font-bold">
                       {u.name}, {u.age}
                     </p>
-                    <p className="text-[11.5px] text-cream/50">{u.city}</p>
-                    <p className="mt-1.5 line-clamp-2 text-[11.5px] text-cream/70">
+                    <p className="text-xs text-cream/50">{u.city}</p>
+                    <p className="mt-1.5 line-clamp-2 text-xs text-cream/70">
                       {sharedInterests(state.me, u).slice(0, 2).join(' · ') || u.interests.slice(0, 2).join(' · ')}
                     </p>
                     <div className="mt-2 scale-90 origin-left">
@@ -201,7 +201,7 @@ function EmptyState({ onCreate }: { onCreate: () => void }) {
     <div className="rounded-3xl border border-dashed border-cream/15 p-6 text-center">
       <p className="font-display text-lg font-bold">Ancora niente qui.</p>
       <p className="mt-1 text-sm text-cream/55">Sii tu la prima scintilla: crea un piano in meno di 60 secondi.</p>
-      <button onClick={onCreate} className="mt-4 inline-flex items-center gap-1.5 rounded-full bg-lime px-4 py-2 text-sm font-semibold text-ink">
+      <button onClick={onCreate} className="mt-4 inline-flex items-center gap-1.5 rounded-full bg-coral px-4 py-2 text-sm font-semibold text-ink">
         <Plus size={16} /> Crea piano
       </button>
     </div>
@@ -231,7 +231,7 @@ export function TravelBridge() {
   const locals = Object.values(state.users).filter((u) => state.travelDestinations.some((d) => u.city.toLowerCase() === d.toLowerCase() || u.travel?.toLowerCase() === d.toLowerCase()))
 
   return (
-    <div className="relative overflow-hidden rounded-[26px] border border-cyan/20 bg-[linear-gradient(140deg,rgb(6_182_212/0.16),rgb(139_92_246/0.14))] p-4">
+    <div className="relative overflow-hidden rounded-3xl border border-cyan/20 bg-surface p-4">
       <div className="absolute -right-10 -top-10 size-36 rounded-full bg-cyan/25 blur-3xl" aria-hidden />
       <div className="relative">
         <div className="flex items-center gap-2">
@@ -239,10 +239,10 @@ export function TravelBridge() {
             <Plane size={16} />
           </span>
           <div>
-            <p className="font-display text-[16px] font-bold">Travel Bridge</p>
-            <p className="text-[11.5px] text-cream/55">Connettiti con chi vive lì, prima ancora di partire.</p>
+            <p className="font-display text-base font-bold">Travel Bridge</p>
+            <p className="text-xs text-cream/55">Connettiti con chi vive lì, prima ancora di partire.</p>
           </div>
-          <span className="ml-auto text-[11px] font-semibold text-cream/50">
+          <span className="ml-auto text-xs font-semibold text-cream/50">
             {state.travelDestinations.length}/{limits.travel === Infinity ? '∞' : limits.travel}
           </span>
         </div>
@@ -250,7 +250,7 @@ export function TravelBridge() {
         {state.travelDestinations.length > 0 && (
           <div className="mt-3 flex flex-wrap gap-2">
             {state.travelDestinations.map((d) => (
-              <span key={d} className="inline-flex items-center gap-1.5 rounded-full bg-cyan px-3 py-1 text-[13px] font-semibold text-ink">
+              <span key={d} className="inline-flex items-center gap-1.5 rounded-full bg-cyan px-3 py-1 text-sm font-semibold text-ink">
                 ✈️ {d}
                 <button onClick={() => removeTravel(d)} aria-label={`Rimuovi ${d}`} className="rounded-full p-0.5 hover:bg-ink/15">
                   <X size={13} />
@@ -273,7 +273,7 @@ export function TravelBridge() {
               value={dest}
               onChange={(e) => setDest(e.target.value)}
               placeholder="Es. Barcellona per l’Erasmus a settembre"
-              className="h-11 w-full rounded-2xl border border-cream/10 bg-ink/60 px-3.5 text-[14px] placeholder:text-cream/30 focus:border-cyan/60 focus:outline-none"
+              className="h-11 w-full rounded-2xl border border-cream/10 bg-ink/60 px-3.5 text-base placeholder:text-cream/30 focus:border-cyan/60 focus:outline-none"
             />
           </label>
           <button type="submit" disabled={!dest.trim()} className="h-11 rounded-2xl bg-cyan px-4 text-sm font-semibold text-ink disabled:opacity-40">
@@ -283,7 +283,7 @@ export function TravelBridge() {
         {state.travelDestinations.length === 0 && (
           <div className="mt-2 flex flex-wrap gap-1.5">
             {suggestions.map((s) => (
-              <button key={s} onClick={() => add(s)} className="rounded-full border border-cream/10 px-2.5 py-1 text-[12px] text-cream/70 hover:border-cyan/50">
+              <button key={s} onClick={() => add(s)} className="rounded-full border border-cream/10 px-2.5 py-1 text-sm text-cream/70 hover:border-cyan/50">
                 {s}
               </button>
             ))}
@@ -301,7 +301,7 @@ export function TravelBridge() {
                     </button>
                   ))}
                 </div>
-                <p className="text-[12.5px] text-cream/70">
+                <p className="text-sm text-cream/70">
                   <span className="font-semibold text-cream">{locals.map((u) => u.name).join(', ')}</span> {locals.length === 1 ? 'è' : 'sono'} lì o ci andrà.
                 </p>
               </div>
@@ -310,14 +310,14 @@ export function TravelBridge() {
               <LivingPlanCard key={p.id} index={i} plan={p} users={p.participants.map(user)} saved={state.saved.includes(p.id)} onSave={() => toggleSave(p.id)} onOpen={() => nav.openPlan(p.id)} />
             ))}
             {!matches.length && (
-              <p className="flex items-center gap-1.5 rounded-2xl bg-ink/40 p-3 text-[12.5px] text-cream/60">
+              <p className="flex items-center gap-1.5 rounded-2xl bg-ink/40 p-3 text-sm text-cream/60">
                 <Sparkles size={14} className="text-cyan" /> Nessun piano lì per ora. Ti avviseremo appena qualcuno del posto ne pubblica uno.
               </p>
             )}
           </div>
         )}
         {!state.lifetime && state.travelDestinations.length >= 1 && (
-          <button onClick={() => nav.openPaywall('Il Travel Bridge Free include 1 meta futura. Con ALONG Forever imposti tutte le città che vuoi, per sempre.')} className="mt-3 flex items-center gap-1 text-[12px] font-semibold text-cyan">
+          <button onClick={() => nav.openPaywall('Il Travel Bridge Free include 1 meta futura. Con ALONG Forever imposti tutte le città che vuoi, per sempre.')} className="mt-3 flex items-center gap-1 text-sm font-semibold text-cyan">
             <MapPin size={13} /> Più mete? Sblocca il Travel Bridge illimitato
           </button>
         )}

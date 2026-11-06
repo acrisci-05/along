@@ -26,25 +26,25 @@ export function PlanDetailSheet({ planId, onClose, onJoin }: { planId: string | 
           <div className="space-y-5">
             <div>
               <div className="flex flex-wrap items-center gap-2">
-                <span className={cn('rounded-full px-2.5 py-1 text-[12px] font-semibold', meta.tone, meta.text)}>
+                <span className={cn('rounded-full px-2.5 py-1 text-sm font-semibold', meta.tone, meta.text)}>
                   {meta.emoji} {meta.label}
                 </span>
-                <span className={cn('rounded-full px-2 py-0.5 font-display text-[10px] font-bold tracking-wider', STATUS_STYLE[status])}>{status}</span>
+                <span className={cn('rounded-full px-2 py-0.5 font-display text-xs font-bold tracking-wider', STATUS_STYLE[status])}>{status}</span>
                 {plan.mode === 'remote' && (
-                  <span className="inline-flex items-center gap-1 rounded-full bg-violet/15 px-2.5 py-1 text-[12px] font-semibold text-violet-300">
+                  <span className="inline-flex items-center gap-1 rounded-full bg-violet/15 px-2.5 py-1 text-sm font-semibold text-violet">
                     <Globe2 size={12} /> Senza Confini
                   </span>
                 )}
               </div>
-              <h2 className="mt-3 text-[28px] font-bold leading-[1.05]">{plan.title}</h2>
+              <h2 className="mt-3 text-2xl font-bold leading-[1.05]">{plan.title}</h2>
               <div className="mt-3 grid grid-cols-2 gap-2">
                 <div className="glass rounded-2xl p-3">
                   <Clock size={15} className="text-cyan" />
-                  <p className="mt-1 text-[13px] font-semibold">{planWhen(plan, now)}</p>
+                  <p className="mt-1 text-sm font-semibold">{planWhen(plan, now)}</p>
                 </div>
                 <div className="glass rounded-2xl p-3">
-                  {plan.mode === 'remote' ? <Globe2 size={15} className="text-violet-300" /> : <MapPin size={15} className="text-coral" />}
-                  <p className="mt-1 line-clamp-2 text-[13px] font-semibold">
+                  {plan.mode === 'remote' ? <Globe2 size={15} className="text-violet" /> : <MapPin size={15} className="text-coral" />}
+                  <p className="mt-1 line-clamp-2 text-sm font-semibold">
                     {plan.habitat}
                     {plan.district ? ` · ${plan.district}` : ''}
                   </p>
@@ -55,11 +55,11 @@ export function PlanDetailSheet({ planId, onClose, onJoin }: { planId: string | 
             <button onClick={() => !isHost && nav.openUser(host.id)} className="glass flex w-full items-center gap-3 rounded-3xl p-3 text-left">
               <Avatar user={host} size={48} blur={plan.privacy && !isHost ? true : undefined} />
               <div className="min-w-0 flex-1">
-                <p className="text-[11px] text-cream/45">Host</p>
-                <p className="font-display text-[16px] font-bold">{isHost ? 'Tu' : `${host.name}, ${host.age}`}</p>
+                <p className="text-xs text-cream/45">Host</p>
+                <p className="font-display text-base font-bold">{isHost ? 'Tu' : `${host.name}, ${host.age}`}</p>
                 <BadgeRow badges={host.badges} />
               </div>
-              {!isHost && <span className="text-[12px] font-semibold text-lime">Profilo →</span>}
+              {!isHost && <span className="text-sm font-semibold text-coral">Profilo →</span>}
             </button>
 
             {plan.vibes.length > 0 && (
@@ -67,7 +67,7 @@ export function PlanDetailSheet({ planId, onClose, onJoin }: { planId: string | 
                 <Eyebrow>Instant Vibe</Eyebrow>
                 <div className="mt-2 flex flex-wrap gap-1.5">
                   {plan.vibes.map((v) => (
-                    <span key={v} className="rounded-full border border-lime/25 bg-lime/5 px-2.5 py-1 text-[12.5px] text-lime">
+                    <span key={v} className="rounded-full border border-coral/25 bg-coral/5 px-2.5 py-1 text-sm text-coral">
                       {v}
                     </span>
                   ))}
@@ -85,39 +85,39 @@ export function PlanDetailSheet({ planId, onClose, onJoin }: { planId: string | 
                   return (
                     <div key={id} className="flex w-14 flex-col items-center gap-1">
                       <Avatar user={u} size={48} blur={plan.privacy && id !== 'me' ? true : undefined} />
-                      <span className="truncate text-[11px] text-cream/60">{id === 'me' ? 'Tu' : plan.privacy ? '???' : u.name}</span>
+                      <span className="truncate text-xs text-cream/60">{id === 'me' ? 'Tu' : plan.privacy ? '???' : u.name}</span>
                     </div>
                   )
                 })}
                 {Array.from({ length: Math.max(0, plan.capacity - plan.participants.length) }).map((_, i) => (
                   <div key={i} className="flex w-14 flex-col items-center gap-1">
                     <div className="size-12 rounded-full border border-dashed border-cream/20" />
-                    <span className="text-[11px] text-cream/30">libero</span>
+                    <span className="text-xs text-cream/30">libero</span>
                   </div>
                 ))}
               </div>
               {plan.privacy && (
-                <p className="mt-2 flex items-center gap-1.5 text-[12px] text-violet-300">
+                <p className="mt-2 flex items-center gap-1.5 text-sm text-violet">
                   <Lock size={12} /> Progressive Unblur: le foto si svelano dopo 5 messaggi significativi nella crew.
                 </p>
               )}
             </div>
 
             {!isHost && (
-              <div className="relative overflow-hidden rounded-3xl border border-lime/30 bg-lime/5 p-4">
-                <p className="flex items-center gap-1.5 font-display text-[11px] font-bold uppercase tracking-[0.2em] text-lime">
+              <div className="relative overflow-hidden rounded-3xl border border-coral/30 bg-coral/5 p-4">
+                <p className="flex items-center gap-1.5 font-display text-xs font-bold uppercase tracking-[0.2em] text-coral">
                   <KeyRound size={13} /> Gatekeeper
                 </p>
-                <p className="mt-1 font-display text-[17px] font-semibold leading-snug">{plan.dilemma.question}</p>
+                <p className="mt-1 font-display text-lg font-semibold leading-snug">{plan.dilemma.question}</p>
               </div>
             )}
 
             <LivingPlanCard plan={plan} users={plan.participants.map(user)} preview now={now} />
 
-            <div className="sticky bottom-0 -mx-5 -mb-8 flex gap-2 bg-gradient-to-t from-ink via-ink/95 to-transparent px-5 pb-6 pt-5">
+            <div className="sticky bottom-0 -mx-5 -mb-8 flex gap-2 bg-gradient-to-t from-[#161616] via-[#161616] to-transparent px-5 pb-6 pt-5">
               <button
                 onClick={() => toggleSave(plan.id)}
-                className={cn('grid size-12 shrink-0 place-items-center rounded-2xl', state.saved.includes(plan.id) ? 'bg-lime text-ink' : 'bg-cream/10 text-cream')}
+                className={cn('grid size-12 shrink-0 place-items-center rounded-2xl', state.saved.includes(plan.id) ? 'bg-coral text-ink' : 'bg-cream/10 text-cream')}
                 aria-label="Salva"
                 aria-pressed={state.saved.includes(plan.id)}
               >
@@ -165,10 +165,10 @@ export function UserSheet({ userId, onClose }: { userId: string | null; onClose:
           <div className="flex items-center gap-4">
             <Avatar user={u} size={84} />
             <div className="min-w-0">
-              <h2 className="text-[26px] font-bold leading-tight">
+              <h2 className="text-xl font-bold leading-tight">
                 {u.name}, {u.age}
               </h2>
-              <p className="flex items-center gap-1 text-[13px] text-cream/55">
+              <p className="flex items-center gap-1 text-sm text-cream/55">
                 <MapPin size={13} /> {u.city}
                 {u.travel && (
                   <span className="ml-1 inline-flex items-center gap-1 text-cyan">
@@ -177,13 +177,13 @@ export function UserSheet({ userId, onClose }: { userId: string | null; onClose:
                 )}
               </p>
               <div className="mt-1.5 flex items-center gap-2">
-                <span className="rounded-full bg-violet/20 px-2 py-0.5 text-[12px] font-bold text-violet-200">{affinity(state.me, u)}% sintonia</span>
-                <span className="text-[12px] font-semibold text-lime">⚡ {u.karma} karma</span>
+                <span className="rounded-full bg-violet/20 px-2 py-0.5 text-sm font-bold text-violet">{affinity(state.me, u)}% sintonia</span>
+                <span className="text-sm font-semibold text-coral">⚡ {u.karma} karma</span>
               </div>
             </div>
           </div>
           {u.lifetime && <LifetimeBadge small />}
-          <p className="text-[14px] leading-snug text-cream/80">{u.bio}</p>
+          <p className="text-base leading-snug text-cream/80">{u.bio}</p>
           <BadgeRow badges={u.badges} />
           <div>
             <Eyebrow>Passioni</Eyebrow>
@@ -191,7 +191,7 @@ export function UserSheet({ userId, onClose }: { userId: string | null; onClose:
               {u.interests.map((i) => {
                 const shared = sharedInterests(state.me, u).includes(i)
                 return (
-                  <span key={i} className={cn('rounded-full border px-2.5 py-1 text-[12.5px]', shared ? 'border-violet bg-violet/25 text-cream' : 'border-cream/10 text-cream/65')}>
+                  <span key={i} className={cn('rounded-full border px-2.5 py-1 text-sm', shared ? 'border-violet bg-violet/25 text-cream' : 'border-cream/10 text-cream/65')}>
                     {shared && '✦ '}
                     {i}
                   </span>
@@ -212,13 +212,13 @@ export function UserSheet({ userId, onClose }: { userId: string | null; onClose:
             </div>
           )}
 
-          <div className="rounded-3xl border border-lime/30 bg-lime/5 p-4">
-            <p className="flex items-center gap-1.5 font-display text-[11px] font-bold uppercase tracking-[0.2em] text-lime">
+          <div className="rounded-3xl border border-coral/30 bg-coral/5 p-4">
+            <p className="flex items-center gap-1.5 font-display text-xs font-bold uppercase tracking-[0.2em] text-coral">
               <KeyRound size={13} /> Il dilemma di {u.name}
             </p>
-            <p className="mt-1 font-display text-[17px] font-semibold leading-snug">{u.dilemma.question}</p>
+            <p className="mt-1 font-display text-lg font-semibold leading-snug">{u.dilemma.question}</p>
           </div>
-          <div className="sticky bottom-0 -mx-5 -mb-8 bg-gradient-to-t from-ink via-ink/95 to-transparent px-5 pb-6 pt-5">
+          <div className="sticky bottom-0 -mx-5 -mb-8 bg-gradient-to-t from-[#161616] via-[#161616] to-transparent px-5 pb-6 pt-5">
             {dm ? (
               <Button className="w-full" size="lg" onClick={() => nav.openChat(dm.id)}>
                 <MessageCircle size={18} /> Apri la chat

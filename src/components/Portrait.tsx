@@ -81,7 +81,7 @@ export function Portrait({ look, hue, crop = 'card', className }: { look: Look; 
       {look.beard && <path d="M35 55 C 36 70, 44 73, 50 73 C 56 73, 64 70, 65 55 C 62 64, 38 64, 35 55 Z" fill={hair} opacity="0.85" />}
       {frontHair}
       {look.glasses && (
-        <g fill="none" stroke="#0b0f19" strokeWidth="1.6" opacity="0.85">
+        <g fill="none" stroke="#101010" strokeWidth="1.6" opacity="0.85">
           <circle cx="43.5" cy="52" r="5.2" />
           <circle cx="56.5" cy="52" r="5.2" />
           <path d="M48.7 52 h2.6" />

@@ -24,8 +24,8 @@ Stato: ✅ fatto · 🔜 prossimo · ⬜ da fare
 ## Fase 1 — Demo convincente (solo frontend, dati finti)
 Obiettivo: un'app che si può far provare a qualcuno e che "sembra vera".
 
-- ⬜ **1.1 Design system (F)** — ridurre colori e badge, gerarchia tipografica chiara, un accento per schermata, componenti coerenti
-- ⬜ **1.2 Scopri (A)** — card più belle e leggibili, profilo completo scorrevole dentro la card, animazioni di swipe rifinite, stato "mazzo finito"
+- ✅ **1.1 Design system (F)** — direzione Editorial Poster, brand corallo, Bricolage + Inter, 7 dimensioni di testo, 4 raggi, niente vetro/glow, card di Scopri a locandina → vedi `DESIGN.md`
+- 🔜 **1.2 Scopri (A)** — card più belle e leggibili, profilo completo scorrevole dentro la card, animazioni di swipe rifinite, stato "mazzo finito"
 - ⬜ **1.3 Match & Like (A)** — schermata match più emozionante, like ricevuti a carte da sfogliare, notifiche in-app più chiare
 - ⬜ **1.4 Chat (B)** — chat più pulita, suggerimenti per rompere il ghiaccio legati al dilemma, proposta di ritrovo con data/ora/luogo in un tap
 - ⬜ **1.5 Onboarding vero (C)** — creare il proprio profilo: nome, età, cosa cerchi, interessi, Habitat, dilemma (non più "Alex")

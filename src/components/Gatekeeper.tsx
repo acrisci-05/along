@@ -96,16 +96,16 @@ export function GatekeeperSheet({
               <div className="flex items-center gap-3">
                 <Avatar user={host} size={44} />
                 <div className="min-w-0">
-                  <p className="text-[13px] text-cream/55">
+                  <p className="text-sm text-cream/55">
                     Per entrare in <span className="font-semibold text-cream">{context}</span>
                   </p>
-                  <p className="text-[13px] text-cream/55">{host.name} chiede di rispondere a:</p>
+                  <p className="text-sm text-cream/55">{host.name} chiede di rispondere a:</p>
                 </div>
               </div>
-              <div className="relative overflow-hidden rounded-3xl bg-[linear-gradient(135deg,#D7FF66,#b7f04a)] p-5 text-ink">
+              <div className="relative overflow-hidden rounded-3xl bg-coral p-5 text-ink">
                 <KeyRound className="absolute -right-3 -top-3 size-20 text-ink/10" aria-hidden />
-                <p className="font-display text-[11px] font-bold uppercase tracking-[0.2em] text-ink/60">Il dilemma</p>
-                <p className="mt-1.5 font-display text-[20px] font-bold leading-tight">{dilemma.question}</p>
+                <p className="font-display text-xs font-bold uppercase tracking-[0.2em] text-ink/60">Il dilemma</p>
+                <p className="mt-1.5 font-display text-lg font-bold leading-tight">{dilemma.question}</p>
               </div>
               {dilemma.options && dilemma.options.length > 0 && (
                 <div className="flex flex-wrap gap-2" role="group" aria-label="Risposte rapide">
@@ -114,7 +114,7 @@ export function GatekeeperSheet({
                       type="button"
                       key={o}
                       onClick={() => setAnswer(o)}
-                      className={`rounded-full border px-3 py-1.5 text-[13px] transition ${answer === o ? 'border-lime bg-lime text-ink' : 'border-cream/15 text-cream/80 hover:border-cream/35'}`}
+                      className={`rounded-full border px-3 py-1.5 text-sm transition ${answer === o ? 'border-coral bg-coral text-ink' : 'border-cream/15 text-cream/80 hover:border-cream/35'}`}
                     >
                       {o}
                     </button>
@@ -129,10 +129,10 @@ export function GatekeeperSheet({
                   rows={3}
                   maxLength={220}
                   placeholder="Rispondi con sincerità (o con stile)…"
-                  className="w-full resize-none rounded-2xl border border-cream/10 bg-ink/70 p-3.5 text-[15px] text-cream placeholder:text-cream/30 focus:border-lime/60 focus:outline-none"
+                  className="w-full resize-none rounded-2xl border border-cream/10 bg-ink/70 p-3.5 text-base text-cream placeholder:text-cream/30 focus:border-coral/60 focus:outline-none"
                 />
               </label>
-              <div className="flex items-center justify-between text-[12px] text-cream/45">
+              <div className="flex items-center justify-between text-sm text-cream/45">
                 <span className="flex items-center gap-1.5">
                   <MessageCircleOff size={13} /> {lowEffort ? 'Un “ciao” non basta. Rispondi al dilemma!' : 'Niente “ciao”: la chat parte dalla tua risposta.'}
                 </span>

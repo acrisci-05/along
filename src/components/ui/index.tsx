@@ -9,12 +9,12 @@ import { useRevealed } from '../../store/store'
 /* ---------------- Button ---------------- */
 type Variant = 'primary' | 'coral' | 'violet' | 'ghost' | 'outline' | 'gold' | 'danger'
 const VARIANTS: Record<Variant, string> = {
-  primary: 'bg-lime text-ink hover:brightness-110 glow-lime',
-  coral: 'bg-coral text-ink hover:brightness-110 glow-coral',
-  violet: 'bg-violet text-cream hover:brightness-110 glow-violet',
-  gold: 'bg-gold text-ink hover:brightness-110 glow-gold',
-  ghost: 'bg-cream/5 text-cream hover:bg-cream/10',
-  outline: 'border border-cream/15 text-cream hover:border-cream/35 hover:bg-cream/5',
+  primary: 'bg-coral text-ink hover:brightness-105',
+  coral: 'bg-coral text-ink hover:brightness-105',
+  violet: 'bg-cream text-ink hover:bg-white',
+  gold: 'bg-gold text-ink hover:brightness-105',
+  ghost: 'bg-surface-2 text-cream hover:bg-[#2c2c2c]',
+  outline: 'border-2 border-cream/80 text-cream hover:bg-cream hover:text-ink',
   danger: 'bg-alarm/15 text-alarm border border-alarm/30 hover:bg-alarm/25',
 }
 
@@ -29,10 +29,10 @@ export function Button({
     <button
       {...rest}
       className={cn(
-        'inline-flex select-none items-center justify-center gap-2 rounded-2xl font-semibold transition active:scale-[0.97] disabled:opacity-40 disabled:active:scale-100',
-        size === 'sm' && 'h-9 px-3 text-[13px]',
+        'inline-flex select-none items-center justify-center gap-2 rounded-md font-display font-bold transition active:scale-[0.97] disabled:bg-surface-2 disabled:text-cream/35 disabled:border-transparent disabled:active:scale-100',
+        size === 'sm' && 'h-9 px-3 text-sm',
         size === 'md' && 'h-11 px-4 text-sm',
-        size === 'lg' && 'h-13 px-5 text-[15px]',
+        size === 'lg' && 'h-13 px-5 text-base',
         VARIANTS[variant],
         className,
       )}
@@ -57,9 +57,9 @@ export function Chip({
   tone?: 'lime' | 'violet' | 'cyan' | 'coral'
 }) {
   const activeTone = {
-    lime: 'bg-lime text-ink border-lime',
-    violet: 'bg-violet text-cream border-violet',
-    cyan: 'bg-cyan text-ink border-cyan',
+    lime: 'bg-cream text-ink border-cream',
+    violet: 'bg-cream text-ink border-cream',
+    cyan: 'bg-cream text-ink border-cream',
     coral: 'bg-coral text-ink border-coral',
   }[tone]
   return (
@@ -68,8 +68,8 @@ export function Chip({
       onClick={onClick}
       aria-pressed={active}
       className={cn(
-        'shrink-0 whitespace-nowrap rounded-full border px-3 py-1.5 text-[13px] font-medium transition',
-        active ? activeTone : 'border-cream/10 bg-cream/[0.04] text-cream/75 hover:border-cream/25 hover:text-cream',
+        'shrink-0 whitespace-nowrap rounded-full border px-3 py-1.5 text-sm font-medium transition',
+        active ? activeTone : 'border-line text-cream/70 hover:border-cream/40 hover:text-cream',
         className,
       )}
     >
@@ -134,7 +134,7 @@ export function AvatarStack({ users, max = 4, size = 28, blur, capacity }: { use
         </motion.div>
       ))}
       {users.length > max && (
-        <div className="grid place-items-center rounded-full bg-slate-card text-[11px] font-semibold ring-2 ring-ink" style={{ width: size, height: size, marginLeft: -size * 0.32 }}>
+        <div className="grid place-items-center rounded-full bg-slate-card text-xs font-semibold ring-2 ring-ink" style={{ width: size, height: size, marginLeft: -size * 0.32 }}>
           +{users.length - max}
         </div>
       )}
@@ -184,7 +184,7 @@ export function Sheet({
     <AnimatePresence>
       {open && (
         <div className="absolute inset-0 z-50 flex items-end" role="presentation">
-          <motion.div className="absolute inset-0 bg-black/60 backdrop-blur-[2px]" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={onClose} />
+          <motion.div className="absolute inset-0 bg-black/60" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={onClose} />
           <motion.div
             ref={ref}
             tabIndex={-1}
@@ -192,7 +192,7 @@ export function Sheet({
             aria-modal="true"
             aria-labelledby={labelledBy ?? (title ? id : undefined)}
             className={cn(
-              'glass-strong relative z-10 flex w-full flex-col rounded-t-[28px] outline-none',
+              'relative z-10 flex w-full flex-col rounded-t-3xl border-t border-line bg-[#161616] outline-none',
               full ? 'h-[94%]' : 'max-h-[92%]',
             )}
             initial={{ y: '100%' }}
@@ -225,7 +225,7 @@ export function Sheet({
 
 /* ---------------- Toggle ---------------- */
 export function Toggle({ checked, onChange, label, tone = 'lime' }: { checked: boolean; onChange: (v: boolean) => void; label: string; tone?: 'lime' | 'violet' | 'gold' }) {
-  const on = { lime: 'bg-lime', violet: 'bg-violet', gold: 'bg-gold' }[tone]
+  const on = { lime: 'bg-coral', violet: 'bg-violet', gold: 'bg-gold' }[tone]
   return (
     <button
       type="button"
@@ -242,16 +242,14 @@ export function Toggle({ checked, onChange, label, tone = 'lime' }: { checked: b
 
 /* ---------------- Section heading ---------------- */
 export function Eyebrow({ children, className }: { children: ReactNode; className?: string }) {
-  return <p className={cn('font-display text-[11px] font-semibold uppercase tracking-[0.18em] text-cream/45', className)}>{children}</p>
+  return <p className={cn('serif text-base text-cream/55', className)}>{children}</p>
 }
 
 /* ---------------- Lifetime badge ---------------- */
 export function LifetimeBadge({ small }: { small?: boolean }) {
   return (
-    <span className="inline-flex rounded-full bg-[linear-gradient(90deg,var(--color-lime),var(--color-cyan),var(--color-violet),var(--color-coral))] p-[1.5px]">
-      <span className={cn('inline-flex items-center gap-1 rounded-full bg-ink font-display font-semibold', small ? 'px-2 py-0.5 text-[10px]' : 'px-2.5 py-1 text-[11px]')}>
-        <span className="text-gradient-neon">✦ FOUNDING MEMBER · LIFETIME</span>
-      </span>
+    <span className={cn('inline-flex items-center gap-1 rounded-sm bg-coral font-display font-extrabold uppercase tracking-wide text-ink poster-shadow', small ? 'px-2 py-0.5 text-[10px]' : 'px-2.5 py-1 text-xs')}>
+      ✦ Founding Member · Lifetime
     </span>
   )
 }
@@ -283,7 +281,7 @@ export function VoiceBubble({ duration, wave, mine }: { duration: number; wave: 
     <div className="flex items-center gap-2.5">
       <button
         onClick={() => setPlaying((p) => !p)}
-        className={cn('grid size-8 shrink-0 place-items-center rounded-full', mine ? 'bg-ink text-lime' : 'bg-violet text-cream')}
+        className={cn('grid size-8 shrink-0 place-items-center rounded-full', mine ? 'bg-ink text-coral' : 'bg-violet text-cream')}
         aria-label={playing ? 'Pausa nota vocale' : 'Riproduci nota vocale'}
       >
         {playing ? <Pause size={14} /> : <Play size={14} className="ml-0.5" />}
@@ -292,12 +290,12 @@ export function VoiceBubble({ duration, wave, mine }: { duration: number; wave: 
         {wave.map((v, i) => (
           <span
             key={i}
-            className={cn('w-[3px] rounded-full transition-colors', i / wave.length <= progress ? (mine ? 'bg-ink' : 'bg-violet-300') : mine ? 'bg-ink/35' : 'bg-cream/30')}
+            className={cn('w-[3px] rounded-full transition-colors', i / wave.length <= progress ? (mine ? 'bg-ink' : 'bg-violet') : mine ? 'bg-ink/35' : 'bg-cream/30')}
             style={{ height: `${v * 9 + 10}%` }}
           />
         ))}
       </div>
-      <span className={cn('text-[11px] tabular-nums', mine ? 'text-ink/70' : 'text-cream/55')}>{mm}</span>
+      <span className={cn('text-xs tabular-nums', mine ? 'text-ink/70' : 'text-cream/55')}>{mm}</span>
     </div>
   )
 }
@@ -309,7 +307,7 @@ function RevolutMark({ className }: { className?: string }) {
   return (
     <svg viewBox="0 0 32 32" className={className} aria-hidden>
       <rect width="32" height="32" rx="9" fill="#F6F4EF" />
-      <path d="M10 8h7.2c3.4 0 5.6 2 5.6 5 0 2.3-1.3 4-3.4 4.7L24 24h-4.1l-3.9-6h-2.3v6H10V8Zm3.7 3.1v3.9h3.3c1.4 0 2.1-.8 2.1-2s-.7-1.9-2.1-1.9h-3.3Z" fill="#0B0F19" />
+      <path d="M10 8h7.2c3.4 0 5.6 2 5.6 5 0 2.3-1.3 4-3.4 4.7L24 24h-4.1l-3.9-6h-2.3v6H10V8Zm3.7 3.1v3.9h3.3c1.4 0 2.1-.8 2.1-2s-.7-1.9-2.1-1.9h-3.3Z" fill="#101010" />
     </svg>
   )
 }
@@ -317,19 +315,19 @@ function RevolutMark({ className }: { className?: string }) {
 export function RevolutTip({ compact }: { compact?: boolean }) {
   if (compact) {
     return (
-      <a href={REVOLUT_URL} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 rounded-full border border-cream/15 px-3 py-1.5 text-xs font-medium text-cream/80 transition hover:border-lime/60 hover:text-lime">
+      <a href={REVOLUT_URL} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 rounded-full border border-cream/15 px-3 py-1.5 text-xs font-medium text-cream/80 transition hover:border-coral/60 hover:text-coral">
         <RevolutMark className="size-4" /> Offrici una birra 🍺
       </a>
     )
   }
   return (
-    <div className="relative overflow-hidden rounded-3xl border border-cream/10 bg-[linear-gradient(135deg,rgb(139_92_246/0.18),rgb(255_128_109/0.12))] p-4">
+    <div className="relative overflow-hidden rounded-3xl border border-cream/10 bg-surface p-4">
       <div className="absolute -right-8 -top-10 size-32 rounded-full bg-coral/25 blur-3xl" aria-hidden />
       <div className="relative flex items-start gap-3">
         <RevolutMark className="size-10 shrink-0" />
         <div className="min-w-0">
-          <p className="font-display text-[15px] font-bold">Offrici una birra ☕⚡</p>
-          <p className="mt-1 text-[13px] leading-snug text-cream/70">
+          <p className="font-display text-base font-bold">Offrici una birra ☕⚡</p>
+          <p className="mt-1 text-sm leading-snug text-cream/70">
             Ti piace ALONG e vuoi supportare lo sviluppo indipendente? Offri un caffè/birra al creator su Revolut. Niente pubblicità, niente dati venduti — solo gratitudine.
           </p>
           <a

@@ -122,24 +122,23 @@ export default function App() {
   return (
     <MotionConfig reducedMotion="user">
       <NavCtx.Provider value={nav}>
-        <div className="relative min-h-dvh overflow-hidden bg-[#06080f] md:flex md:items-center md:justify-center md:gap-14 md:p-6">
+        <div className="relative min-h-dvh overflow-hidden bg-[#0a0a0a] md:flex md:items-center md:justify-center md:gap-14 md:p-6">
           {/* desktop ambient */}
           <div className="pointer-events-none fixed inset-0 hidden md:block" aria-hidden>
-            <div className="absolute -left-40 top-10 size-[520px] rounded-full bg-violet/20 blur-3xl" />
-            <div className="absolute -right-32 bottom-0 size-[480px] rounded-full bg-lime/10 blur-3xl" />
+            <div className="absolute -left-40 top-10 size-[520px] rounded-full bg-coral/10 blur-3xl" />
           </div>
 
           {/* desktop side panel */}
           <aside className={cn('relative z-10 hidden max-w-sm flex-col gap-6 lg:flex', wide && 'lg:hidden')}>
             <Logo big />
-            <p className="font-display text-[44px] font-bold leading-[0.98] text-cream">
+            <p className="font-display text-3xl font-bold leading-[0.98] text-cream">
               Less scrolling.
               <br />
-              <span className="text-lime">More doing.</span>
+              <span className="text-coral">More doing.</span>
               <br />
               <span className="text-gradient-neon">Find your people.</span>
             </p>
-            <p className="text-[15px] leading-relaxed text-cream/60">
+            <p className="text-base leading-relaxed text-cream/60">
               L’app d’incontri dove fai match su qualcosa da fare. Swipe = rispondi a un dilemma, foto svelate solo al match, 48 ore per vedersi davvero. Date o amici, decidi tu.
             </p>
             <FrameSwitch frame={frame} setFrame={setFrame} />
@@ -152,17 +151,12 @@ export default function App() {
           <div
             className={cn(
               'relative z-10 mx-auto flex h-dvh w-full flex-col overflow-hidden bg-ink',
-              !wide && 'md:h-[min(880px,calc(100dvh-48px))] md:w-[402px] md:rounded-[54px] md:border-[11px] md:border-[#1a1e29] md:shadow-[0_0_0_1px_rgb(255_255_255/0.06),0_40px_120px_-20px_rgb(0_0_0/0.9),0_0_80px_-30px_rgb(139_92_246/0.5)]',
+              !wide && 'md:h-[min(880px,calc(100dvh-48px))] md:w-[402px] md:rounded-[54px] md:border-[11px] md:border-[#1f1f1f] md:shadow-[0_0_0_1px_rgb(255_255_255/0.06),0_40px_120px_-20px_rgb(0_0_0/0.9),0_0_80px_-30px_rgb(139_92_246/0.5)]',
               wide && 'md:h-dvh md:max-w-[720px] md:border-x md:border-cream/5',
             )}
           >
-            {/* aurora mesh */}
-            <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden>
-              <div className="absolute -left-1/4 -top-1/4 size-[85%] animate-aurora-1 rounded-full bg-violet/25 blur-3xl will-change-transform" />
-              <div className="absolute -right-1/3 top-1/4 size-[70%] animate-aurora-2 rounded-full bg-cyan/12 blur-3xl will-change-transform" />
-              <div className="absolute -bottom-1/4 left-0 size-[75%] animate-aurora-3 rounded-full bg-coral/12 blur-3xl will-change-transform" />
-              <div className="absolute inset-0 bg-[radial-gradient(transparent_0,rgb(11_15_25/0.5)_70%)]" />
-            </div>
+            {/* quiet backdrop: a single warm light, no animated mesh */}
+            <div className="pointer-events-none absolute inset-x-0 top-0 h-72 bg-[radial-gradient(ellipse_at_top,rgb(255_128_109/0.10),transparent_70%)]" aria-hidden />
 
             {!wide && <div className="absolute left-1/2 top-2 z-[60] hidden h-[26px] w-[110px] -translate-x-1/2 rounded-full bg-black md:block" aria-hidden />}
 
@@ -175,7 +169,7 @@ export default function App() {
                 <nav className="hidden items-center gap-1 md:flex" aria-label="Navigazione principale">
                   {TABS.map((t) =>
                     t.id === 'create' ? (
-                      <button key={t.id} onClick={() => setCreating(true)} className="ml-1 inline-flex h-9 items-center gap-1 rounded-full bg-lime px-3 text-[13px] font-semibold text-ink">
+                      <button key={t.id} onClick={() => setCreating(true)} className="ml-1 inline-flex h-9 items-center gap-1 rounded-full bg-coral px-3 text-sm font-semibold text-ink">
                         <Plus size={15} /> Crea
                       </button>
                     ) : (
@@ -183,7 +177,7 @@ export default function App() {
                         key={t.id}
                         onClick={() => setTab(t.id as Tab)}
                         aria-current={tab === t.id ? 'page' : undefined}
-                        className={cn('h-9 rounded-full px-3 text-[13px] font-medium', tab === t.id ? 'bg-cream/10 text-cream' : 'text-cream/55 hover:text-cream')}
+                        className={cn('h-9 rounded-full px-3 text-sm font-medium', tab === t.id ? 'bg-cream/10 text-cream' : 'text-cream/55 hover:text-cream')}
                       >
                         {t.label}
                       </button>
@@ -192,17 +186,17 @@ export default function App() {
                 </nav>
               )}
               <div className="flex items-center gap-2">
-                <span className="rounded-full border border-lime/25 bg-lime/10 px-2.5 py-1 font-display text-[12px] font-bold tabular-nums text-lime" aria-label={`Karma ${state.me.karma}`}>
+                <span className="rounded-full border border-line px-2.5 py-1 font-display text-sm font-bold tabular-nums text-cream/85" aria-label={`Karma ${state.me.karma}`}>
                   ⚡ {state.me.karma}
                 </span>
                 {!state.lifetime && (
-                  <button onClick={() => setPaywall({ open: true })} className="grid size-9 place-items-center rounded-full border border-violet/40 bg-violet/15 text-violet-200" aria-label="ALONG Forever">
+                  <button onClick={() => setPaywall({ open: true })} className="grid size-9 place-items-center rounded-full border border-line text-coral" aria-label="ALONG Forever">
                     <Sparkles size={15} />
                   </button>
                 )}
                 <button
                   onClick={() => setTab('profile')}
-                  className={cn('rounded-full p-[2px]', state.lifetime ? 'bg-[conic-gradient(var(--color-lime),var(--color-cyan),var(--color-violet),var(--color-coral),var(--color-lime))]' : tab === 'profile' ? 'bg-lime' : 'bg-cream/15')}
+                  className={cn('rounded-full p-[2px]', state.lifetime || tab === 'profile' ? 'bg-coral' : 'bg-line')}
                   aria-label="Il mio profilo"
                 >
                   <span className="block rounded-full bg-ink p-[2px]">
@@ -215,7 +209,7 @@ export default function App() {
             {/* content */}
             <main ref={scrollRef} inert={overlayOpen} className="no-scrollbar relative z-10 min-h-0 flex-1 overflow-y-auto px-4 pt-2">
               <AnimatePresence mode="wait">
-                <motion.div key={tab} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -6 }} transition={{ duration: 0.2 }} className={cn('flex min-h-full flex-col', tab === 'explore' ? 'pb-[118px]' : 'pb-24', wide && 'md:pb-8')}>
+                <motion.div key={tab} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -6 }} transition={{ duration: 0.2 }} className={cn('flex min-h-full flex-col', tab === 'explore' ? 'pb-[76px]' : 'pb-24', wide && 'md:pb-8')}>
                   {views[tab]}
                 </motion.div>
               </AnimatePresence>
@@ -224,10 +218,10 @@ export default function App() {
             {/* bottom nav */}
             <nav
               inert={overlayOpen}
-              className={cn('absolute inset-x-0 bottom-0 z-30 bg-gradient-to-t from-ink via-ink/85 to-transparent px-3 pt-8 pb-[max(10px,env(safe-area-inset-bottom))]', wide && 'md:hidden', !wide && 'md:pb-4')}
+              className={cn('absolute inset-x-0 bottom-0 z-30 border-t border-line bg-ink px-2 pb-[max(8px,env(safe-area-inset-bottom))] pt-1.5', wide && 'md:hidden', !wide && 'md:pb-5')}
               aria-label="Navigazione principale"
             >
-              <div className="flex items-center justify-between rounded-[26px] border border-cream/10 bg-[#111115]/95 px-2 py-1.5 backdrop-blur-xl">
+              <div className="flex items-center justify-between">
                 {TABS.map((t) => {
                   if (t.id === 'create')
                     return (
@@ -235,10 +229,10 @@ export default function App() {
                         key={t.id}
                         whileTap={{ scale: 0.9 }}
                         onClick={() => setCreating(true)}
-                        className="-mt-7 grid size-[58px] place-items-center rounded-[20px] bg-lime text-ink glow-lime"
-                        aria-label="Crea un piano"
+                        className="grid h-11 w-14 place-items-center rounded-md bg-coral text-ink"
+                        aria-label="Proponi un piano"
                       >
-                        <Plus size={28} strokeWidth={2.6} />
+                        <Plus size={24} strokeWidth={2.8} />
                       </motion.button>
                     )
                   const active = tab === t.id
@@ -251,14 +245,14 @@ export default function App() {
                       aria-current={active ? 'page' : undefined}
                       aria-label={badgeFor(t.id) > 0 ? `${t.label} (${badgeFor(t.id)} novità)` : t.label}
                     >
-                      {active && <motion.span layoutId="nav-dot" className="absolute -top-1 h-1 w-6 rounded-full bg-lime" />}
+                      {active && <motion.span layoutId="nav-dot" className="absolute -top-1.5 h-[3px] w-8 bg-coral" />}
                       <span className="relative">
-                        <Icon size={21} className={active ? 'text-lime' : 'text-cream/55'} />
+                        <Icon size={21} className={active ? 'text-cream' : 'text-cream/45'} strokeWidth={active ? 2.4 : 2} />
                         {badgeFor(t.id) > 0 && (
-                          <span className="absolute -right-2 -top-1.5 grid min-w-4 place-items-center rounded-full bg-coral px-1 text-[9.5px] font-bold text-ink">{badgeFor(t.id)}</span>
+                          <span className="absolute -right-2.5 -top-1.5 grid h-4 min-w-4 place-items-center rounded-full bg-coral px-1 text-[10px] font-bold leading-none text-ink">{badgeFor(t.id)}</span>
                         )}
                       </span>
-                      <span className={cn('text-[10px] font-medium', active ? 'text-cream' : 'text-cream/45')}>{t.label}</span>
+                      <span className={cn('font-display text-[10px] font-bold uppercase tracking-wide', active ? 'text-cream' : 'text-cream/40')}>{t.label}</span>
                     </button>
                   )
                 })}
@@ -277,13 +271,13 @@ export default function App() {
                     exit={{ opacity: 0, y: -10, scale: 0.95 }}
                     className={cn(
                       'glass-strong pointer-events-auto flex w-full max-w-sm items-start gap-3 rounded-2xl p-3 shadow-2xl',
-                      { lime: 'border-lime/40', coral: 'border-coral/40', violet: 'border-violet/50', cyan: 'border-cyan/40', gold: 'border-gold/50' }[t.tone],
+                      { lime: 'border-coral/40', coral: 'border-coral/40', violet: 'border-violet/50', cyan: 'border-cyan/40', gold: 'border-gold/50' }[t.tone],
                     )}
                   >
-                    <span className={cn('mt-1 size-2.5 shrink-0 rounded-full', { lime: 'bg-lime', coral: 'bg-coral', violet: 'bg-violet', cyan: 'bg-cyan', gold: 'bg-gold' }[t.tone])} />
+                    <span className={cn('mt-1 size-2.5 shrink-0 rounded-full', { lime: 'bg-coral', coral: 'bg-coral', violet: 'bg-violet', cyan: 'bg-cyan', gold: 'bg-gold' }[t.tone])} />
                     <div className="min-w-0 flex-1">
-                      <p className="text-[13.5px] font-semibold">{t.title}</p>
-                      {t.body && <p className="text-[12px] text-cream/60">{t.body}</p>}
+                      <p className="text-sm font-semibold">{t.title}</p>
+                      {t.body && <p className="text-sm text-cream/60">{t.body}</p>}
                     </div>
                     <button onClick={() => dismissToast(t.id)} aria-label="Chiudi notifica" className="text-cream/40 hover:text-cream">
                       <X size={14} />
@@ -355,13 +349,8 @@ export default function App() {
 
 function Logo({ big }: { big?: boolean }) {
   return (
-    <span className="inline-flex items-center gap-2">
-      <svg viewBox="0 0 64 64" className={big ? 'size-11' : 'size-8'} aria-hidden>
-        <rect width="64" height="64" rx="18" fill="#D7FF66" />
-        <path d="M18 46 32 16l14 30" fill="none" stroke="#0B0F19" strokeWidth="7" strokeLinecap="round" strokeLinejoin="round" />
-        <circle cx="32" cy="38" r="4.5" fill="#FF806D" />
-      </svg>
-      <span className={cn('font-display font-bold tracking-[0.22em]', big ? 'text-2xl' : 'text-[17px]')}>ALONG</span>
+    <span className={cn('font-display font-extrabold tracking-[-0.05em]', big ? 'text-3xl' : 'text-xl')}>
+      along<span className="text-coral">.</span>
     </span>
   )
 }
@@ -375,7 +364,7 @@ function FrameSwitch({ frame, setFrame }: { frame: 'phone' | 'wide'; setFrame: (
           ['wide', Monitor, 'Vista estesa'],
         ] as const
       ).map(([k, Icon, l]) => (
-        <button key={k} role="radio" aria-checked={frame === k} onClick={() => setFrame(k)} className={cn('flex h-9 items-center gap-1.5 rounded-xl px-3 text-[12.5px] font-semibold', frame === k ? 'bg-cream text-ink' : 'text-cream/60')}>
+        <button key={k} role="radio" aria-checked={frame === k} onClick={() => setFrame(k)} className={cn('flex h-9 items-center gap-1.5 rounded-xl px-3 text-sm font-semibold', frame === k ? 'bg-cream text-ink' : 'text-cream/60')}>
           <Icon size={15} /> {l}
         </button>
       ))}
@@ -395,13 +384,13 @@ function Onboarding() {
     <Sheet open={!state.onboarded} onClose={setOnboarded}>
       <div className="space-y-5">
         <div>
-          <p className="font-display text-[11px] font-bold uppercase tracking-[0.22em] text-lime">Benvenut* su ALONG</p>
-          <h2 className="mt-1 text-[30px] font-bold leading-[1.02]">
+          <p className="serif text-sm text-coral">Benvenut* su ALONG</p>
+          <h2 className="mt-1 text-2xl font-bold leading-[1.02]">
             Meno swipe a vuoto.
             <br />
             <span className="text-gradient-neon">Più uscite vere.</span>
           </h2>
-          <p className="mt-2 text-[14px] text-cream/65">Date o nuove amicizie, sempre attorno a qualcosa da fare insieme. Tre regole:</p>
+          <p className="mt-2 text-base text-cream/65">Date o nuove amicizie, sempre attorno a qualcosa da fare insieme. Tre regole:</p>
         </div>
         <ul className="space-y-2">
           {RULES.map((r, i) => (
@@ -411,7 +400,7 @@ function Onboarding() {
               </span>
               <div>
                 <p className="font-display font-bold">{r.title}</p>
-                <p className="text-[13px] text-cream/60">{r.body}</p>
+                <p className="text-sm text-cream/60">{r.body}</p>
               </div>
             </motion.li>
           ))}

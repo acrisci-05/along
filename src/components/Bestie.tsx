@@ -21,28 +21,28 @@ export function BestieSticker({
           'sticker rounded-2xl p-4 text-ink shadow-[0_14px_30px_-12px_rgb(0_0_0/0.7)]',
           finish === 'paper' && 'bg-[#FFF6C9]',
           finish === 'holo' && 'holo',
-          finish === 'neon' && 'bg-lime',
+          finish === 'neon' && 'bg-coral',
         )}
       >
         <div className="mb-3 flex items-center justify-between">
-          <span className="rounded-full bg-ink px-2.5 py-1 font-display text-[10px] font-bold uppercase tracking-widest text-cream">Bestie Vouching</span>
-          <span className="font-display text-[11px] font-semibold text-ink/60">certified ✓</span>
+          <span className="rounded-full bg-ink px-2.5 py-1 font-display text-xs font-bold uppercase tracking-widest text-cream">Bestie Vouching</span>
+          <span className="font-display text-xs font-semibold text-ink/60">certified ✓</span>
         </div>
         <dl className="space-y-2.5">
           <div>
-            <dt className="text-[11px] font-bold uppercase tracking-wide text-ink/55">Il suo peggior difetto al primo appuntamento:</dt>
-            <dd className="font-display text-[15px] font-semibold leading-snug">“{vouch.worstFlaw}”</dd>
+            <dt className="text-xs font-bold uppercase tracking-wide text-ink/55">Il suo peggior difetto al primo appuntamento:</dt>
+            <dd className="font-display text-base font-semibold leading-snug">“{vouch.worstFlaw}”</dd>
           </div>
           <div>
-            <dt className="text-[11px] font-bold uppercase tracking-wide text-ink/55">Perché dovreste uscirci comunque:</dt>
-            <dd className="font-display text-[15px] font-semibold leading-snug">“{vouch.whyGoOut}”</dd>
+            <dt className="text-xs font-bold uppercase tracking-wide text-ink/55">Perché dovreste uscirci comunque:</dt>
+            <dd className="font-display text-base font-semibold leading-snug">“{vouch.whyGoOut}”</dd>
           </div>
           <div>
-            <dt className="text-[11px] font-bold uppercase tracking-wide text-ink/55">La sua red flag innocua:</dt>
-            <dd className="font-display text-[15px] font-semibold leading-snug">“{vouch.redFlag}” 🚩</dd>
+            <dt className="text-xs font-bold uppercase tracking-wide text-ink/55">La sua red flag innocua:</dt>
+            <dd className="font-display text-base font-semibold leading-snug">“{vouch.redFlag}” 🚩</dd>
           </div>
         </dl>
-        <p className="mt-3 text-right text-[12px] italic text-ink/60">— {vouch.by}</p>
+        <p className="mt-3 text-right text-sm italic text-ink/60">— {vouch.by}</p>
         <div className="sticker-peel" aria-hidden />
       </div>
       {onShare && <ShareBestie name={name} onShare={onShare} />}
@@ -65,15 +65,15 @@ function ShareBestie({ name, onShare }: { name: string; onShare: () => void }) {
     window.setTimeout(() => setCopied(false), 2200)
   }
   return (
-    <button onClick={share} className="mt-4 inline-flex items-center gap-2 rounded-full border border-cream/15 px-3.5 py-2 text-[13px] font-medium text-cream/85 transition hover:border-lime/50 hover:text-lime">
+    <button onClick={share} className="mt-4 inline-flex items-center gap-2 rounded-full border border-cream/15 px-3.5 py-2 text-sm font-medium text-cream/85 transition hover:border-coral/50 hover:text-coral">
       {copied ? <Check size={15} /> : <Share2 size={15} />} {copied ? 'Link copiato!' : 'Condividi link con il tuo bestie'}
     </button>
   )
 }
 
 const BADGE_META = {
-  fast: { icon: Zap, label: 'Fast Replier', emoji: '⚡', color: 'text-lime bg-lime/10 border-lime/25' },
-  voice: { icon: Mic, label: 'Voice Lover', emoji: '🎙️', color: 'text-violet-300 bg-violet/15 border-violet/30' },
+  fast: { icon: Zap, label: 'Fast Replier', emoji: '⚡', color: 'text-coral bg-coral/10 border-coral/25' },
+  voice: { icon: Mic, label: 'Voice Lover', emoji: '🎙️', color: 'text-violet bg-violet/15 border-violet/30' },
   zero: { icon: ShieldCheck, label: 'Zero Ghosting', emoji: '🛡️', color: 'text-cyan bg-cyan/10 border-cyan/25' },
 } as const
 
@@ -82,7 +82,7 @@ export function BadgeRow({ badges }: { badges: User['badges'] }) {
   return (
     <div className="flex flex-wrap gap-1.5">
       {badges.map((b) => (
-        <span key={b} className={cn('inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[11px] font-semibold', BADGE_META[b].color)}>
+        <span key={b} className={cn('inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs font-semibold', BADGE_META[b].color)}>
           <span aria-hidden>{BADGE_META[b].emoji}</span> {BADGE_META[b].label}
         </span>
       ))}
@@ -103,15 +103,15 @@ export function KarmaMeter({ karma, stats }: { karma: number; stats: MeStats }) 
     <div className="glass rounded-3xl p-4">
       <div className="flex items-end justify-between">
         <div>
-          <p className="flex items-center gap-1.5 text-[12px] font-semibold uppercase tracking-widest text-cream/50">
+          <p className="flex items-center gap-1.5 text-sm font-semibold uppercase tracking-widest text-cream/50">
             <Gauge size={14} /> Karma Meter
           </p>
-          <p className="mt-1 font-display text-3xl font-bold tabular-nums text-lime">{karma}</p>
+          <p className="mt-1 font-display text-3xl font-bold tabular-nums text-coral">{karma}</p>
         </div>
-        <span className="rounded-full bg-lime/10 px-2.5 py-1 text-[12px] font-semibold text-lime">{level}</span>
+        <span className="rounded-full bg-coral/10 px-2.5 py-1 text-sm font-semibold text-coral">{level}</span>
       </div>
       <div className="mt-3 h-2 overflow-hidden rounded-full bg-cream/10" role="progressbar" aria-valuenow={karma} aria-valuemin={0} aria-valuemax={300} aria-label="Livello karma">
-        <div className="h-full rounded-full bg-[linear-gradient(90deg,var(--color-cyan),var(--color-lime))] transition-[width] duration-700" style={{ width: `${pct}%` }} />
+        <div className="h-full rounded-full bg-coral transition-[width] duration-700" style={{ width: `${pct}%` }} />
       </div>
       <ul className="mt-4 space-y-2">
         {rows.map((r) => {
@@ -120,10 +120,10 @@ export function KarmaMeter({ karma, stats }: { karma: number; stats: MeStats }) 
             <li key={r.key} className={cn('flex items-center gap-3 rounded-2xl border p-2.5', r.on ? M.color : 'border-cream/5 bg-cream/[0.02] text-cream/40')}>
               <M.icon size={18} />
               <div className="min-w-0 flex-1">
-                <p className="text-[13px] font-semibold">{M.label}</p>
-                <p className="text-[11px] opacity-80">{r.on ? r.detail : r.hint}</p>
+                <p className="text-sm font-semibold">{M.label}</p>
+                <p className="text-xs opacity-80">{r.on ? r.detail : r.hint}</p>
               </div>
-              <span className="text-[11px] font-semibold">{r.on ? 'ATTIVO' : 'Bloccato'}</span>
+              <span className="text-xs font-semibold">{r.on ? 'ATTIVO' : 'Bloccato'}</span>
             </li>
           )
         })}

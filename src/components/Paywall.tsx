@@ -39,8 +39,8 @@ export function Paywall({ open, onClose, reason }: { open: boolean; onClose: () 
         {phase === 'done' ? (
           <motion.div key="done" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="flex flex-col items-center pt-8 text-center">
             <div className="relative">
-              <motion.div className="absolute inset-0 rounded-full bg-lime/40 blur-2xl" animate={{ scale: [1, 1.3, 1] }} transition={{ repeat: Infinity, duration: 2.4 }} />
-              <div className="relative grid size-24 place-items-center rounded-full bg-lime text-ink">
+              <motion.div className="absolute inset-0 rounded-full bg-coral/40 blur-2xl" animate={{ scale: [1, 1.3, 1] }} transition={{ repeat: Infinity, duration: 2.4 }} />
+              <div className="relative grid size-24 place-items-center rounded-full bg-coral text-ink">
                 <Check size={44} strokeWidth={3} />
               </div>
             </div>
@@ -59,22 +59,22 @@ export function Paywall({ open, onClose, reason }: { open: boolean; onClose: () 
           </motion.div>
         ) : (
           <motion.div key="pay" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-            <div className="relative overflow-hidden rounded-[28px] border border-cream/10 bg-[radial-gradient(circle_at_20%_10%,rgb(215_255_102/0.25),transparent_45%),radial-gradient(circle_at_90%_80%,rgb(139_92_246/0.35),transparent_50%)] p-5">
-              <p className="font-display text-[11px] font-bold uppercase tracking-[0.22em] text-lime">Pay once · Own it forever</p>
-              <h2 className="mt-2 text-[32px] font-bold leading-[1.02]">
-                ALONG <span className="text-gradient-neon">Forever</span>
+            <div className="relative overflow-hidden rounded-md bg-coral p-5 text-ink">
+              <p className="serif text-lg text-ink/70">pay once, own it forever —</p>
+              <h2 className="mt-1 text-3xl leading-[0.95]">
+                ALONG Forever.
               </h2>
-              <p className="mt-2 text-[14px] leading-snug text-cream/70">
+              <p className="mt-2 text-base leading-snug text-ink/75">
                 {reason ?? 'Niente abbonamenti mensili. Paghi una volta, sblocchi tutto per sempre — come un buon quaderno.'}
               </p>
               <div className="mt-4 flex items-end gap-3">
-                <span className="whitespace-nowrap font-display text-[44px] font-bold leading-none tabular-nums">{price}</span>
-                <span className="whitespace-nowrap pb-1 text-sm text-cream/50">
+                <span className="whitespace-nowrap font-display text-3xl font-extrabold leading-none tracking-[-0.04em] tabular-nums">{price}</span>
+                <span className="whitespace-nowrap pb-1 text-sm text-ink/60">
                   una tantum{launch && <span className="ml-1.5 line-through">19,99 €</span>}
                 </span>
               </div>
-              <div className="mt-3 flex items-center justify-between rounded-2xl bg-ink/50 px-3 py-2">
-                <span className="text-[13px] text-cream/75">Prezzo di lancio · primi iscritti</span>
+              <div className="mt-4 flex items-center justify-between rounded-sm bg-ink px-3 py-2">
+                <span className="text-sm text-cream/80">Prezzo di lancio · primi iscritti</span>
                 <Toggle checked={launch} onChange={setLaunch} label="Prezzo di lancio" />
               </div>
             </div>
@@ -88,18 +88,18 @@ export function Paywall({ open, onClose, reason }: { open: boolean; onClose: () 
                   transition={{ delay: 0.05 * i }}
                   className="flex items-center gap-3 rounded-2xl border border-cream/5 bg-cream/[0.03] p-3"
                 >
-                  <span className="grid size-9 place-items-center rounded-xl bg-lime/10 text-lime">
+                  <span className="grid size-9 place-items-center rounded-xl bg-coral/10 text-coral">
                     <f.icon size={18} />
                   </span>
                   <div>
-                    <p className="text-[14px] font-semibold">{f.title}</p>
-                    <p className="text-[12px] text-cream/50">{f.sub}</p>
+                    <p className="text-base font-semibold">{f.title}</p>
+                    <p className="text-sm text-cream/50">{f.sub}</p>
                   </div>
                 </motion.li>
               ))}
             </ul>
 
-            <div className="mt-4 rounded-2xl border border-cream/5 bg-cream/[0.03] p-3 text-[12.5px] text-cream/60">
+            <div className="mt-4 rounded-2xl border border-cream/5 bg-cream/[0.03] p-3 text-sm text-cream/60">
               <p className="flex items-center gap-1.5 font-semibold text-cream/80">
                 <ShieldCheck size={14} className="text-cyan" /> Il livello Free resta generoso
               </p>
@@ -107,13 +107,13 @@ export function Paywall({ open, onClose, reason }: { open: boolean; onClose: () 
             </div>
 
               <div className="mt-3 flex items-center justify-between rounded-2xl border border-dashed border-cream/15 px-3 py-2.5">
-                <span className="text-[12.5px] text-cream/60">
+                <span className="text-sm text-cream/60">
                   <span className="font-semibold text-cream/85">Demo:</span> simula acquisto avvenuto
                 </span>
                 <Toggle checked={state.lifetime} onChange={(v) => setLifetime(v)} label="Simula stato Lifetime" tone="gold" />
               </div>
 
-            <div className="sticky bottom-0 -mx-5 -mb-8 mt-2 bg-gradient-to-t from-ink via-ink/95 to-transparent px-5 pb-6 pt-6">
+            <div className="sticky bottom-0 -mx-5 -mb-8 mt-2 bg-gradient-to-t from-[#161616] via-[#161616] to-transparent px-5 pb-6 pt-6">
               <Button className="w-full" size="lg" onClick={buy} disabled={phase === 'paying'}>
                 {phase === 'paying' ? (
                   <>
@@ -123,7 +123,7 @@ export function Paywall({ open, onClose, reason }: { open: boolean; onClose: () 
                   <>Sblocca per sempre a {price}</>
                 )}
               </Button>
-              <p className="mt-2 text-center text-[11px] text-cream/35">Pagamento simulato · nessun addebito reale in questa demo</p>
+              <p className="mt-2 text-center text-xs text-cream/35">Pagamento simulato · nessun addebito reale in questa demo</p>
             </div>
           </motion.div>
         )}
@@ -142,7 +142,7 @@ function ConfettiBurst() {
         return (
           <motion.span
             key={i}
-            className="absolute size-2 rounded-[2px]"
+            className="absolute size-2 rounded-sm"
             style={{ background: colors[i % colors.length] }}
             initial={{ x: 0, y: 0, opacity: 1, rotate: 0 }}
             animate={{ x: Math.cos(angle) * dist, y: Math.sin(angle) * dist + 60, opacity: 0, rotate: 360 }}

@@ -1,24 +1,65 @@
 @import "tailwindcss";
 
 @theme {
-  --color-ink: #0b0f19;
-  --color-ink-2: #111115;
-  --color-slate-card: #1e293b;
-  --color-lime: #d7ff66;
-  --color-coral: #ff806d;
-  --color-violet: #8b5cf6;
-  --color-cyan: #06b6d4;
+  /* ---- Surfaces & text (Editorial Poster, dark) ---- */
+  --color-ink: #101010;
+  --color-ink-2: #0a0a0a;
+  --color-surface: #1a1a1a;
+  --color-surface-2: #242424;
+  --color-line: #2e2e2e;
+  --color-slate-card: #1a1a1a;
   --color-cream: #f6f4ef;
-  --color-gold: #f5c451;
-  --color-ember: #ff9f43;
-  --color-alarm: #ff4d5e;
 
-  --font-display: "Space Grotesk", "Satoshi", ui-sans-serif, system-ui, sans-serif;
+  /* ---- Brand & semantic ---- */
+  --color-coral: #ff806d;   /* brand: primary actions, match, Date */
+  --color-lime: #d7ff66;    /* Amici, positive confirmations */
+  --color-violet: #c4b5fd;  /* Senza Confini / remote (soft) */
+  --color-cyan: #67e8f9;    /* local timer > 12h, radar */
+  --color-gold: #f5c451;    /* Sala d'Attesa */
+  --color-ember: #ffb347;   /* timer 12h–6h */
+  --color-alarm: #ff4d5e;   /* timer < 6h, errors */
+
+  /* ---- Poster colours (category, text always ink) ---- */
+  --color-p-food: #ff806d;
+  --color-p-drink: #f5c451;
+  --color-p-sport: #d7ff66;
+  --color-p-cinema: #b9a4ff;
+  --color-p-study: #7dd3fc;
+  --color-p-walk: #a7f3d0;
+  --color-p-gaming: #c4b5fd;
+  --color-p-music: #f9a8d4;
+  --color-p-books: #fde68a;
+  --color-p-talk: #fde68a;
+  --color-p-travel: #67e8f9;
+
+  /* ---- Type ---- */
+  --font-display: "Bricolage Grotesque", ui-sans-serif, system-ui, sans-serif;
   --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-serif: "Instrument Serif", ui-serif, Georgia, serif;
+  /* 7-step scale */
+  --text-xs: 11px;
+  --text-xs--line-height: 1.35;
+  --text-sm: 13px;
+  --text-sm--line-height: 1.4;
+  --text-base: 15px;
+  --text-base--line-height: 1.45;
+  --text-lg: 18px;
+  --text-lg--line-height: 1.3;
+  --text-xl: 24px;
+  --text-xl--line-height: 1.1;
+  --text-2xl: 32px;
+  --text-2xl--line-height: 1;
+  --text-3xl: 48px;
+  --text-3xl--line-height: 0.95;
 
-  --animate-aurora-1: aurora1 22s ease-in-out infinite alternate;
-  --animate-aurora-2: aurora2 28s ease-in-out infinite alternate;
-  --animate-aurora-3: aurora3 34s ease-in-out infinite alternate;
+  /* ---- Radii: 4 steps ---- */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 10px;
+  --radius-xl: 14px;
+  --radius-2xl: 14px;
+  --radius-3xl: 20px;
+
   --animate-beam: beam-spin 2.6s linear infinite;
   --animate-beam-fast: beam-spin 1.2s linear infinite;
   --animate-radar: beam-spin 5s linear infinite;
@@ -65,46 +106,48 @@
     -webkit-font-smoothing: antialiased;
     -webkit-tap-highlight-color: transparent;
   }
-  h1, h2, h3, h4 { font-family: var(--font-display); letter-spacing: -0.02em; }
-  :focus-visible { outline: 2px solid var(--color-lime); outline-offset: 2px; border-radius: 6px; }
+  h1, h2, h3, h4 { font-family: var(--font-display); font-weight: 800; letter-spacing: -0.03em; }
+  :focus-visible { outline: 2px solid var(--color-coral); outline-offset: 2px; border-radius: 6px; }
   button { cursor: pointer; }
   button:disabled { cursor: not-allowed; }
-  ::selection { background: var(--color-lime); color: var(--color-ink); }
+  ::selection { background: var(--color-coral); color: var(--color-ink); }
 }
 
 @utility glass {
-  background: rgb(30 41 59 / 0.55);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgb(246 244 239 / 0.08);
+  background: var(--color-surface);
+  border: 1px solid var(--color-line);
 }
 @utility glass-strong {
-  background: rgb(17 17 21 / 0.82);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgb(246 244 239 / 0.1);
+  background: #141414;
+  border: 1px solid var(--color-line);
 }
 @utility glow-lime {
-  box-shadow: 0 0 0 1px rgb(215 255 102 / 0.4), 0 8px 28px -6px rgb(215 255 102 / 0.45);
+  box-shadow: none;
 }
 @utility glow-coral {
-  box-shadow: 0 0 0 1px rgb(255 128 109 / 0.4), 0 8px 28px -6px rgb(255 128 109 / 0.45);
+  box-shadow: none;
 }
 @utility glow-violet {
-  box-shadow: 0 0 0 1px rgb(139 92 246 / 0.45), 0 8px 28px -6px rgb(139 92 246 / 0.5);
+  box-shadow: none;
 }
 @utility glow-gold {
-  box-shadow: 0 0 0 1px rgb(245 196 81 / 0.45), 0 8px 28px -8px rgb(245 196 81 / 0.5);
+  box-shadow: none;
 }
 @utility no-scrollbar {
   scrollbar-width: none;
   &::-webkit-scrollbar { display: none; }
 }
 @utility text-gradient-neon {
-  background: linear-gradient(90deg, var(--color-lime), var(--color-cyan), var(--color-violet), var(--color-coral));
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
+  color: var(--color-coral);
+}
+@utility serif {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-weight: 400;
+  letter-spacing: 0;
+}
+@utility poster-shadow {
+  box-shadow: 3px 4px 0 var(--color-ink);
 }
 @utility holo {
   background: linear-gradient(115deg, #ffd1f5 0%, #c6f6ff 20%, #e8ffb5 40%, #ffd9b0 60%, #d9c7ff 80%, #ffd1f5 100%);

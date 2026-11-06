@@ -51,7 +51,7 @@ export function Radar() {
       <header className="flex items-end justify-between">
         <div>
           <Eyebrow>City Radar · {state.me.city}</Eyebrow>
-          <h1 className="mt-1 text-[28px] font-bold leading-none">
+          <h1 className="mt-1 text-2xl font-bold leading-none">
             Cosa succede <span className="text-cyan">qui</span>
           </h1>
         </div>
@@ -62,7 +62,7 @@ export function Radar() {
               ['list', List, 'Quartieri'],
             ] as const
           ).map(([k, Icon, l]) => (
-            <button key={k} role="tab" aria-selected={view === k} onClick={() => setView(k)} className={cn('flex h-9 items-center gap-1.5 rounded-xl px-3 text-[12.5px] font-semibold', view === k ? 'bg-cyan text-ink' : 'text-cream/60')}>
+            <button key={k} role="tab" aria-selected={view === k} onClick={() => setView(k)} className={cn('flex h-9 items-center gap-1.5 rounded-xl px-3 text-sm font-semibold', view === k ? 'bg-cyan text-ink' : 'text-cream/60')}>
               <Icon size={15} /> {l}
             </button>
           ))}
@@ -81,7 +81,7 @@ export function Radar() {
       </div>
 
       {view === 'map' ? (
-        <div className="relative aspect-[1/1.05] overflow-hidden rounded-[28px] border border-cyan/20 bg-[#0a1220]">
+        <div className="relative aspect-[1/1.05] overflow-hidden rounded-3xl border border-cyan/20 bg-[#141414]">
           <svg viewBox="0 0 100 105" className="absolute inset-0 h-full w-full" aria-hidden>
             <defs>
               <pattern id="grid" width="6" height="6" patternUnits="userSpaceOnUse">
@@ -137,7 +137,7 @@ export function Radar() {
                 aria-pressed={active}
               >
                 <span className="relative flex flex-col items-center">
-                  <span className="flex items-center gap-1 rounded-full px-1.5 py-0.5 text-[10px] font-bold text-ink shadow-lg" style={{ background: color, boxShadow: `0 0 16px ${color}88` }}>
+                  <span className="flex items-center gap-1 rounded-full px-1.5 py-0.5 text-xs font-bold text-ink shadow-lg" style={{ background: color, boxShadow: `0 0 16px ${color}88` }}>
                     {CATEGORY_META[h.kind as keyof typeof CATEGORY_META]?.emoji}
                     {count > 0 && <span>{count}</span>}
                   </span>
@@ -147,7 +147,7 @@ export function Radar() {
               </motion.button>
             )
           })}
-          <div className="absolute bottom-3 left-3 right-3 flex items-center justify-between rounded-2xl bg-ink/70 px-3 py-2 text-[11.5px] text-cream/65 backdrop-blur">
+          <div className="absolute bottom-3 left-3 right-3 flex items-center justify-between rounded-2xl bg-ink/70 px-3 py-2 text-xs text-cream/65 backdrop-blur">
             <span>
               <span className="font-semibold text-cyan">{live.length} piani vivi</span> nei tuoi dintorni
             </span>
@@ -162,12 +162,12 @@ export function Radar() {
                 <p className="flex items-center gap-1.5 font-display font-bold">
                   <MapPin size={15} className="text-cyan" /> {d.name}
                 </p>
-                <span className={cn('rounded-full px-2 py-0.5 text-[11px] font-semibold', d.plans.length ? 'bg-cyan/15 text-cyan' : 'bg-cream/5 text-cream/40')}>{d.plans.length} piani</span>
+                <span className={cn('rounded-full px-2 py-0.5 text-xs font-semibold', d.plans.length ? 'bg-cyan/15 text-cyan' : 'bg-cream/5 text-cream/40')}>{d.plans.length} piani</span>
               </div>
               {d.plans.length > 0 && (
                 <div className="mt-2 flex flex-wrap gap-1.5">
                   {d.plans.map((p) => (
-                    <button key={p.id} onClick={() => nav.openPlan(p.id)} className="rounded-full border border-cream/10 px-2.5 py-1 text-[12px] text-cream/80 hover:border-cyan/50">
+                    <button key={p.id} onClick={() => nav.openPlan(p.id)} className="rounded-full border border-cream/10 px-2.5 py-1 text-sm text-cream/80 hover:border-cyan/50">
                       {CATEGORY_META[p.category].emoji} {p.title}
                     </button>
                   ))}
@@ -185,7 +185,7 @@ export function Radar() {
             <div>
               <Eyebrow>Habitat selezionato</Eyebrow>
               <p className="font-display text-lg font-bold">{selected}</p>
-              <p className="text-[12px] text-cream/50">{HABITATS[selected]?.district}</p>
+              <p className="text-sm text-cream/50">{HABITATS[selected]?.district}</p>
             </div>
             {selectedPlans.map((p, i) => (
               <LivingPlanCard key={p.id} plan={p} index={i} now={now} users={p.participants.map(user)} saved={state.saved.includes(p.id)} onSave={() => toggleSave(p.id)} onOpen={() => nav.openPlan(p.id)} />
@@ -193,7 +193,7 @@ export function Radar() {
             {!selectedPlans.length && (
               <div className="rounded-2xl border border-dashed border-cream/15 p-4 text-center text-sm text-cream/55">
                 Nessun piano qui ora.{' '}
-                <button onClick={nav.openCreate} className="font-semibold text-lime underline-offset-2 hover:underline">
+                <button onClick={nav.openCreate} className="font-semibold text-coral underline-offset-2 hover:underline">
                   Creane uno
                 </button>
               </div>

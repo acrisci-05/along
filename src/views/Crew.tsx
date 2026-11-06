@@ -29,23 +29,23 @@ export function Crew() {
     <div className="space-y-5 pb-6">
       <header>
         <Eyebrow>Chat · Focus Mode</Eyebrow>
-        <h1 className="mt-1 text-[28px] font-bold leading-none">
-          Pochi match, <span className="text-lime">uscite vere</span>
+        <h1 className="mt-1 text-2xl font-bold leading-none">
+          Pochi match, <span className="text-coral">uscite vere</span>
         </h1>
       </header>
 
       {/* slot meter */}
-      <section className="glass rounded-[26px] p-4" aria-label="Slot chat attivi">
+      <section className="glass rounded-3xl p-4" aria-label="Slot chat attivi">
         <div className="flex items-center justify-between">
-          <p className="text-[13px] font-semibold">
-            Slot attivi <span className="tabular-nums text-lime">{activeChats.length}</span>/{limits.slots}
+          <p className="text-sm font-semibold">
+            Slot attivi <span className="tabular-nums text-coral">{activeChats.length}</span>/{limits.slots}
           </p>
           {!state.lifetime ? (
-            <button onClick={() => nav.openPaywall('Espandi a 5 slot chat attivi in contemporanea, per sempre. Pagamento unico.')} className="text-[12px] font-semibold text-violet-300 hover:underline">
+            <button onClick={() => nav.openPaywall('Espandi a 5 slot chat attivi in contemporanea, per sempre. Pagamento unico.')} className="text-sm font-semibold text-violet hover:underline">
               5 slot con Forever →
             </button>
           ) : (
-            <span className="text-[12px] font-semibold text-gradient-neon">Lifetime · 5 slot</span>
+            <span className="text-sm font-semibold text-gradient-neon">Lifetime · 5 slot</span>
           )}
         </div>
         <div className="mt-3 flex gap-2">
@@ -64,14 +64,14 @@ export function Crew() {
                     <BeamAvatar tone={timerTone(c, now)}>
                       <Avatar user={user(c.peerIds[0])} size={36} />
                     </BeamAvatar>
-                    <span className={cn('text-[10.5px] font-semibold tabular-nums', TONE_TEXT[timerTone(c, now)])}>
+                    <span className={cn('text-xs font-semibold tabular-nums', TONE_TEXT[timerTone(c, now)])}>
                       {c.mode === 'remote' ? 'capsule' : c.clockStopped ? 'confermato' : formatCountdown((c.deadline ?? now) - now)}
                     </span>
                   </>
                 ) : (
                   <>
                     <span className="grid size-[42px] place-items-center rounded-full bg-cream/5 text-cream/30">+</span>
-                    <span className="text-[10.5px] text-cream/35">libero</span>
+                    <span className="text-xs text-cream/35">libero</span>
                   </>
                 )}
               </motion.button>
@@ -102,21 +102,21 @@ export function Crew() {
                 </BeamAvatar>
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2">
-                    <p className="truncate font-display text-[15px] font-bold">{peers.map((p) => p.name).join(', ')}</p>
-                    {c.unread > 0 && <span className="grid size-5 place-items-center rounded-full bg-coral text-[10px] font-bold text-ink">{c.unread}</span>}
+                    <p className="truncate font-display text-base font-bold">{peers.map((p) => p.name).join(', ')}</p>
+                    {c.unread > 0 && <span className="grid size-5 place-items-center rounded-full bg-coral text-xs font-bold text-ink">{c.unread}</span>}
                   </div>
-                  <p className="truncate text-[12px] text-cream/45">{c.title}</p>
-                  <p className="truncate text-[12.5px] text-cream/70">{lastPreview(c, (id) => user(id).name)}</p>
+                  <p className="truncate text-sm text-cream/45">{c.title}</p>
+                  <p className="truncate text-sm text-cream/70">{lastPreview(c, (id) => user(id).name)}</p>
                 </div>
                 <div className="shrink-0 text-right">
                   {c.mode === 'remote' ? (
-                    <span className="inline-flex items-center gap-1 rounded-full bg-violet/15 px-2 py-0.5 text-[10.5px] font-semibold text-violet-300">
+                    <span className="inline-flex items-center gap-1 rounded-full bg-violet/15 px-2 py-0.5 text-xs font-semibold text-violet">
                       <Mic size={11} /> Pen-Pal
                     </span>
                   ) : c.clockStopped ? (
-                    <span className="rounded-full bg-lime/15 px-2 py-0.5 text-[10.5px] font-semibold text-lime">✓ Confermato</span>
+                    <span className="rounded-full bg-coral/15 px-2 py-0.5 text-xs font-semibold text-coral">✓ Confermato</span>
                   ) : (
-                    <span className={cn('inline-flex items-center gap-1 text-[12px] font-bold tabular-nums', TONE_TEXT[tone])}>
+                    <span className={cn('inline-flex items-center gap-1 text-sm font-bold tabular-nums', TONE_TEXT[tone])}>
                       <Timer size={12} /> {formatCountdown((c.deadline ?? now) - now)}
                     </span>
                   )}
@@ -132,7 +132,7 @@ export function Crew() {
       <section className="space-y-2">
         <div className="flex items-baseline justify-between">
           <Eyebrow className="text-gold/80">Sala d’Attesa · {waitingChats.length}</Eyebrow>
-          {free <= 0 && waitingChats.length > 0 && <span className="text-[11px] text-cream/45">libera uno slot per farli entrare</span>}
+          {free <= 0 && waitingChats.length > 0 && <span className="text-xs text-cream/45">libera uno slot per farli entrare</span>}
         </div>
         {waitingChats.map((c, i) => {
           const u = user(c.peerIds[0])
@@ -143,7 +143,7 @@ export function Crew() {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: i * 0.05 }}
-              className="relative overflow-hidden rounded-3xl border border-gold/35 bg-[linear-gradient(135deg,rgb(245_196_81/0.18),rgb(245_196_81/0.04))] p-3.5 glow-gold"
+              className="relative overflow-hidden rounded-3xl border border-gold/35 bg-gold/10 p-3.5"
             >
               <div className="absolute -right-6 -top-6 size-24 rounded-full bg-gold/20 blur-2xl" aria-hidden />
               <div className="relative flex items-center gap-3">
@@ -154,16 +154,16 @@ export function Crew() {
                   </span>
                 </div>
                 <div className="min-w-0 flex-1">
-                  <p className="font-display text-[15px] font-bold text-gold">
+                  <p className="font-display text-base font-bold text-gold">
                     {u.name}, {u.age}
                   </p>
-                  <p className="truncate text-[12px] text-cream/55">per “{c.title}” · {timeAgo(c.createdAt, now)} fa</p>
+                  <p className="truncate text-sm text-cream/55">per “{c.title}” · {timeAgo(c.createdAt, now)} fa</p>
                 </div>
                 <Hourglass size={16} className="text-gold/70" />
               </div>
               {c.incoming && (
-                <p className="relative mt-2.5 rounded-2xl bg-ink/50 p-2.5 text-[12.5px] text-cream/80">
-                  <span className="block text-[10.5px] font-semibold uppercase tracking-wider text-gold/70">Ha risposto al dilemma</span>“{c.incoming.answer}”
+                <p className="relative mt-2.5 rounded-2xl bg-ink/50 p-2.5 text-sm text-cream/80">
+                  <span className="block text-xs font-semibold uppercase tracking-wider text-gold/70">Ha risposto al dilemma</span>“{c.incoming.answer}”
                 </p>
               )}
               <div className="relative mt-2.5">
@@ -184,14 +184,14 @@ export function Crew() {
             </motion.div>
           )
         })}
-        {!waitingChats.length && <p className="rounded-2xl border border-dashed border-gold/20 p-4 text-center text-[13px] text-cream/45">La Sala d’Attesa è vuota. Respira. 🌿</p>}
+        {!waitingChats.length && <p className="rounded-2xl border border-dashed border-gold/20 p-4 text-center text-sm text-cream/45">La Sala d’Attesa è vuota. Respira. 🌿</p>}
       </section>
 
       {/* archive */}
       {archived.length > 0 && (
         <section>
           <button onClick={() => setShowArchive((s) => !s)} className="flex w-full items-center justify-between rounded-2xl px-1 py-2 text-left" aria-expanded={showArchive}>
-            <span className="flex items-center gap-1.5 text-[12px] font-semibold uppercase tracking-[0.16em] text-cream/45">
+            <span className="flex items-center gap-1.5 text-sm font-semibold uppercase tracking-[0.16em] text-cream/45">
               <Archive size={14} /> Archivio · {archived.length}
             </span>
             <ChevronDown size={16} className={cn('text-cream/45 transition', showArchive && 'rotate-180')} />
@@ -204,12 +204,12 @@ export function Crew() {
                     <button onClick={() => nav.openChat(c.id)} className="flex w-full items-center gap-3 rounded-2xl bg-cream/[0.03] p-2.5 text-left opacity-75 hover:opacity-100">
                       <Avatar user={user(c.peerIds[0])} size={34} />
                       <div className="min-w-0 flex-1">
-                        <p className="truncate text-[13.5px] font-semibold">{c.peerIds.map((id) => user(id).name).join(', ')}</p>
-                        <p className="truncate text-[11.5px] text-cream/45">{c.title}</p>
+                        <p className="truncate text-sm font-semibold">{c.peerIds.map((id) => user(id).name).join(', ')}</p>
+                        <p className="truncate text-xs text-cream/45">{c.title}</p>
                       </div>
                       <span
                         className={cn(
-                          'rounded-full px-2 py-0.5 text-[10.5px] font-semibold',
+                          'rounded-full px-2 py-0.5 text-xs font-semibold',
                           c.status === 'evolved' ? 'bg-cyan/15 text-cyan' : c.status === 'expired' ? 'bg-alarm/15 text-alarm' : 'bg-cream/10 text-cream/60',
                         )}
                       >
@@ -224,7 +224,7 @@ export function Crew() {
         </section>
       )}
 
-      <p className="flex items-center justify-center gap-1.5 text-center text-[11.5px] text-cream/35">
+      <p className="flex items-center justify-center gap-1.5 text-center text-xs text-cream/35">
         <Sparkles size={12} /> Chiudere con eleganza vale +15 Karma. Il ghosting non vale niente.
       </p>
     </div>
