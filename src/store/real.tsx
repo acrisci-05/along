@@ -152,6 +152,13 @@ async function blurredCopy(src: string): Promise<Blob> {
 
 export function RealStoreProvider({ children }: { children: ReactNode }) {
   const [phase, setPhase] = useState<Account['phase']>('loading')
+  // an expired or already-used email link comes back as #error=…
+  const [notice] = useState<string | undefined>(() => {
+    const params = new URLSearchParams(window.location.hash.slice(1) || window.location.search.slice(1))
+    if (!params.get('error') && !params.get('error_code')) return undefined
+    window.history.replaceState(null, '', window.location.pathname)
+    return params.get('error_code') === 'otp_expired' ? 'Il link è scaduto o è già stato usato. Chiedine uno nuovo.' : 'Accesso non riuscito. Riprova.'
+  })
   const [email, setEmail] = useState<string>()
   const [state, setState] = useState<AppState>(emptyState)
   const [typing, setTyping] = useState<Record<string, string | undefined>>({})
@@ -747,6 +754,7 @@ export function RealStoreProvider({ children }: { children: ReactNode }) {
     const account: Account = {
       phase,
       email,
+      notice,
       retry: () => {
         setPhase('loading')
         if (!sbRef.current) {
@@ -759,7 +767,7 @@ export function RealStoreProvider({ children }: { children: ReactNode }) {
         const sb = sbRef.current
         if (!sb) return 'Servizio non raggiungibile. Riprova tra poco.'
         const clean = address.trim().toLowerCase()
-        const { error } = await sb.auth.signInWithOtp({ email: clean, options: { shouldCreateUser: true } })
+        const { error } = await sb.auth.signInWithOtp({ email: clean, options: { shouldCreateUser: true, emailRedirectTo: window.location.origin } })
         if (error) return friendly(error)
         setEmail(clean)
         return null
@@ -1135,7 +1143,7 @@ export function RealStoreProvider({ children }: { children: ReactNode }) {
       setOnboarded: () => {},
       reset: () => {},
     }
-  }, [state, phase, email, limits, typing, toasts, match, toast, fail, soon, call, refresh, likeUser, pushLocalMessage, bumpStat, syncPhotos, startRealtime, rem])
+  }, [state, phase, email, notice, limits, typing, toasts, match, toast, fail, soon, call, refresh, likeUser, pushLocalMessage, bumpStat, syncPhotos, startRealtime, rem])
 
   return <Ctx.Provider value={store}>{children}</Ctx.Provider>
 }

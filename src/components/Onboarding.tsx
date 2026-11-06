@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type ReactNode } from 'react'
+import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { AnimatePresence, motion } from 'motion/react'
 import { ArrowLeft, KeyRound, Loader2, Lock, ShieldCheck, Timer } from 'lucide-react'
 import type { Look, User } from '../types'
@@ -41,7 +41,8 @@ export function Onboarding() {
   const { state, completeOnboarding, account } = useStore()
   const phase = account?.phase
   const [step, setStep] = useState(phase === 'needsProfile' ? 1 : 0)
-  const [signingIn, setSigningIn] = useState(false)
+  const [signingIn, setSigningIn] = useState(!!account?.notice)
+  const prevPhase = useRef(phase)
   const [saving, setSaving] = useState(false)
   const [saveError, setSaveError] = useState<string | null>(null)
   // step 1
@@ -76,10 +77,11 @@ export function Onboarding() {
   // signed in without a profile yet → straight to "Chi sei"; signed out → back to the welcome
   useEffect(() => {
     if (phase === 'needsProfile') setStep((s) => (s === 0 ? 1 : s))
-    if (phase === 'signedOut') {
+    if (phase === 'signedOut' && (prevPhase.current === 'ready' || prevPhase.current === 'needsProfile')) {
       setStep(0)
       setSigningIn(false)
     }
+    prevPhase.current = phase
   }, [phase])
 
   if (state.onboarded) return null

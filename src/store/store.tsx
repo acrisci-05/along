@@ -53,6 +53,8 @@ type Awaitable<T> = T | Promise<T>
 export interface Account {
   phase: 'loading' | 'signedOut' | 'needsProfile' | 'ready' | 'error'
   email?: string
+  /** message to show on the sign-in screen (e.g. expired link) */
+  notice?: string
   retry: () => void
   sendCode: (email: string) => Promise<string | null>
   verifyCode: (code: string) => Promise<string | null>

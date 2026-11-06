@@ -58,7 +58,7 @@ export function SignIn({ account, onBack }: { account: Account; onBack: () => vo
           }}
         >
           <h2 className="text-2xl">La tua email</h2>
-          <p className="mt-1 text-sm text-muted">Ti mandiamo un codice di 6 cifre. Niente password da ricordare: vale sia per iscriverti sia per rientrare.</p>
+          <p className="mt-1 text-sm text-muted">Ti mandiamo un’email per entrare. Niente password da ricordare: vale sia per iscriverti sia per rientrare.</p>
           <label className="mt-6 block">
             <span className="text-sm font-semibold">Email</span>
             <input
@@ -72,9 +72,9 @@ export function SignIn({ account, onBack }: { account: Account; onBack: () => vo
               className="mt-1.5 h-12 w-full rounded-xl border border-line bg-surface px-4 text-base placeholder:text-cream/30 focus:border-brand focus:outline-none"
             />
           </label>
-          {error && (
+          {(error ?? account.notice) && (
             <p role="alert" className="mt-3 text-sm text-alarm">
-              {error}
+              {error ?? account.notice}
             </p>
           )}
           <div className="mt-auto pt-8">
@@ -94,10 +94,10 @@ export function SignIn({ account, onBack }: { account: Account; onBack: () => vo
         >
           <h2 className="text-2xl">Controlla la posta</h2>
           <p className="mt-1 text-sm text-muted">
-            Abbiamo scritto a <span className="font-semibold text-cream">{email.trim().toLowerCase()}</span>. Il codice scade tra 10 minuti. Se non lo trovi, guarda nello spam.
+            Abbiamo scritto a <span className="font-semibold text-cream">{email.trim().toLowerCase()}</span>. Apri l’email su questo dispositivo e tocca il link per entrare, oppure scrivi qui il codice se c’è. Se non la trovi, guarda nello spam.
           </p>
           <label className="mt-6 block">
-            <span className="text-sm font-semibold">Codice</span>
+            <span className="text-sm font-semibold">Codice (se presente nell’email)</span>
             <input
               autoFocus
               inputMode="numeric"
@@ -106,9 +106,9 @@ export function SignIn({ account, onBack }: { account: Account; onBack: () => vo
               maxLength={8}
               value={code}
               onChange={(e) => setCode(e.target.value.replace(/\D/g, '').slice(0, 8))}
-              placeholder="······"
-              aria-label="Codice di 6 cifre"
-              className="mt-1.5 h-14 w-full rounded-xl border border-line bg-surface px-4 text-center text-2xl font-bold tracking-[0.4em] tabular-nums placeholder:text-cream/25 focus:border-brand focus:outline-none"
+              placeholder="Codice"
+              aria-label="Codice ricevuto per email"
+              className="mt-1.5 h-14 w-full rounded-xl border border-line bg-surface px-4 text-center text-2xl font-bold tracking-[0.4em] tabular-nums placeholder:text-base placeholder:font-normal placeholder:tracking-normal placeholder:text-cream/25 focus:border-brand focus:outline-none"
             />
           </label>
           {error && (
@@ -117,7 +117,7 @@ export function SignIn({ account, onBack }: { account: Account; onBack: () => vo
             </p>
           )}
           <button type="button" onClick={() => void send()} disabled={wait > 0 || busy} className="mt-4 w-fit text-sm font-semibold text-brand disabled:text-muted">
-            {wait > 0 ? `Nuovo codice tra ${wait} s` : 'Mandami un nuovo codice'}
+            {wait > 0 ? `Nuova email tra ${wait} s` : 'Mandami una nuova email'}
           </button>
           <div className="mt-auto pt-8">
             <Button type="submit" size="lg" className="w-full rounded-full" disabled={code.length < 6 || busy}>
