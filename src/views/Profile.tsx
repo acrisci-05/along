@@ -68,6 +68,43 @@ export function Profile() {
         <p className="mt-2 text-[12px] text-ink/60">Chi vuole scriverti deve prima rispondere. Mai più “ciao” a vuoto.</p>
       </section>
 
+      <section className="glass space-y-3 rounded-3xl p-4">
+        <div className="flex items-center justify-between">
+          <p className="text-[14px] font-semibold">Cosa cerchi</p>
+          <span className="text-[11.5px] text-cream/45">visibile sulla tua card</span>
+        </div>
+        <div className="grid grid-cols-2 gap-2">
+          {(
+            [
+              ['date', '💘 Date', 'bg-coral text-ink'],
+              ['friends', '🤝 Amici', 'bg-lime text-ink'],
+            ] as const
+          ).map(([k, l, on]) => {
+            const active = me.intent.includes(k)
+            return (
+              <button
+                key={k}
+                aria-pressed={active}
+                onClick={() => {
+                  const next = active ? me.intent.filter((i) => i !== k) : [...me.intent, k]
+                  if (next.length) updateMe({ intent: next })
+                }}
+                className={cn('h-11 rounded-2xl text-[13.5px] font-semibold transition', active ? on : 'border border-cream/10 text-cream/55')}
+              >
+                {l}
+              </button>
+            )
+          })}
+        </div>
+        <button onClick={() => nav.setTab('plans')} className="flex w-full items-center justify-between rounded-2xl bg-cream/[0.04] px-3 py-2.5 text-left hover:bg-cream/[0.08]">
+          <span>
+            <span className="block text-[13.5px] font-semibold">I miei piani</span>
+            <span className="block text-[11.5px] text-cream/50">Quello che proponi appare sulla tua card</span>
+          </span>
+          <span className="text-[12px] font-semibold text-lime">Apri →</span>
+        </button>
+      </section>
+
       <KarmaMeter karma={me.karma} stats={state.stats} />
 
       {/* bestie */}

@@ -1,11 +1,13 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactElement } from 'react'
 import { AnimatePresence, MotionConfig, motion } from 'motion/react'
-import { Compass, MessagesSquare, Monitor, Plus, Radar as RadarIcon, Smartphone, Sparkles, Ticket, X } from 'lucide-react'
+import { Flame, Heart, Map as MapIcon, MessagesSquare, Monitor, Plus, Smartphone, Sparkles, X } from 'lucide-react'
 import type { Mode } from './types'
 import { NavCtx, type Nav, type Tab } from './nav'
 import { useStore } from './store/store'
 import { cn } from './lib/utils'
-import { Explore } from './views/Explore'
+import { Discover } from './views/Discover'
+import { Likes } from './views/Likes'
+import { MatchOverlay } from './components/MatchOverlay'
 import { Radar } from './views/Radar'
 import { MyPlans } from './views/MyPlans'
 import { Crew } from './views/Crew'
@@ -17,12 +19,12 @@ import { QuickCreate } from './components/QuickCreate'
 import { Paywall } from './components/Paywall'
 import { Avatar, Button, RevolutTip, Sheet } from './components/ui'
 
-const TABS: Array<{ id: Tab | 'create'; label: string; icon: typeof Compass }> = [
-  { id: 'explore', label: 'Esplora', icon: Compass },
-  { id: 'radar', label: 'Radar', icon: RadarIcon },
-  { id: 'create', label: 'Crea', icon: Plus },
-  { id: 'plans', label: 'I Miei Piani', icon: Ticket },
-  { id: 'crew', label: 'Crew', icon: MessagesSquare },
+const TABS: Array<{ id: Tab | 'create'; label: string; icon: typeof Flame }> = [
+  { id: 'explore', label: 'Scopri', icon: Flame },
+  { id: 'radar', label: 'Mappa', icon: MapIcon },
+  { id: 'create', label: 'Proponi', icon: Plus },
+  { id: 'likes', label: 'Like', icon: Heart },
+  { id: 'crew', label: 'Chat', icon: MessagesSquare },
 ]
 
 function readPref<T extends string>(key: string, fallback: T): T {
@@ -35,7 +37,7 @@ function readPref<T extends string>(key: string, fallback: T): T {
 
 export default function App() {
   const store = useStore()
-  const { state, activeChats, waitingChats, user, joinPlan, messageUser, limits, toasts, dismissToast } = store
+  const { state, activeChats, waitingChats, user, joinPlan, limits, toasts, dismissToast } = store
   const [tab, setTabState] = useState<Tab>(() => readPref<Tab>('along:tab', 'explore'))
   const [mode, setMode] = useState<Mode>('local')
   const [planId, setPlanId] = useState<string | null>(null)
@@ -102,9 +104,12 @@ export default function App() {
   const gatePlan = gate?.kind === 'plan' ? state.plans.find((p) => p.id === gate.id) : undefined
   const gateUser = gate ? (gate.kind === 'plan' ? (gatePlan ? user(gatePlan.hostId) : undefined) : user(gate.id)) : undefined
   const crewBadge = activeChats.reduce((n, c) => n + (c.unread ? 1 : 0), 0) + waitingChats.length
+  const likesBadge = state.likesIn.filter((l) => l.status === 'new').length
+  const badgeFor = (id: string) => (id === 'crew' ? crewBadge : id === 'likes' ? likesBadge : 0)
 
   const views: Record<Tab, ReactElement> = {
-    explore: <Explore mode={mode} setMode={setMode} />,
+    explore: <Discover mode={mode} setMode={setMode} />,
+    likes: <Likes />,
     radar: <Radar />,
     plans: <MyPlans />,
     crew: <Crew />,
@@ -112,7 +117,7 @@ export default function App() {
   }
 
   const wide = frame === 'wide'
-  const overlayOpen = !!(planId || userId || gate || creating || paywall.open || chatId || !state.onboarded)
+  const overlayOpen = !!(planId || userId || gate || creating || paywall.open || chatId || !state.onboarded || store.match)
 
   return (
     <MotionConfig reducedMotion="user">
@@ -135,7 +140,7 @@ export default function App() {
               <span className="text-gradient-neon">Find your people.</span>
             </p>
             <p className="text-[15px] leading-relaxed text-cream/60">
-              ALONG trasforma idee in piani reali. Dilemmi al posto dei “ciao”, 3 slot chat per restare presenti, un timer di 48 ore contro il ghosting.
+              L’app d’incontri dove fai match su qualcosa da fare. Swipe = rispondi a un dilemma, foto svelate solo al match, 48 ore per vedersi davvero. Date o amici, decidi tu.
             </p>
             <FrameSwitch frame={frame} setFrame={setFrame} />
             <div className="w-fit">
@@ -210,7 +215,7 @@ export default function App() {
             {/* content */}
             <main ref={scrollRef} inert={overlayOpen} className="no-scrollbar relative z-10 min-h-0 flex-1 overflow-y-auto px-4 pt-2">
               <AnimatePresence mode="wait">
-                <motion.div key={tab} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -6 }} transition={{ duration: 0.2 }} className={cn(!wide && 'pb-24', wide && 'pb-24 md:pb-8')}>
+                <motion.div key={tab} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -6 }} transition={{ duration: 0.2 }} className={cn('flex min-h-full flex-col', tab === 'explore' ? 'pb-[118px]' : 'pb-24', wide && 'md:pb-8')}>
                   {views[tab]}
                 </motion.div>
               </AnimatePresence>
@@ -244,13 +249,13 @@ export default function App() {
                       onClick={() => setTab(t.id as Tab)}
                       className="relative flex w-16 flex-col items-center gap-0.5 py-1.5"
                       aria-current={active ? 'page' : undefined}
-                      aria-label={t.id === 'crew' && crewBadge > 0 ? `${t.label} (${crewBadge} novità)` : t.label}
+                      aria-label={badgeFor(t.id) > 0 ? `${t.label} (${badgeFor(t.id)} novità)` : t.label}
                     >
                       {active && <motion.span layoutId="nav-dot" className="absolute -top-1 h-1 w-6 rounded-full bg-lime" />}
                       <span className="relative">
                         <Icon size={21} className={active ? 'text-lime' : 'text-cream/55'} />
-                        {t.id === 'crew' && crewBadge > 0 && (
-                          <span className="absolute -right-2 -top-1.5 grid min-w-4 place-items-center rounded-full bg-coral px-1 text-[9.5px] font-bold text-ink">{crewBadge}</span>
+                        {badgeFor(t.id) > 0 && (
+                          <span className="absolute -right-2 -top-1.5 grid min-w-4 place-items-center rounded-full bg-coral px-1 text-[9.5px] font-bold text-ink">{badgeFor(t.id)}</span>
                         )}
                       </span>
                       <span className={cn('text-[10px] font-medium', active ? 'text-cream' : 'text-cream/45')}>{t.label}</span>
@@ -306,8 +311,13 @@ export default function App() {
               dilemma={gate?.kind === 'plan' ? gatePlan?.dilemma : gateUser?.dilemma}
               host={gateUser}
               context={gate?.kind === 'plan' ? `“${gatePlan?.title}”` : `una chat con ${gateUser?.name}`}
-              onSubmit={(answer) => (gate!.kind === 'plan' ? joinPlan(gate!.id, answer) : messageUser(gate!.id, answer))}
-              onGoChat={(id) => nav.openChat(id)}
+              onSubmit={(answer) => {
+                if (gate!.kind === 'plan') return joinPlan(gate!.id, answer)
+                store.likeUser(gate!.id, answer)
+                store.toast({ tone: 'coral', title: `Risposta inviata a ${gateUser?.name} 💌`, body: 'Se le/gli piace, è match e le foto si svelano.' })
+                return { ok: true, chatId: '' }
+              }}
+              onGoChat={(id) => (id ? nav.openChat(id) : setGate(null))}
               onManageSlots={() => {
                 closeSheets()
                 setTab('crew')
@@ -329,6 +339,7 @@ export default function App() {
               onCreated={() => setTab('plans')}
             />
             <Paywall open={paywall.open} reason={paywall.reason} onClose={() => setPaywall({ open: false })} />
+            <MatchOverlay />
             <Onboarding />
           </div>
 
@@ -373,9 +384,9 @@ function FrameSwitch({ frame, setFrame }: { frame: 'phone' | 'wide'; setFrame: (
 }
 
 const RULES = [
-  { emoji: '🔑', title: 'Il Gatekeeper', body: 'Ogni piano ha un dilemma. Per entrare rispondi: la chat non parte mai con un “ciao”.' },
-  { emoji: '🎯', title: '3 slot, Focus Mode', body: 'Massimo 3 chat attive. Le altre aspettano in Sala d’Attesa. Chiudi con eleganza: +15 Karma.' },
-  { emoji: '⏳', title: '48 ore anti-ghosting', body: 'Ogni connessione locale ha 48h per fissare il ritrovo. Poi “Stop the Clock” e si esce davvero.' },
+  { emoji: '🔑', title: 'Swipe = rispondi', body: 'A destra non basta un pollice: rispondi al suo dilemma. Il match nasce da una frase, non da una foto.' },
+  { emoji: '🌫️', title: 'Foto sfocate fino al match', body: 'Vedi chi è, cosa propone e cosa dice il suo migliore amico. Il volto si svela solo quando è scintilla.' },
+  { emoji: '⏳', title: '48 ore per vedersi', body: 'Ogni match vicino ha 48h per diventare un’uscita vera. Massimo 3 chat attive: niente collezionisti di match.' },
 ]
 
 function Onboarding() {
@@ -386,11 +397,11 @@ function Onboarding() {
         <div>
           <p className="font-display text-[11px] font-bold uppercase tracking-[0.22em] text-lime">Benvenut* su ALONG</p>
           <h2 className="mt-1 text-[30px] font-bold leading-[1.02]">
-            Non è una dating app.
+            Meno swipe a vuoto.
             <br />
-            <span className="text-gradient-neon">È un playground.</span>
+            <span className="text-gradient-neon">Più uscite vere.</span>
           </h2>
-          <p className="mt-2 text-[14px] text-cream/65">Le persone si incontrano attraverso cose concrete da fare. Tre regole semplici:</p>
+          <p className="mt-2 text-[14px] text-cream/65">Date o nuove amicizie, sempre attorno a qualcosa da fare insieme. Tre regole:</p>
         </div>
         <ul className="space-y-2">
           {RULES.map((r, i) => (
@@ -406,7 +417,7 @@ function Onboarding() {
           ))}
         </ul>
         <Button className="w-full" size="lg" onClick={setOnboarded}>
-          Iniziamo a fare cose
+          Inizia a scoprire
         </Button>
       </div>
     </Sheet>

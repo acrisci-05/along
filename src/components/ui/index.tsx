@@ -3,6 +3,8 @@ import { useEffect, useId, useRef, useState, type ButtonHTMLAttributes, type Rea
 import { Lock, Pause, Play, X } from 'lucide-react'
 import type { User } from '../../types'
 import { cn, type BeamTone } from '../../lib/utils'
+import { Portrait } from '../Portrait'
+import { useRevealed } from '../../store/store'
 
 /* ---------------- Button ---------------- */
 type Variant = 'primary' | 'coral' | 'violet' | 'ghost' | 'outline' | 'gold' | 'danger'
@@ -80,19 +82,20 @@ export function Chip({
 export function Avatar({
   user,
   size = 40,
-  blur = false,
+  blur: blurProp,
   className,
   ring,
   lockIcon = true,
 }: {
   lockIcon?: boolean
-  user: Pick<User, 'name' | 'hue' | 'emoji'>
+  user: Pick<User, 'id' | 'name' | 'hue' | 'look'>
   size?: number
   blur?: boolean
   className?: string
   ring?: boolean
 }) {
-  const h = user.hue
+  const revealed = useRevealed()
+  const blur = blurProp ?? !revealed(user.id)
   return (
     <div
       className={cn('relative shrink-0 overflow-hidden rounded-full bg-ink', ring && 'ring-2 ring-ink', className)}
@@ -100,21 +103,11 @@ export function Avatar({
       aria-label={blur ? `Foto di ${user.name} sfocata` : `Foto di ${user.name}`}
       role="img"
     >
-      <div
-        className={cn('absolute inset-0 transition-[filter,transform] duration-700', blur && 'scale-125 blur-lg')}
-        style={{
-          background: `radial-gradient(circle at 30% 25%, hsl(${h} 95% 72%), transparent 55%), radial-gradient(circle at 80% 85%, hsl(${(h + 60) % 360} 85% 55%), transparent 60%), linear-gradient(140deg, hsl(${h} 70% 45%), hsl(${(h + 200) % 360} 60% 22%))`,
-        }}
-      >
-        <span className="absolute inset-0 grid place-items-center font-display font-bold text-ink/85" style={{ fontSize: size * 0.42 }}>
-          {user.name.charAt(0)}
-        </span>
-        <span className="absolute bottom-[6%] right-[8%]" style={{ fontSize: size * 0.28 }} aria-hidden>
-          {user.emoji}
-        </span>
+      <div className={cn('absolute inset-0 transition-[filter,transform] duration-700', blur && 'scale-125 blur-[6px]')}>
+        <Portrait look={user.look} hue={user.hue} crop="avatar" className="h-full w-full" />
       </div>
       {blur && lockIcon && (
-        <div className="absolute inset-0 grid place-items-center bg-ink/20">
+        <div className="absolute inset-0 grid place-items-center bg-ink/25">
           <Lock size={Math.max(10, size * 0.28)} className="text-cream/80" aria-hidden />
         </div>
       )}

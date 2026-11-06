@@ -1,6 +1,6 @@
 import { createContext, useContext } from 'react'
 
-export type Tab = 'explore' | 'radar' | 'plans' | 'crew' | 'profile'
+export type Tab = 'explore' | 'radar' | 'likes' | 'plans' | 'crew' | 'profile'
 
 export interface Nav {
   tab: Tab

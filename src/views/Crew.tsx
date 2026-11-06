@@ -28,9 +28,9 @@ export function Crew() {
   return (
     <div className="space-y-5 pb-6">
       <header>
-        <Eyebrow>Crew · Focus Mode</Eyebrow>
+        <Eyebrow>Chat · Focus Mode</Eyebrow>
         <h1 className="mt-1 text-[28px] font-bold leading-none">
-          Poche chat, <span className="text-lime">piani veri</span>
+          Pochi match, <span className="text-lime">uscite vere</span>
         </h1>
       </header>
 

@@ -1,7 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
-import type { AppState, Chat, Message, Plan, Toast, User } from '../types'
+import type { AppState, Chat, Like, Message, Plan, Prefs, Toast, User } from '../types'
 import { AUTO_REPLIES, createInitialState, DEMO_VERSION, FAREWELL, INCOMING_POOL } from '../data/mock'
-import { H, randomWave, uid } from '../lib/utils'
+import { affinity, H, planStatus, randomWave, uid } from '../lib/utils'
 
 const KEY = 'along:state'
 
@@ -69,6 +69,24 @@ interface Store {
   removeTravel: (dest: string) => void
   setOnboarded: () => void
   reset: () => void
+  match: MatchEvent | null
+  dismissMatch: () => void
+  likeUser: (userId: string, answer: string) => void
+  passUser: (userId: string) => void
+  undoSwipe: () => string | null
+  resetDeck: () => void
+  acceptLike: (likeId: string) => void
+  declineLike: (likeId: string) => void
+  setPrefs: (p: Partial<Prefs>) => void
+}
+
+export interface MatchEvent {
+  userId: string
+  chatId: string
+  waiting: boolean
+  answer: string
+  question: string
+  fromMe: boolean
 }
 
 const Ctx = createContext<Store | null>(null)
@@ -117,6 +135,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const [state, setState] = useState<AppState>(load)
   const [typing, setTyping] = useState<Record<string, string | undefined>>({})
   const [toasts, setToasts] = useState<Toast[]>([])
+  const [match, setMatch] = useState<MatchEvent | null>(null)
   const timers = useRef<number[]>([])
   const stateRef = useRef(state)
   stateRef.current = state
@@ -360,42 +379,107 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const simulateIncomingFor = useCallback(
     (planId?: string) => {
       const s = stateRef.current
-      const myPlans = s.plans.filter((p) => p.hostId === 'me').sort((a, b) => b.createdAt - a.createdAt)
-      const plan = myPlans.find((p) => p.id === planId) ?? myPlans[0]
-      if (!plan) {
-        toast({ tone: 'coral', title: 'Nessun piano attivo', body: 'Crea un piano per ricevere richieste.' })
-        return
-      }
-      const busy = new Set(s.chats.filter((c) => c.planId === plan.id && c.status !== 'closed').flatMap((c) => c.peerIds))
-      const candidate = INCOMING_POOL.find((x) => !busy.has(x.userId)) ?? pick(INCOMING_POOL)
+      const plan = s.plans.find((p) => p.id === planId)
+      const taken = new Set([
+        ...s.likesIn.filter((l) => l.status === 'new').map((l) => l.userId),
+        ...s.chats.filter((c) => c.status === 'active' || c.status === 'waiting').flatMap((c) => c.peerIds),
+      ])
+      const candidate = INCOMING_POOL.find((x) => !taken.has(x.userId)) ?? pick(INCOMING_POOL)
       const u = s.users[candidate.userId]
-      const now = Date.now()
-      const full = activeCount(s.chats) >= limits.slots
-      const chat: Chat = {
-        id: uid('c'),
-        planId: plan.id,
-        peerIds: [candidate.userId],
-        mode: plan.mode,
-        title: plan.title,
-        status: full ? 'waiting' : 'active',
-        createdAt: now,
-        deadline: !full && plan.mode === 'local' ? now + 48 * H : undefined,
-        unread: full ? 0 : 1,
-        incoming: full ? { question: plan.dilemma.question, answer: candidate.answer } : undefined,
-        messages: full ? [] : [{ id: uid('m'), from: candidate.userId, kind: 'dilemma', question: plan.dilemma.question, text: candidate.answer, at: now }],
+      const like: Like = {
+        id: uid('l'),
+        userId: candidate.userId,
+        question: plan?.dilemma.question ?? s.me.dilemma.question,
+        answer: candidate.answer,
+        at: Date.now(),
+        status: 'new',
       }
       setState((prev) => ({
         ...prev,
-        chats: [chat, ...prev.chats],
-        plans: prev.plans.map((p) => (p.id === plan.id && !p.interested.includes(candidate.userId) ? { ...p, interested: [...p.interested, candidate.userId] } : p)),
+        likesIn: [like, ...prev.likesIn],
+        plans: plan ? prev.plans.map((p) => (p.id === plan.id && !p.interested.includes(u.id) ? { ...p, interested: [...p.interested, u.id] } : p)) : prev.plans,
       }))
-      toast(
-        full
-          ? { tone: 'gold', title: `${u.name} è in Sala d’Attesa 🔒`, body: `Ha risposto al tuo dilemma. Libera uno slot per farl* entrare.` }
-          : { tone: 'violet', title: `${u.name} vuole unirsi`, body: `Ha risposto al dilemma di “${plan.title}”.` },
-      )
+      toast({ tone: 'violet', title: `${u.name} ha risposto al tuo dilemma 💌`, body: 'Leggi la risposta in “Like” e decidi tu.' })
     },
-    [limits.slots, toast],
+    [toast],
+  )
+
+  /** Opens a 1:1 match chat, respecting the slot limit (else Sala d’Attesa). */
+  const openMatch = useCallback(
+    (userId: string, opener: { question: string; answer: string; fromMe: boolean }, s: AppState) => {
+      const now = Date.now()
+      const u = s.users[userId]
+      const plan = s.plans.find((p) => p.hostId === userId && planStatus(p, now) !== 'EXPIRED' && planStatus(p, now) !== 'FULL')
+      const mode: Plan['mode'] = u.city === s.me.city || (plan?.mode === 'local' && s.travelDestinations.some((d) => d.toLowerCase() === u.city.toLowerCase())) ? 'local' : 'remote'
+      const lim = s.lifetime ? LIFETIME_LIMITS.slots : FREE_LIMITS.slots
+      const full = activeCount(s.chats) >= lim
+      const chat: Chat = {
+        id: uid('c'),
+        planId: opener.fromMe ? plan?.id : undefined,
+        peerIds: [userId],
+        mode,
+        title: opener.fromMe && plan ? plan.title : `Match con ${u.name}`,
+        status: full ? 'waiting' : 'active',
+        createdAt: now,
+        deadline: !full && mode === 'local' ? now + 48 * H : undefined,
+        unread: full ? 0 : 1,
+        incoming: full ? { question: opener.question, answer: opener.answer } : undefined,
+        messages: full
+          ? []
+          : [
+              { id: uid('m'), from: 'system', kind: 'system', text: `⚡ È una scintilla! Foto svelate. ${mode === 'local' ? 'Avete 48 ore per vedervi dal vivo.' : 'Modalità Audio-Capsule: niente timer.'}`, at: now },
+              { id: uid('m'), from: opener.fromMe ? 'me' : userId, kind: 'dilemma', question: opener.question, text: opener.answer, at: now },
+            ],
+      }
+      return { chat, full }
+    },
+    [],
+  )
+
+  const likeUser = useCallback(
+    (userId: string, answer: string) => {
+      const now = Date.now()
+      const s0 = stateRef.current
+      const u = s0.users[userId]
+      setState((prev) => ({
+        ...prev,
+        swipes: { ...prev.swipes, [userId]: 'like' },
+        swipeHistory: [...prev.swipeHistory, userId],
+        likesOut: [...prev.likesOut.filter((l) => l.userId !== userId), { userId, answer, at: now, status: 'pending' }],
+        stats: { ...prev.stats, textSent: prev.stats.textSent + 1 },
+      }))
+      const chance = Math.min(0.92, 0.5 + (affinity(s0.me, u) - 50) / 80)
+      const matched = Math.random() < chance
+      later(() => {
+        const s = stateRef.current
+        if (!matched) {
+          setState({ ...s, likesOut: s.likesOut.map((l) => (l.userId === userId ? { ...l, status: 'missed' } : l)) })
+          return
+        }
+        const { chat, full } = openMatch(userId, { question: u.dilemma.question, answer, fromMe: true }, s)
+        setState({
+          ...s,
+          chats: [chat, ...s.chats],
+          likesOut: s.likesOut.map((l) => (l.userId === userId ? { ...l, status: 'matched' } : l)),
+          plans: chat.planId ? s.plans.map((p) => (p.id === chat.planId && !p.participants.includes('me') ? { ...p, participants: [...p.participants, 'me'] } : p)) : s.plans,
+        })
+        setMatch({ userId, chatId: chat.id, waiting: full, answer, question: u.dilemma.question, fromMe: true })
+        if (!full) scheduleReply(chat.id, 'dilemma')
+      }, 1800 + Math.random() * 1600)
+    },
+    [later, openMatch, scheduleReply],
+  )
+
+  const acceptLike = useCallback(
+    (likeId: string) => {
+      const s = stateRef.current
+      const like = s.likesIn.find((l) => l.id === likeId)
+      if (!like) return
+      const { chat, full } = openMatch(like.userId, { question: like.question, answer: like.answer, fromMe: false }, s)
+      setState({ ...s, chats: [chat, ...s.chats], likesIn: s.likesIn.map((l) => (l.id === likeId ? { ...l, status: 'accepted' } : l)), swipes: { ...s.swipes, [like.userId]: 'like' } })
+      setMatch({ userId: like.userId, chatId: chat.id, waiting: full, answer: like.answer, question: like.question, fromMe: false })
+    },
+    [openMatch],
   )
 
   const createPlan = useCallback(
@@ -487,15 +571,41 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       },
       removeTravel: (dest) => setState((prev) => ({ ...prev, travelDestinations: prev.travelDestinations.filter((d) => d !== dest) })),
       setOnboarded: () => setState((prev) => ({ ...prev, onboarded: true })),
+      match,
+      dismissMatch: () => setMatch(null),
+      likeUser,
+      passUser: (userId) =>
+        setState((prev) => ({ ...prev, swipes: { ...prev.swipes, [userId]: 'pass' }, swipeHistory: [...prev.swipeHistory, userId] })),
+      undoSwipe: () => {
+        const s = stateRef.current
+        const last = s.swipeHistory[s.swipeHistory.length - 1]
+        if (!last || s.swipes[last] !== 'pass') return null
+        const swipes = { ...s.swipes }
+        delete swipes[last]
+        setState({ ...s, swipes, swipeHistory: s.swipeHistory.slice(0, -1) })
+        return last
+      },
+      resetDeck: () =>
+        setState((prev) => {
+          const keep = Object.fromEntries(Object.entries(prev.swipes).filter(([, v]) => v === 'like'))
+          return { ...prev, swipes: keep, swipeHistory: prev.swipeHistory.filter((id) => keep[id]) }
+        }),
+      acceptLike,
+      declineLike: (likeId) => {
+        setState((prev) => ({ ...prev, likesIn: prev.likesIn.map((l) => (l.id === likeId ? { ...l, status: 'declined' } : l)), me: { ...prev.me, karma: prev.me.karma + 3 } }))
+        toast({ tone: 'lime', title: '“Non stavolta” inviato con gentilezza', body: '+3 Karma. Nessuno resta appeso.' })
+      },
+      setPrefs: (p) => setState((prev) => ({ ...prev, prefs: { ...prev.prefs, ...p } })),
       reset: () => {
         timers.current.forEach((t) => clearTimeout(t))
         timers.current = []
         setTyping({})
+        setMatch(null)
         setState({ ...createInitialState(), onboarded: true })
         toast({ tone: 'cyan', title: 'Dati demo ripristinati', body: 'Tutto è tornato allo stato iniziale.' })
       },
     }
-  }, [state, limits, typing, toasts, user, toast, dismissToast, joinPlan, messageUser, pushMine, finishChat, stopClock, acceptWaiting, createPlan, simulateIncomingFor, setLifetime])
+  }, [state, limits, typing, toasts, user, toast, dismissToast, joinPlan, messageUser, pushMine, finishChat, stopClock, acceptWaiting, createPlan, simulateIncomingFor, setLifetime, match, likeUser, acceptLike])
 
   return <Ctx.Provider value={store}>{children}</Ctx.Provider>
 }
@@ -513,4 +623,10 @@ export function useNow(interval = 1000) {
     return () => clearInterval(iv)
   }, [interval])
   return now
+}
+
+/** Photos stay blurred until there is (or was) a match / chat with that person. */
+export function useRevealed() {
+  const { state } = useStore()
+  return useCallback((id: string) => id === 'me' || state.chats.some((c) => c.peerIds.includes(id)), [state.chats])
 }

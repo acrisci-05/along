@@ -35,6 +35,7 @@ const users: User[] = [
     dilemma: { question: 'Se prendiamo una pizza, cosa non deve MAI esserci sopra?', options: ['Ananas', 'Panna', 'Ketchup', 'Niente, sono anarchica'] },
     bestie: { worstFlaw: 'Ti fotografa il piatto per 4 minuti prima di farti mangiare.', whyGoOut: 'Conosce il posto giusto in ogni vicolo. E condivide sempre le gyoza.', redFlag: 'Ha opinioni MOLTO forti sullo spessore dei noodles.', by: 'Marta, bestie dal liceo' },
     karma: 214, badges: ['fast', 'zero'],
+    gender: 'f', intent: ['date', 'friends'], distanceKm: 1.2, look: { skin: 1, hair: 'long', hairColor: '#3b2416', shirt: '#FF806D', earring: true },
   },
   {
     id: 'u-marco', name: 'Marco', age: 27, city: 'Napoli', hue: 88, emoji: '🎾',
@@ -44,6 +45,7 @@ const users: User[] = [
     dilemma: { question: 'Perdi 6-0 6-0. Cosa dici al tuo compagno a fine partita?', options: ['Colpa del vento', 'Birra? Offro io', 'Rivincita. Ora.'] },
     bestie: { worstFlaw: 'Arriva 20 minuti prima e ti scrive “dove sei?”.', whyGoOut: 'Ti fa sentire un campione anche quando la palla va in tribuna.', redFlag: 'Ha un foglio Excel delle sue statistiche di padel.', by: 'Andrea, compagno di squadra' },
     karma: 188, badges: ['fast'],
+    gender: 'm', intent: ['friends'], distanceKm: 4.8, look: { skin: 2, hair: 'short', hairColor: '#1d1410', shirt: '#D7FF66', beard: true },
   },
   {
     id: 'u-sofia', name: 'Sofia', age: 22, city: 'Napoli', hue: 330, emoji: '🎬',
@@ -53,6 +55,7 @@ const users: User[] = [
     dilemma: { question: 'Hai 2 ore libere in una città sconosciuta senza telefono: cosa fai?', options: ['Mi perdo apposta', 'Cerco un cinema', 'Trovo un bar e parlo con chiunque'] },
     bestie: { worstFlaw: 'Ti spiega il finale del film durante i titoli di coda. Con i diagrammi.', whyGoOut: 'Ti fa vedere il mondo come un’inquadratura perfetta.', redFlag: 'Ha pianto a Interstellar. Tre volte. Al cinema.', by: 'Bea, coinquilina' },
     karma: 176, badges: ['voice', 'zero'],
+    gender: 'f', intent: ['date', 'friends'], distanceKm: 2.1, look: { skin: 0, hair: 'bob', hairColor: '#7a2e1f', shirt: '#8B5CF6', glasses: true },
   },
   {
     id: 'u-luca', name: 'Luca', age: 25, city: 'Milano', hue: 265, emoji: '🎮',
@@ -62,6 +65,7 @@ const users: User[] = [
     dilemma: { question: 'Il tuo compagno sbaglia l’ultimo round decisivo. Cosa scrivi in chat?', options: ['“ns try”', 'Silenzio stampa', '“GG, next”'] },
     bestie: { worstFlaw: 'Dice “ultima partita” alle 23 e sono le 2.', whyGoOut: 'Ti carica anche quando sei a 0-8. Pazienza infinita.', redFlag: 'Ha un nome per ogni sua tastiera meccanica.', by: 'Fede, duo storico' },
     karma: 201, badges: ['fast', 'voice'], travel: undefined,
+    gender: 'm', intent: ['friends'], distanceKm: 660, look: { skin: 1, hair: 'wavy', hairColor: '#2a1d14', shirt: '#22d3ee' },
   },
   {
     id: 'u-chiara', name: 'Chiara', age: 23, city: 'Napoli', hue: 190, emoji: '📚',
@@ -71,6 +75,7 @@ const users: User[] = [
     dilemma: { question: 'Pausa studio ideale: 15 minuti per…', options: ['Caffè al volo', 'Camminata', 'Meme sul telefono'] },
     bestie: { worstFlaw: 'Ti fa la lezione di anatomia mentre mangi.', whyGoOut: 'Ti porta sempre uno snack anche se non l’hai chiesto.', redFlag: 'Evidenziatori in 9 colori. Codificati.', by: 'Ire, compagna di corso' },
     karma: 230, badges: ['zero', 'fast'],
+    gender: 'f', intent: ['friends'], distanceKm: 0.8, look: { skin: 2, hair: 'bun', hairColor: '#4a2a18', shirt: '#06B6D4', glasses: true },
   },
   {
     id: 'u-davide', name: 'Davide', age: 26, city: 'Roma', hue: 35, emoji: '✈️',
@@ -80,6 +85,7 @@ const users: User[] = [
     dilemma: { question: 'In viaggio: piano dettagliato o zaino e improvvisazione?', options: ['Excel con orari', 'Zaino e via', 'Metà e metà'] },
     bestie: { worstFlaw: 'Prenota il volo prima di chiederti se puoi venire.', whyGoOut: 'Trova sempre il localino che non c’è su nessuna guida.', redFlag: 'Ha 14 app di viaggio sul telefono.', by: 'Gio, compagno di Erasmus' },
     karma: 165, badges: ['voice'], travel: 'Valencia',
+    gender: 'm', intent: ['date', 'friends'], distanceKm: 190, look: { skin: 3, hair: 'curly', hairColor: '#120c08', shirt: '#F5C451', beard: true },
   },
   {
     id: 'u-nina', name: 'Nina', age: 29, city: 'Bologna', hue: 280, emoji: '🎧',
@@ -89,6 +95,7 @@ const users: User[] = [
     dilemma: { question: 'Una canzone che ascolti in loop quando nessuno ti guarda?', options: [] },
     bestie: { worstFlaw: 'Ti manda 40 canzoni alle 3 di notte e vuole un feedback.', whyGoOut: 'Ti fa scoprire la tua nuova canzone preferita ogni settimana.', redFlag: 'Giudica le persone dalla loro top 5 di Wrapped.', by: 'Ale, socio di consolle' },
     karma: 199, badges: ['voice', 'zero'],
+    gender: 'f', intent: ['date', 'friends'], distanceKm: 480, look: { skin: 4, hair: 'curly', hairColor: '#0d0907', shirt: '#c084fc', earring: true },
   },
   {
     id: 'u-kenji', name: 'Kenji', age: 28, city: 'Torino', hue: 150, emoji: '🌙',
@@ -98,6 +105,7 @@ const users: User[] = [
     dilemma: { question: 'Il libro che regaleresti a uno sconosciuto per capire chi sei?', options: [] },
     bestie: { worstFlaw: 'Risponde con citazioni. Sempre.', whyGoOut: 'Ascolta davvero, e si ricorda tutto quello che dici.', redFlag: 'Sottolinea i libri. A penna.', by: 'Yuki, sorella' },
     karma: 222, badges: ['voice', 'zero'],
+    gender: 'm', intent: ['date'], distanceKm: 760, look: { skin: 1, hair: 'short', hairColor: '#0b0b0f', shirt: '#334155', glasses: true },
   },
   {
     id: 'u-elena', name: 'Elena', age: 24, city: 'Barcellona', hue: 0, emoji: '🌶️',
@@ -107,6 +115,7 @@ const users: User[] = [
     dilemma: { question: 'Prima sera in una città nuova: dove mi porti?', options: ['Tetto con vista', 'Bar di quartiere', 'Mercato notturno'] },
     bestie: { worstFlaw: 'Parla 4 lingue. Contemporaneamente.', whyGoOut: 'Ti fa sentire a casa in una città dove non conosci nessuno.', redFlag: 'Mette il peperoncino anche sul cornetto.', by: 'Paola, amica di Erasmus' },
     karma: 187, badges: ['fast', 'voice'],
+    gender: 'f', intent: ['date', 'friends'], distanceKm: 1100, look: { skin: 2, hair: 'wavy', hairColor: '#24140c', shirt: '#ef4444', earring: true },
   },
   {
     id: 'u-tommaso', name: 'Tommaso', age: 30, city: 'Napoli', hue: 210, emoji: '🌅',
@@ -116,7 +125,78 @@ const users: User[] = [
     dilemma: { question: 'Scale o ascensore, se sono 300 gradini con vista mare?', options: ['Scale, ovvio', 'Ascensore e senso di colpa'] },
     bestie: { worstFlaw: 'Ti dice “è vicino” e sono 6 km.', whyGoOut: 'Ti mostra Napoli da angoli che non sapevi esistessero.', redFlag: 'Si ferma a commentare ogni balcone barocco.', by: 'Ste, collega' },
     karma: 205, badges: ['zero'],
+    gender: 'm', intent: ['date', 'friends'], distanceKm: 3.5, look: { skin: 1, hair: 'buzz', hairColor: '#6b4a2b', shirt: '#0ea5e9', beard: true },
   },
+  {
+    id: 'u-martina', name: 'Martina', age: 26, city: 'Napoli', hue: 345, emoji: '🍕',
+    bio: 'Restauratrice di affreschi. Cerco qualcuno che regga una passeggiata di 3 ore e una pizza fritta alla fine.',
+    interests: ['arte', 'camminate', 'pizza fritta', 'vinili', 'Nolan'],
+    habitats: ['Bar storico · Piazza Bellini', 'Parco della Floridiana'],
+    dilemma: { question: 'Primo appuntamento: museo vuoto o mercato rumoroso?', options: ['Museo vuoto', 'Mercato rumoroso', 'Entrambi, in quest’ordine'] },
+    bestie: { worstFlaw: 'Si ferma davanti a ogni chiesa. OGNI chiesa.', whyGoOut: 'Ti racconta Napoli come se fosse un romanzo.', redFlag: 'Ha litigato con una guida turistica. E ha vinto.', by: 'Fra, amica d’infanzia' },
+    karma: 196, badges: ['zero', 'voice'],
+    gender: 'f', intent: ['date'], distanceKm: 1.6, look: { skin: 1, hair: 'wavy', hairColor: '#5a2a14', shirt: '#F5C451', earring: true },
+  },
+  {
+    id: 'u-federico', name: 'Federico', age: 28, city: 'Napoli', hue: 25, emoji: '🎸',
+    bio: 'Chitarrista in una band che nessuno conosce (ancora). Cucino una carbonara che fa piangere i romani.',
+    interests: ['musica live', 'cucina', 'synthwave', 'padel', 'serie tv'],
+    habitats: ['Bar storico · Piazza Bellini', 'Padel Club Fuorigrotta'],
+    dilemma: { question: 'Concerto in prima fila o al bar in fondo a parlare?', options: ['Prima fila', 'Bar in fondo', 'Dipende dalla band'] },
+    bestie: { worstFlaw: 'Ti fa sentire la demo nuova. In macchina. A tutto volume.', whyGoOut: 'Ti porta nei posti dove suonano i migliori, prima che diventino famosi.', redFlag: 'Accorda la chitarra durante le conversazioni serie.', by: 'Peppe, bassista' },
+    karma: 172, badges: ['fast'],
+    gender: 'm', intent: ['date', 'friends'], distanceKm: 2.4, look: { skin: 2, hair: 'long', hairColor: '#1a120c', shirt: '#111827', beard: true },
+  },
+  {
+    id: 'u-aurora', name: 'Aurora', age: 23, city: 'Napoli', hue: 300, emoji: '🌙',
+    bio: 'Studio astrofisica, vivo di notte. Ti spiego le costellazioni dal Belvedere se mi offri un caffè.',
+    interests: ['stelle', 'libri', 'Murakami', 'camminate', 'jazz'],
+    habitats: ['Belvedere di Posillipo', 'Biblioteca Nazionale'],
+    dilemma: { question: 'Se potessi vivere in un’altra epoca per un giorno, quale?', options: [] },
+    bestie: { worstFlaw: 'Guarda il cielo invece della strada. Abbiamo perso due bus.', whyGoOut: 'Ti fa sentire piccolo nel modo più bello possibile.', redFlag: 'Ha dato un nome a ogni pianta di casa. Sono 34.', by: 'Gaia, coinquilina' },
+    karma: 210, badges: ['voice', 'zero'],
+    gender: 'f', intent: ['date', 'friends'], distanceKm: 3.1, look: { skin: 3, hair: 'long', hairColor: '#0f0a08', shirt: '#8B5CF6', glasses: true },
+  },
+  {
+    id: 'u-samuele', name: 'Samuele', age: 27, city: 'Napoli', hue: 140, emoji: '🧗',
+    bio: 'Arrampicata, sentieri e colazioni infinite. Cerco gente con cui fare cose all’aperto senza prendersi sul serio.',
+    interests: ['arrampicata', 'camminate', 'running', 'podcast', 'ramen'],
+    habitats: ['Parco della Floridiana', 'Palestra Vomero Fit'],
+    dilemma: { question: 'Alba in vetta o tramonto al mare?', options: ['Alba in vetta', 'Tramonto al mare'] },
+    bestie: { worstFlaw: 'Ti sveglia alle 5 per “vedere l’alba”. Senza preavviso.', whyGoOut: 'Con lui anche una salita diventa una storia da raccontare.', redFlag: 'Ha 7 borracce. Tutte con un nome.', by: 'Ale, compagno di cordata' },
+    karma: 204, badges: ['fast', 'zero'],
+    gender: 'm', intent: ['friends', 'date'], distanceKm: 5.2, look: { skin: 4, hair: 'buzz', hairColor: '#0d0907', shirt: '#22c55e' },
+  },
+  {
+    id: 'u-irene', name: 'Irene', age: 25, city: 'Napoli', hue: 50, emoji: '📷',
+    bio: 'Fotografa di matrimoni (ironico, lo so). Il weekend scatto in analogico per i vicoli e cerco modelli involontari.',
+    interests: ['fotografia analogica', 'mercati', 'city pop', 'ramen', 'cinema d’autore'],
+    habitats: ['Mercato di Porta Nolana', 'Ramen bar · Decumani'],
+    dilemma: { question: 'Una foto che non hai mai scattato ma ricordi benissimo?', options: [] },
+    bestie: { worstFlaw: 'Ti dice “fermo così” nel mezzo di una frase.', whyGoOut: 'Vede la bellezza nelle cose che tutti ignorano. Anche in te.', redFlag: 'Annusa i rullini nuovi.', by: 'Vale, sorella' },
+    karma: 189, badges: ['voice'],
+    gender: 'f', intent: ['friends', 'date'], distanceKm: 1.9, look: { skin: 0, hair: 'short', hairColor: '#d6a65c', shirt: '#f472b6', earring: true },
+  },
+  {
+    id: 'u-omar', name: 'Omar', age: 29, city: 'Milano', hue: 200, emoji: '☕',
+    bio: 'Barista specialty e nottambulo. Scambio vocali lunghi su libri, caffè e città dove vorrei vivere.',
+    interests: ['caffè', 'libri', 'viaggi', 'jazz', 'synthwave'],
+    habitats: [],
+    dilemma: { question: 'La città dove vivresti domani, senza pensarci?', options: ['Lisbona', 'Tokyo', 'Napoli, ovvio'] },
+    bestie: { worstFlaw: 'Giudica il tuo caffè. In silenzio. Ma lo vedi.', whyGoOut: 'Ti scrive i vocali più belli che riceverai quest’anno.', redFlag: 'Pesa il caffè col bilancino anche in vacanza.', by: 'Sara, ex coinquilina' },
+    karma: 215, badges: ['voice', 'zero'],
+    gender: 'm', intent: ['date', 'friends'], distanceKm: 660, look: { skin: 3, hair: 'curly', hairColor: '#120c08', shirt: '#F6F4EF', beard: true },
+  },
+  {
+    id: 'u-lea', name: 'Léa', age: 26, city: 'Lisbona', hue: 180, emoji: '🌊',
+    bio: 'Italo-francese a Lisbona, surf all’alba e fado la sera. Cerco pen-pal per scambiarci città e canzoni.',
+    interests: ['surf', 'viaggi', 'lingue', 'vinili', 'scrittura'],
+    habitats: [],
+    dilemma: { question: 'Mi mandi una canzone che sa di estate senza dire il titolo?', options: [] },
+    bestie: { worstFlaw: 'Risponde dopo tre giorni. Ma con un vocale di 9 minuti.', whyGoOut: 'Ti fa venire voglia di prenotare un volo. Subito.', redFlag: 'Ha una mappa con le spille di tutti i posti dove ha pianto.', by: 'Inès, amica di Erasmus' },
+    karma: 198, badges: ['voice'],
+    gender: 'f', intent: ['friends', 'date'], distanceKm: 2200, look: { skin: 2, hair: 'wavy', hairColor: '#b07a3f', shirt: '#06B6D4' },
+  }
 ]
 
 export function createMe(): User {
@@ -128,6 +208,7 @@ export function createMe(): User {
     dilemma: { question: 'Sei su un’isola deserta con un solo album: quale porti?', options: [] },
     bestie: { worstFlaw: 'Dice sempre “5 minuti e arrivo” mentre è ancora sotto la doccia.', whyGoOut: 'Ti fa ridere fino alle lacrime e si ricorda il tuo ordine al bar.', redFlag: 'Salva i meme in cartelle tematiche. Con sottocartelle.', by: 'Il tuo bestie (in attesa di revisione)' },
     karma: 120, badges: [],
+    gender: 'nb', intent: ['date', 'friends'], look: { skin: 1, hair: 'wavy', hairColor: '#2b1a10', shirt: '#D7FF66' },
   }
 }
 
@@ -142,7 +223,7 @@ const plans = (now: number): Plan[] => [
   {
     id: 'p-ramen', hostId: 'u-giulia', title: 'Ramen tonkotsu ai Decumani', category: 'food', mode: 'local', city: 'Napoli',
     habitat: 'Ramen bar · Decumani', district: 'Centro Storico', when: day(0, 20, 30), capacity: 4,
-    participants: ['u-giulia', 'me'], vibes: ['Chiacchiere vere', 'Niente telefoni a tavola', 'Si divide tutto'],
+    participants: ['u-giulia', 'u-irene'], vibes: ['Chiacchiere vere', 'Niente telefoni a tavola', 'Si divide tutto'],
     dilemma: users[0].dilemma, details: { cuisine: 'Giapponese', budget: '15–20 €' }, privacy: false, cost: 68, interested: ['u-chiara'], createdAt: now - 18 * H,
   },
   {
@@ -211,6 +292,48 @@ const plans = (now: number): Plan[] => [
     participants: ['me'], vibes: ['Tramonto', 'Taralli e chiacchiere'],
     dilemma: { question: 'Sei su un’isola deserta con un solo album: quale porti?', options: [] }, details: { budget: '10 €' }, privacy: false, interested: ['u-sofia', 'u-tommaso', 'u-kenji'], createdAt: now - 2 * H,
   },
+  {
+    id: 'p-martina', hostId: 'u-martina', title: 'Passeggiata nei vicoli + pizza fritta', category: 'walk', mode: 'local', city: 'Napoli',
+    habitat: 'Bar storico · Piazza Bellini', district: 'Centro Storico', when: day(0, 19, 0), capacity: 2,
+    participants: ['u-martina'], vibes: ['Passo lento', 'Storie di affreschi', 'Pizza fritta finale'],
+    dilemma: { question: 'Primo appuntamento: museo vuoto o mercato rumoroso?', options: ['Museo vuoto', 'Mercato rumoroso', 'Entrambi, in quest’ordine'] }, details: { budget: '6 €' }, privacy: true, interested: [], createdAt: now - 4 * H,
+  },
+  {
+    id: 'p-federico', hostId: 'u-federico', title: 'Live acustico + birra artigianale', category: 'drink', mode: 'local', city: 'Napoli',
+    habitat: 'Bar storico · Piazza Bellini', district: 'Centro Storico', when: day(1, 21, 30), capacity: 2,
+    participants: ['u-federico'], vibes: ['Musica dal vivo', 'Niente small talk'],
+    dilemma: { question: 'Concerto in prima fila o al bar in fondo a parlare?', options: ['Prima fila', 'Bar in fondo', 'Dipende dalla band'] }, details: { budget: '10 €' }, privacy: true, interested: [], createdAt: now - 7 * H,
+  },
+  {
+    id: 'p-aurora', hostId: 'u-aurora', title: 'Stelle dal Belvedere (porto il telescopio)', category: 'walk', mode: 'local', city: 'Napoli',
+    habitat: 'Belvedere di Posillipo', district: 'Posillipo', when: day(2, 22, 0), capacity: 3,
+    participants: ['u-aurora'], vibes: ['Coperta e tè caldo', 'Domande grandi'],
+    dilemma: { question: 'Se potessi vivere in un’altra epoca per un giorno, quale?', options: [] }, details: {}, privacy: true, interested: [], createdAt: now - 9 * H,
+  },
+  {
+    id: 'p-samuele', hostId: 'u-samuele', title: 'Corsa all’alba alla Floridiana + colazione', category: 'sport', mode: 'local', city: 'Napoli',
+    habitat: 'Parco della Floridiana', district: 'Vomero', when: day(1, 7, 0), capacity: 4,
+    participants: ['u-samuele'], vibes: ['5 km tranquilli', 'Cornetto obbligatorio'],
+    dilemma: { question: 'Alba in vetta o tramonto al mare?', options: ['Alba in vetta', 'Tramonto al mare'] }, details: { level: 'Principianti ok' }, privacy: false, cost: 12, interested: [], createdAt: now - 5 * H,
+  },
+  {
+    id: 'p-irene', hostId: 'u-irene', title: 'Photo walk analogica al mercato', category: 'walk', mode: 'local', city: 'Napoli',
+    habitat: 'Mercato di Porta Nolana', district: 'Porta Nolana', when: day(3, 10, 30), capacity: 3,
+    participants: ['u-irene'], vibes: ['Rullino condiviso', 'Ramen dopo'],
+    dilemma: { question: 'Una foto che non hai mai scattato ma ricordi benissimo?', options: [] }, details: {}, privacy: true, interested: [], createdAt: now - 12 * H,
+  },
+  {
+    id: 'p-omar', hostId: 'u-omar', title: 'Pen-pal di vocali: libri & caffè', category: 'talk', mode: 'remote', city: 'Milano',
+    habitat: 'Audio-capsule · asincrono', when: day(0, 23, 0), whenLabel: 'Quando vuoi, di notte', capacity: 2,
+    participants: ['u-omar'], vibes: ['Vocali lunghi', 'Un libro a settimana'],
+    dilemma: { question: 'La città dove vivresti domani, senza pensarci?', options: ['Lisbona', 'Tokyo', 'Napoli, ovvio'] }, details: { platform: 'Audio-capsule', timezone: 'CET' }, privacy: true, interested: [], createdAt: now - 15 * H,
+  },
+  {
+    id: 'p-lea', hostId: 'u-lea', title: 'Scambio città: tu mi racconti Napoli, io Lisbona', category: 'travel', mode: 'remote', city: 'Lisbona',
+    habitat: 'Vocali · Spotify', when: day(5, 21, 0), whenLabel: 'Questa settimana', capacity: 2,
+    participants: ['u-lea'], vibes: ['Una canzone a testa', 'Magari un volo'],
+    dilemma: { question: 'Mi mandi una canzone che sa di estate senza dire il titolo?', options: [] }, details: { destination: 'Lisbona', timezone: 'WET (UTC+0)' }, privacy: true, interested: [], createdAt: now - 20 * H,
+  },
 ]
 
 const msg = (from: string, text: string, at: number, extra: Partial<Chat['messages'][number]> = {}) => ({
@@ -219,13 +342,14 @@ const msg = (from: string, text: string, at: number, extra: Partial<Chat['messag
 
 const chats = (now: number): Chat[] => [
   {
-    id: 'c-ramen', planId: 'p-ramen', peerIds: ['u-giulia'], mode: 'local', title: 'Ramen tonkotsu ai Decumani', status: 'active',
-    createdAt: now - 18 * H, deadline: now - 18 * H + 48 * H, unread: 1,
+    id: 'c-ramen', planId: 'p-ramen', peerIds: ['u-giulia'], mode: 'local', title: 'Ramen tonkotsu ai Decumani', status: 'evolved', closedReason: 'Evoluta dal vivo',
+    createdAt: now - 60 * H, deadline: now - 12 * H, clockStopped: true, unread: 0,
     messages: [
       { id: 'm1', from: 'me', kind: 'dilemma', question: users[0].dilemma.question, text: 'Panna. Non si discute.', at: now - 18 * H },
       msg('u-giulia', 'Risposta corretta, sei dentro 😂 Ramen stasera alle 20:30?', now - 17.8 * H),
       msg('me', 'Perfetto! Tonkotsu o shoyu per te?', now - 17.6 * H),
       msg('u-giulia', 'Tonkotsu, sempre. Ho prenotato per 4, mancano ancora due persone ✨', now - 2 * H),
+      { id: 'm1b', from: 'system', kind: 'system', text: 'Missione compiuta: vi vedete dal vivo / contatti scambiati. Slot liberato 🎉', at: now - 1.5 * H },
     ],
   },
   {
@@ -268,7 +392,9 @@ const chats = (now: number): Chat[] => [
   },
 ]
 
-export const DEMO_VERSION = 3
+const MY_DILEMMA = 'Sei su un’isola deserta con un solo album: quale porti?'
+
+export const DEMO_VERSION = 5
 
 export function createInitialState(): AppState {
   const now = Date.now()
@@ -283,6 +409,16 @@ export function createInitialState(): AppState {
     stats: { replyTimes: [42, 95, 60, 30], voiceSent: 2, textSent: 7, elegantCloses: 1, ghosted: 0, clocksStopped: 0 },
     travelDestinations: [],
     onboarded: false,
+    swipes: {},
+    swipeHistory: [],
+    likesIn: [
+      { id: 'l-1', userId: 'u-federico', question: MY_DILEMMA, answer: 'Un live dei Daft Punk. Così se mi annoio ballo da solo sulla spiaggia.', at: now - 40 * M, status: 'new' },
+      { id: 'l-2', userId: 'u-aurora', question: MY_DILEMMA, answer: 'Kind of Blue. Di notte, con le stelle, non serve altro.', at: now - 3 * H, status: 'new' },
+      { id: 'l-3', userId: 'u-omar', question: MY_DILEMMA, answer: 'Un disco di Pino Daniele. Tanto prima o poi passo da Napoli.', at: now - 9 * H, status: 'new' },
+    ],
+    likesOut: [],
+    prefs: { intent: 'date', show: 'all', ageMin: 20, ageMax: 35 },
+    savedBy: ['u-irene', 'u-samuele', 'u-lea'],
   }
 }
 

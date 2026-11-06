@@ -208,7 +208,7 @@ function EmptyState({ onCreate }: { onCreate: () => void }) {
   )
 }
 
-function TravelBridge() {
+export function TravelBridge() {
   const { state, addTravel, removeTravel, limits, user, toggleSave } = useStore()
   const nav = useNav()
   const [dest, setDest] = useState('')

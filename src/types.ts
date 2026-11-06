@@ -45,6 +45,46 @@ export interface User {
   lifetime?: boolean
   travel?: string
   stickerFinish?: 'paper' | 'holo' | 'neon'
+  gender: Gender
+  intent: Intent[]
+  look: Look
+  distanceKm?: number
+}
+
+export type Gender = 'f' | 'm' | 'nb'
+export type Intent = 'date' | 'friends'
+
+export interface Look {
+  skin: number
+  hair: 'short' | 'long' | 'bun' | 'curly' | 'buzz' | 'wavy' | 'bob'
+  hairColor: string
+  shirt: string
+  glasses?: boolean
+  beard?: boolean
+  earring?: boolean
+}
+
+export interface Like {
+  id: string
+  userId: string
+  answer: string
+  question: string
+  at: number
+  status: 'new' | 'accepted' | 'declined'
+}
+
+export interface OutgoingLike {
+  userId: string
+  answer: string
+  at: number
+  status: 'pending' | 'matched' | 'missed'
+}
+
+export interface Prefs {
+  intent: Intent
+  show: 'all' | 'f' | 'm'
+  ageMin: number
+  ageMax: number
 }
 
 export interface PlanDetails {
@@ -142,4 +182,10 @@ export interface AppState {
   stats: MeStats
   travelDestinations: string[]
   onboarded: boolean
+  swipes: Record<string, 'pass' | 'like'>
+  swipeHistory: string[]
+  likesIn: Like[]
+  likesOut: OutgoingLike[]
+  prefs: Prefs
+  savedBy: string[]
 }

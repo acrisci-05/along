@@ -53,7 +53,7 @@ export function PlanDetailSheet({ planId, onClose, onJoin }: { planId: string | 
             </div>
 
             <button onClick={() => !isHost && nav.openUser(host.id)} className="glass flex w-full items-center gap-3 rounded-3xl p-3 text-left">
-              <Avatar user={host} size={48} blur={plan.privacy && !isHost} />
+              <Avatar user={host} size={48} blur={plan.privacy && !isHost ? true : undefined} />
               <div className="min-w-0 flex-1">
                 <p className="text-[11px] text-cream/45">Host</p>
                 <p className="font-display text-[16px] font-bold">{isHost ? 'Tu' : `${host.name}, ${host.age}`}</p>
@@ -84,7 +84,7 @@ export function PlanDetailSheet({ planId, onClose, onJoin }: { planId: string | 
                   const u = user(id)
                   return (
                     <div key={id} className="flex w-14 flex-col items-center gap-1">
-                      <Avatar user={u} size={48} blur={plan.privacy && id !== 'me'} />
+                      <Avatar user={u} size={48} blur={plan.privacy && id !== 'me' ? true : undefined} />
                       <span className="truncate text-[11px] text-cream/60">{id === 'me' ? 'Tu' : plan.privacy ? '???' : u.name}</span>
                     </div>
                   )
@@ -156,7 +156,8 @@ export function UserSheet({ userId, onClose }: { userId: string | null; onClose:
   const { state, user, toggleSave } = useStore()
   const nav = useNav()
   const u = userId ? user(userId) : null
-  const dm = u && state.chats.find((c) => !c.planId && c.peerIds.includes(u.id) && c.status === 'active')
+  const dm = u && state.chats.find((c) => c.peerIds.length === 1 && c.peerIds[0] === u.id && (c.status === 'active' || c.status === 'waiting'))
+  const pending = u && state.likesOut.some((l) => l.userId === u.id && l.status === 'pending')
   return (
     <Sheet open={!!u} onClose={onClose}>
       {u && (
@@ -222,9 +223,13 @@ export function UserSheet({ userId, onClose }: { userId: string | null; onClose:
               <Button className="w-full" size="lg" onClick={() => nav.openChat(dm.id)}>
                 <MessageCircle size={18} /> Apri la chat
               </Button>
+            ) : pending ? (
+              <Button className="w-full" size="lg" variant="ghost" disabled>
+                💌 Risposta inviata · aspetta la sua scelta
+              </Button>
             ) : (
               <Button className="w-full" size="lg" onClick={() => nav.openGatekeeperForUser(u.id)}>
-                <KeyRound size={18} /> Rispondi per scrivere il primo messaggio
+                <KeyRound size={18} /> Rispondi al suo dilemma
               </Button>
             )}
           </div>

@@ -39,7 +39,7 @@ export function ChatRoom({ chatId, onClose }: { chatId: string; onClose: () => v
   const readOnly = chat.status !== 'active'
   const tone = timerTone(chat, now)
   const meaningful = meaningfulCount(chat)
-  const blurred = !!plan?.privacy && meaningful < 5
+  const blurred = !!plan?.privacy && peers.length > 1 && meaningful < 5
   const typingUser = typing[chatId] ? user(typing[chatId]!) : null
 
   return (
@@ -234,7 +234,7 @@ function PlanHub({ chat, plan, peers, now, readOnly, meaningful }: { chat: Chat;
         </div>
       )}
 
-      {plan?.privacy && (
+      {plan?.privacy && peers.length > 1 && (
         <div className="rounded-2xl border border-violet/25 bg-violet/5 p-3">
           <div className="flex items-center justify-between text-[12.5px]">
             <span className="flex items-center gap-1.5 font-semibold">

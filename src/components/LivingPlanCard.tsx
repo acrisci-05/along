@@ -161,7 +161,7 @@ export function LivingPlanCard({
 
         {/* footer */}
         <div className="mt-4 flex items-center gap-3">
-          <AvatarStack users={users} capacity={plan.capacity} size={30} blur={plan.privacy} max={4} />
+          <AvatarStack users={users} capacity={plan.capacity} size={30} blur={plan.privacy || undefined} max={4} />
           <div className="min-w-0 flex-1">
             <p className="flex items-center gap-1 text-[12.5px] font-semibold">
               <Users size={13} className="text-cream/50" /> {plan.participants.length}/{plan.capacity}

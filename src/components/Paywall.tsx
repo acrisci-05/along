@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { AnimatePresence, motion } from 'motion/react'
-import { Check, Eye, Infinity as InfinityIcon, Loader2, MessagesSquare, Plane, ShieldCheck, Sparkles, Sticker } from 'lucide-react'
+import { Check, Eye, Undo2, Infinity as InfinityIcon, Loader2, MessagesSquare, Plane, ShieldCheck, Sparkles, Sticker } from 'lucide-react'
 import { Button, LifetimeBadge, RevolutTip, Sheet, Toggle } from './ui'
 import { useStore } from '../store/store'
 
@@ -10,7 +10,8 @@ const FEATURES = [
   { icon: Plane, title: 'Travel Bridge illimitato', sub: 'Tutte le città future che vuoi' },
   { icon: Sparkles, title: 'Badge Founding Member', sub: 'Bordo gradiente neon permanente' },
   { icon: Sticker, title: 'Sticker Bestie olografico', sub: 'Finiture holo e neon' },
-  { icon: Eye, title: 'Vedi chi è interessato', sub: 'Chi ha salvato i tuoi piani, prima del match' },
+  { icon: Eye, title: 'Vedi chi ti ha salvato', sub: 'Chi ha salvato il tuo profilo e i tuoi piani' },
+  { icon: Undo2, title: 'Annulla l’ultimo “passo”', sub: 'Quando il dito è più veloce del cuore' },
 ]
 
 export function Paywall({ open, onClose, reason }: { open: boolean; onClose: () => void; reason?: string }) {
@@ -102,7 +103,7 @@ export function Paywall({ open, onClose, reason }: { open: boolean; onClose: () 
               <p className="flex items-center gap-1.5 font-semibold text-cream/80">
                 <ShieldCheck size={14} className="text-cyan" /> Il livello Free resta generoso
               </p>
-              <p className="mt-1">3 piani attivi, 3 slot chat, Radar Locale e Sintonie Remote complete. Per sempre gratis.</p>
+              <p className="mt-1">Swipe e risposte illimitate, 3 piani attivi, 3 chat, Mappa e Senza Confini. Per sempre gratis.</p>
             </div>
 
               <div className="mt-3 flex items-center justify-between rounded-2xl border border-dashed border-cream/15 px-3 py-2.5">
