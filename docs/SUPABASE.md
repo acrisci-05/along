@@ -35,16 +35,16 @@ Si apre il browser per autorizzare la CLI (oppure ti chiede un *access token*: l
 ```bash
 npx supabase link --project-ref IL_TUO_PROJECT_REF
 ```
-Ti chiede la **password del database** del passo 1.
+Può chiederti la **password del database** del passo 1 (ora o al passo successivo).
 
 ```bash
-npx supabase db push
+npx supabase db push --remote
 ```
-Applica `supabase/migrations/…_along_init.sql`: tabelle, regole di sicurezza (RLS), funzioni, bucket per foto e vocali, tempo reale, elenco Habitat. Rispondi `Y` alla conferma.
+(`--remote` è necessario con la CLI 3: senza, prova a usare un database locale con Docker.) Applica `supabase/migrations/…_along_init.sql`: tabelle, regole di sicurezza (RLS), funzioni, bucket per foto e vocali, tempo reale, elenco Habitat. Rispondi `Y` alla conferma.
 
 Controllo facoltativo:
 ```bash
-npx supabase migration list
+npx supabase migration list --remote
 ```
 La migrazione deve comparire sia in *Local* sia in *Remote*.
 
@@ -89,5 +89,6 @@ Scrivimi “fatto”, oppure incollami l’eventuale errore. Se vuoi che provi i
 |---|---|
 | `Cannot find project ref` | Rifai `npx supabase link --project-ref …` |
 | `password authentication failed` | Password del database sbagliata: la reimposti in **Project Settings → Database** |
-| “le tabelle mancano” nella verifica | Esegui `npx supabase db push` |
+| “le tabelle mancano” nella verifica | Esegui `npx supabase db push --remote` |
+| `failed to connect … 127.0.0.1:54322` / “Make sure Docker is running” | Hai dimenticato `--remote`: `npx supabase db push --remote` |
 | “Non collegato” | Controlla i nomi delle variabili in `.env.local` e riavvia `npm run dev` |

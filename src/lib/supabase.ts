@@ -31,7 +31,7 @@ export async function checkBackend(): Promise<{ ok: boolean; detail: string }> {
     if (error) {
       // anon users can't read habitats (RLS: authenticated only): reaching the API is enough
       if (error.code === '42501' || /permission|not allowed|JWT/i.test(error.message)) return { ok: true, detail: `Collegato a ${backendHost} (regole di sicurezza attive)` }
-      if (error.code === '42P01' || /does not exist|schema cache/i.test(error.message)) return { ok: false, detail: 'Collegato, ma le tabelle mancano: esegui “npx supabase db push”' }
+      if (error.code === '42P01' || /does not exist|schema cache/i.test(error.message)) return { ok: false, detail: 'Collegato, ma le tabelle mancano: esegui “npx supabase db push --remote”' }
       return { ok: false, detail: error.message }
     }
     return { ok: true, detail: `Collegato a ${backendHost}${count !== null ? ` · ${count} habitat` : ''}` }
