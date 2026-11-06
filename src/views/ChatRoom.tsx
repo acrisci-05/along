@@ -140,6 +140,7 @@ export function ChatRoom({ chatId, onClose }: { chatId: string; onClose: () => v
             receipts={receipts}
             last={m.id === lastMine}
             onReport={(id) => nav.openSafety(id, 'report')}
+            onAccept={!readOnly && m.kind === 'proposal' && m.from !== 'me' && m.proposal?.status === 'pending' ? () => store.acceptProposal(chat.id, m.id) : undefined}
           />
         ))}
         <AnimatePresence>
@@ -544,7 +545,7 @@ function SplitBill({ chat, total, people, disabled, onSent }: { chat: Chat; tota
   )
 }
 
-function Bubble({ m, prev, author, blurred, group, receipts, last, onReport }: { m: Message; prev?: Message; author?: User; blurred: boolean; group: boolean; receipts: boolean; last: boolean; onReport: (userId: string) => void }) {
+function Bubble({ m, prev, author, blurred, group, receipts, last, onReport, onAccept }: { m: Message; prev?: Message; author?: User; blurred: boolean; group: boolean; receipts: boolean; last: boolean; onReport: (userId: string) => void; onAccept?: () => void }) {
   const mine = m.from === 'me'
   if (m.kind === 'system')
     return (
@@ -586,8 +587,13 @@ function Bubble({ m, prev, author, blurred, group, receipts, last, onReport }: {
           </p>
         </div>
         <div className="flex items-center justify-between border-t border-dashed border-cream/15 px-3.5 py-2 text-sm">
-          <span className={ok ? 'font-semibold text-brand' : 'text-muted'}>{ok ? 'Confermata da entrambi' : 'In attesa di risposta'}</span>
+          <span className={ok ? 'font-semibold text-brand' : 'text-muted'}>{ok ? 'Confermata da entrambi' : onAccept ? 'Ti va?' : 'In attesa di risposta'}</span>
           {ok && <CheckCircle2 size={16} className="text-brand" />}
+          {!ok && onAccept && (
+            <button onClick={onAccept} className="rounded-full bg-brand px-4 py-1.5 text-sm font-bold text-ink">
+              Ci sto
+            </button>
+          )}
         </div>
       </motion.div>
     )
@@ -650,7 +656,7 @@ function Bubble({ m, prev, author, blurred, group, receipts, last, onReport }: {
 }
 
 function Composer({ chat, onPlus }: { chat: Chat; onPlus: () => void }) {
-  const { sendMessage, sendVoice, toast, state } = useStore()
+  const { sendMessage, sendVoice, toast, state, notifyTyping, demo } = useStore()
   const [text, setText] = useState('')
   const [risk, setRisk] = useState<OutgoingRisk | null>(null)
   const noVoice = isMinor(state.me) && chat.peerIds.length === 1
@@ -711,6 +717,10 @@ function Composer({ chat, onPlus }: { chat: Chat; onPlus: () => void }) {
       tick()
       setRec({ start: Date.now(), real: true })
     } catch {
+      if (!demo) {
+        toast({ tone: 'coral', title: 'Microfono non disponibile', body: 'Consenti l’accesso al microfono per mandare un vocale.' })
+        return
+      }
       setRec({ start: Date.now(), real: false })
       toast({ tone: 'gold', title: 'Microfono non disponibile', body: 'Registro una nota vocale simulata.' })
     }
@@ -730,7 +740,7 @@ function Composer({ chat, onPlus }: { chat: Chat; onPlus: () => void }) {
         const blob = new Blob(m.chunks, { type: m.recorder?.mimeType || 'audio/webm' })
         const step = Math.max(1, Math.floor(m.samples.length / 22))
         const wave = Array.from({ length: 22 }, (_, i) => m.samples[i * step] ?? 3)
-        sendVoice(chat.id, duration, { audioUrl: URL.createObjectURL(blob), wave })
+        sendVoice(chat.id, duration, { audioUrl: URL.createObjectURL(blob), wave, blob })
       }
       cleanup()
       setRec(null)
@@ -781,7 +791,10 @@ function Composer({ chat, onPlus }: { chat: Chat; onPlus: () => void }) {
         <span className="sr-only">Messaggio</span>
         <input
           value={text}
-          onChange={(e) => setText(e.target.value)}
+          onChange={(e) => {
+            setText(e.target.value)
+            if (e.target.value) notifyTyping(chat.id)
+          }}
           placeholder="Scrivi un messaggio"
           className="h-11 w-full rounded-full border border-line bg-surface px-4 text-base placeholder:text-cream/35 focus:border-brand/60 focus:outline-none"
         />

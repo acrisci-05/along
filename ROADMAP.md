@@ -43,13 +43,16 @@ Obiettivo: un'app che si può far provare a qualcuno e che "sembra vera".
 
 ## Fase 3 — Backend (diventa multi-utente)
 - ✅ **3.1 Scelta e setup** — Supabase (UE, Francoforte): schema, regole di sicurezza RLS (età, blocchi, verifica, limiti), storage foto/vocali, tempo reale, client nel codice, guida `docs/SUPABASE.md`, test `npm run db:test` (42 controlli). Progetto `along` creato in UE, migrazione applicata, app collegata (“Collegato”)
-- 🔜 **3.2 Account** — registrazione e login (email / magic link)
-- ⬜ **3.3 Profili, like e match su database** — sostituire i dati finti
-- ⬜ **3.4 Chat in tempo reale** — messaggi, note vocali vere (microfono), timer 48h lato server
-- ⬜ **3.5 Foto online** — storage, compressione, sfocatura protetta lato server
+- ✅ **3.2 Account** — accesso con email e codice di 6 cifre (niente password; email in italiano), poi i 3 passi del profilo; chi rientra salta l’onboarding. Profilo → Account: Esci ed Elimina account (scrivi ELIMINA: profilo, foto, like, messaggi e vocali cancellati subito; chi parlava con te vede la chat chiusa). Google: più avanti
+- ✅ **3.3 Profili, like e match su database** — Scopri mostra solo persone vere (se non c’è nessuno: “Sei tra i primi a Napoli” + Invita amici), 20 profili al giorno contati dal server, risposta al dilemma = like, accetta/“non stavolta” (+3 karma), match anche se vi siete scelti a vicenda senza chat doppie, piani e crew (`join_plan`), blocchi e segnalazioni, verifica (esito ancora simulato), Karma calcolato dal server. La data di nascita esatta non è leggibile dagli altri: vedono solo l’età
+- ✅ **3.4 Chat in tempo reale** — messaggi, “sta scrivendo”, Visualizzato (reciproco), vocali veri caricati sul server, proposta d’uscita con “Ci sto” per l’altra persona (ferma il timer, +5 a entrambi), chiusura con eleganza, Sala d’Attesa che si svuota da sola. Il timer di 48 ore scade lato server quando uno dei due apre l’app
+- ✅ **3.5 Foto online** — fino a 6 foto compresse (4:5), più una copia minuscola e sfocata: prima del match gli altri ricevono solo quella; gli originali si scaricano solo dopo il match (regole dello storage)
+- Provato su un Supabase locale con persone di prova: `npm run db:test` (70 controlli) e 3 percorsi completi nel browser (registrazione, like, match, chat, vocali, piani, crew, esci/rientra, elimina account, 16-17 separati e verifica)
+
+> **Fine Fase 3.** Punti aperti: verifica con un fornitore vero (oggi l’esito è simulato), timer scaduti anche ad app chiusa (job programmato, con le notifiche 4.1), email da un mittente tuo (SMTP) prima della beta: il mittente gratuito di Supabase manda pochi codici l’ora e solo agli indirizzi del team.
 
 ## Fase 4 — Esperienza completa
-- ⬜ **4.1 Notifiche** — nuovo like, match, timer in scadenza
+- 🔜 **4.1 Notifiche** — nuovo like, match, timer in scadenza
 - ⬜ **4.2 Piani di gruppo reali (D)** — crew, partecipanti, Split the Bill condiviso
 - ⬜ **4.3 Mappa vera (D)** — mappa della città con gli Habitat, senza tracciamento GPS continuo
 - ⬜ **4.4 Dopo l'uscita** — "Com'è andata?", ri-proporre un piano

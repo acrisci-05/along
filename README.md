@@ -50,4 +50,5 @@ Su desktop l'app è mostrata in una cornice smartphone, con switch per la vista 
 ## Backend (Supabase)
 - Schema, regole di sicurezza e storage: `supabase/migrations/`. Test delle regole senza Supabase: `npm run db:test`.
 - Per collegare un progetto vero segui **[docs/SUPABASE.md](docs/SUPABASE.md)** (Supabase CLI: `login`, `link`, `db push`, poi `.env.local`).
-- Senza `.env.local` l’app resta in modalità demo; il codice di Supabase si scarica solo quando è configurato.
+- Con `.env.local` l’app è **vera**: accesso con email e codice, profili, foto, like, match, chat e piani sul database (`src/store/real.tsx`, schermate di accesso in `src/components/Account.tsx`). Le stesse schermate funzionano con la demo (`src/store/store.tsx`) grazie a un’unica interfaccia `Store`.
+- Senza `.env.local` l’app resta in modalità demo con persone finte; il codice di Supabase si scarica solo quando è configurato.

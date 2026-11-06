@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { motion } from 'motion/react'
 import { BadgeCheck, BellRing, Eye, ShieldAlert, Crown, Info, KeyRound, MapPin, Pencil, RotateCcw, Sparkles } from 'lucide-react'
 import { useNav } from '../nav'
+import { AccountSection } from '../components/Account'
 import { useStore } from '../store/store'
 import { cn } from '../lib/utils'
 import { isMinor } from '../lib/age'
@@ -16,7 +17,7 @@ import { BadgeRow, earnedBadges, KarmaMeter } from '../components/Karma'
 import { Avatar, Button, Eyebrow, LifetimeBadge, RevolutTip, Sheet, Toggle } from '../components/ui'
 
 export function Profile() {
-  const { state, updateMe, setLifetime, reset, simulateIncoming, toast, setPrefs, unblockUser, injectSuspicious } = useStore()
+  const { state, updateMe, setLifetime, reset, simulateIncoming, toast, setPrefs, unblockUser, injectSuspicious, demo } = useStore()
   const nav = useNav()
   const me = state.me
   const minor = isMinor(me)
@@ -236,8 +237,10 @@ export function Profile() {
         </div>
       </section>
 
+      {!demo && <AccountSection />}
+
       {/* settings */}
-      <section className="space-y-2">
+      {demo && <section className="space-y-2">
         <Eyebrow>Impostazioni demo</Eyebrow>
         <div className="glass divide-y divide-cream/5 rounded-3xl">
           <div className="flex items-center justify-between gap-3 p-3.5">
@@ -272,7 +275,7 @@ export function Profile() {
         <p className="flex items-start gap-1.5 px-1 text-xs text-cream/40">
           <Info size={13} className="mt-0.5 shrink-0" /> Tutti i dati vivono solo nel tuo browser (localStorage). Nessun server, nessun tracciamento GPS.
         </p>
-      </section>
+      </section>}
 
       <footer className="pt-2 text-center">
         <p className="font-display text-sm font-bold tracking-[0.3em] text-cream/60">ALONG</p>

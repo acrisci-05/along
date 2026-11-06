@@ -33,7 +33,7 @@ function computeWhen(key: WhenKey, time: string, custom: string) {
 }
 
 export function QuickCreate({ open, onClose, onPaywall, onCreated }: { open: boolean; onClose: () => void; onPaywall: (reason: string) => void; onCreated: (planId: string) => void }) {
-  const { state, createPlan, hostedActivePlans, limits } = useStore()
+  const { state, createPlan, hostedActivePlans, limits, toast } = useStore()
   const [step, setStep] = useState(0)
   const [title, setTitle] = useState('')
   const [category, setCategory] = useState<Category>('drink')
@@ -110,8 +110,8 @@ export function QuickCreate({ open, onClose, onPaywall, onCreated }: { open: boo
   const minor = isMinor(state.me)
   const canNext = [title.trim().length >= 3, habitat.length > 0, (whenKey !== 'custom' || !!custom) && (!minor || inMinorHours(when)), capacity >= 2, dilemma.trim().length >= 8][step]
 
-  const publish = () => {
-    const r = createPlan({
+  const publish = async () => {
+    const r = await createPlan({
       title,
       category,
       mode,
@@ -127,6 +127,8 @@ export function QuickCreate({ open, onClose, onPaywall, onCreated }: { open: boo
     if (r.ok) {
       onCreated(r.planId)
       onClose()
+    } else if (r.reason === 'error') {
+      toast({ tone: 'coral', title: 'Piano non pubblicato', body: r.message ?? 'Riprova tra poco.' })
     } else {
       onPaywall(`Hai già ${limits.plans} piani attivi: il massimo del livello Free. Con ALONG Forever crei piani illimitati, per sempre.`)
     }

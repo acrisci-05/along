@@ -10,7 +10,7 @@ import { Avatar, Eyebrow } from '../components/ui'
 type Seg = 'host' | 'join' | 'saved'
 
 export function MyPlans() {
-  const { state, user, toggleSave, hostedActivePlans, limits, simulateIncoming } = useStore()
+  const { state, user, toggleSave, hostedActivePlans, limits, simulateIncoming, demo } = useStore()
   const nav = useNav()
   const now = useNow(30_000)
   const [seg, setSeg] = useState<Seg>('host')
@@ -75,9 +75,11 @@ export function MyPlans() {
                   <p className="flex items-center gap-1.5 text-sm font-semibold">
                     <Eye size={15} className="text-violet" /> {p.interested.length} person{p.interested.length === 1 ? 'a' : 'e'} interessat{p.interested.length === 1 ? 'a' : 'e'}
                   </p>
-                  <button onClick={simulateIncoming} className="inline-flex items-center gap-1 text-sm font-semibold text-cyan hover:underline">
-                    <UserPlus size={13} /> Simula richiesta
-                  </button>
+                  {demo && (
+                    <button onClick={simulateIncoming} className="inline-flex items-center gap-1 text-sm font-semibold text-cyan hover:underline">
+                      <UserPlus size={13} /> Simula richiesta
+                    </button>
+                  )}
                 </div>
                 {p.interested.length > 0 &&
                   (state.lifetime ? (

@@ -14,12 +14,13 @@ create table storage.objects (id uuid primary key default gen_random_uuid(), buc
 alter table storage.objects enable row level security;
 create function storage.foldername(name text) returns text[] language sql immutable as $$ select (string_to_array(name, '/'))[1:array_length(string_to_array(name,'/'),1)-1] $$;
 create publication supabase_realtime;
-`
-const grants = `
+-- come su Supabase: tabelle e funzioni nuove sono accessibili agli utenti autenticati, salvo revoche
 grant usage on schema public, storage, auth to authenticated;
-grant all on all tables in schema public to authenticated; grant all on storage.objects to authenticated;
-grant execute on all functions in schema public to authenticated;
+alter default privileges in schema public grant all on tables to authenticated;
+alter default privileges in schema public grant execute on functions to authenticated;
+grant all on storage.objects to authenticated;
 `
+const grants = ''
 // applies every migration in supabase/migrations, in order, on an in-memory Postgres (PGlite)
 const dir = new URL('../migrations/', import.meta.url)
 const sql = fs.readdirSync(dir).filter((f) => f.endsWith('.sql')).sort().map((f) => fs.readFileSync(new URL(f, dir), 'utf8')).join('\n')
@@ -67,7 +68,7 @@ ok('chat visible to members', (await tryq(U.adult1, `select id from chats`)).row
 ok('chat invisible to others', (await tryq(U.teen1, `select id from chats`)).rows.length === 0)
 ok('member can write', (await tryq(U.adult1, `insert into messages (chat_id, sender, kind, text) values ($1, $2, 'text', 'Ciao! Tramonto sabato?')`, [chatId, U.adult1])).ok)
 ok('cannot spoof sender', !(await tryq(U.adult1, `insert into messages (chat_id, sender, kind, text) values ($1, $2, 'text', 'x')`, [chatId, U.adult2])).ok)
-ok('dilemma message created', (await tryq(U.adult2, `select kind from messages where chat_id = $1 order by created_at`, [chatId])).rows[0]?.kind === 'dilemma')
+ok('dilemma message created', (await tryq(U.adult2, `select kind from messages where chat_id = $1 order by created_at`, [chatId])).rows.some((r) => r.kind === 'dilemma'))
 
 // block hides
 ok('block', (await tryq(U.adult2, `insert into blocks (blocker, blocked) values ($1, $2)`, [U.adult2, U.adult1])).ok)
@@ -109,6 +110,58 @@ ok('teen original photo hidden before match', (await tryq(U.teen1, `select name 
 ok('teen blurred photo visible to compatible teen', (await tryq(U.teen1, `select name from storage.objects where bucket_id = 'photos-blurred' and name like $1`, [`${U.teen2}/%`])).rows.length === 1)
 ok('adult cannot see teen blurred photo', (await tryq(U.adult1, `select name from storage.objects where bucket_id = 'photos-blurred' and name like $1`, [`${U.teen2}/%`])).rows.length === 0)
 ok('adult1 original visible to its match adult2', (await tryq(U.adult2, `select name from storage.objects where bucket_id = 'photos' and name like $1`, [`${U.adult1}/%`])).rows.length === 1)
+
+// funzioni dell'app (step 3.2)
+{
+  const A = U.adult1, B = U.adult2
+  const msgs = async (uid) => (await tryq(uid, `select kind, text from messages where chat_id = $1 order by created_at`, [chatId])).rows
+  ok('proposal insert', (await tryq(A, `insert into messages (chat_id, sender, kind, proposal) values ($1, $2, 'proposal', '{"title":"Tramonto","when":"sabato 19","place":"Lungomare","status":"pending"}') `, [chatId, A])).ok)
+  const pid = (await db.query(`select id from messages where kind = 'proposal'`)).rows[0].id
+  ok('sender cannot accept own proposal', !(await tryq(A, `select accept_proposal($1)`, [pid])).ok)
+  ok('peer accepts proposal', (await tryq(B, `select accept_proposal($1)`, [pid])).ok)
+  ok('clock stopped after proposal', (await db.query(`select clock_stopped from chats where id = $1`, [chatId])).rows[0].clock_stopped === true)
+  ok('karma +5 both', (await db.query(`select karma from profiles where id = $1`, [B])).rows[0].karma === 105)
+  ok('outsider cannot finish chat', !(await tryq(U.teen1, `select finish_chat($1, 'closed', 'x')`, [chatId])).ok)
+  ok('internal helpers not callable', !(await tryq(A, `select add_karma($1, 1000)`, [A])).ok)
+  ok('finish chat elegantly', (await tryq(A, `select finish_chat($1, 'closed', 'Chiusura con eleganza')`, [chatId])).ok)
+  ok('both members closed', (await db.query(`select count(*)::int c from chat_members where chat_id = $1 and status = 'closed'`, [chatId])).rows[0].c === 2)
+  ok('system message added', (await msgs(A)).some((m) => m.kind === 'system'))
+  // like reciproco: niente chat doppie
+  await tryq(A, `insert into likes (from_user, to_user, question, answer) values ($1, $2, 'q', 'secondo giro')`, [B, A]).catch(() => {})
+  await db.query(`delete from likes`)
+  await tryq(A, `insert into likes (from_user, to_user, question, answer) values ($1, $2, 'q', 'risposta di A')`, [A, B])
+  await tryq(B, `insert into likes (from_user, to_user, question, answer) values ($1, $2, 'q', 'risposta di B')`, [B, A])
+  const lAB = (await db.query(`select id from likes where from_user = $1`, [A])).rows[0].id
+  const c2 = (await tryq(B, `select accept_like($1) as c`, [lAB])).rows?.[0]?.c
+  ok('mutual like -> both matched', (await db.query(`select count(*)::int c from likes where status = 'matched'`)).rows[0].c === 2)
+  ok('new chat has spark + dilemma', JSON.stringify((await tryq(A, `select kind from messages where chat_id = $1 order by created_at`, [c2])).rows.map((r) => r.kind)) === '["system","dilemma"]')
+  ok('48h timer set', (await db.query(`select deadline is not null d from chats where id = $1`, [c2])).rows[0].d === true)
+  const persona = (await db.query(`select id from profiles where name = 'Persona' limit 1`)).rows[0].id
+  await db.query(`insert into likes (from_user, to_user, question, answer) values ($1, $2, 'q', 'ciao Bruno')`, [persona, B])
+  const lx = (await db.query(`select id from likes where answer = 'ciao Bruno'`)).rows[0].id
+  const k0 = (await db.query(`select karma from profiles where id = $1`, [B])).rows[0].karma
+  ok('decline like +3 karma', (await tryq(B, `select decline_like($1)`, [lx])).ok && (await db.query(`select karma from profiles where id = $1`, [B])).rows[0].karma === k0 + 3)
+  { const ka = (await db.query(`select karma from profiles where id = $1`, [A])).rows[0].karma; await tryq(A, `select decline_like($1)`, [lx]); ok('cannot decline others likes', (await db.query(`select karma from profiles where id = $1`, [A])).rows[0].karma === ka) }
+  ok('birth date not readable by others', !(await tryq(A, `select birth_date from profiles where id = $1`, [B])).ok)
+  { const r = await tryq(A, `select id, age, birth_date from profile_ages()`); ok('ages visible, own birth date only', r.ok && r.rows.some((x) => x.id === B && x.age === 30 && x.birth_date === null) && r.rows.some((x) => x.id === A && x.birth_date)) }
+  // blocco
+  ok('block_user', (await tryq(B, `select block_user($1)`, [A])).ok)
+  ok('chat closed after block', (await db.query(`select count(*)::int c from chat_members where chat_id = $1 and status = 'closed'`, [c2])).rows[0].c === 2)
+  ok('likes removed after block', (await db.query(`select count(*)::int c from likes where (from_user = $1 and to_user = $2) or (from_user = $2 and to_user = $1)`, [A, B])).rows[0].c === 0)
+  await tryq(B, `delete from blocks where blocker = $1`, [B])
+  // voce
+  ok('upload own voice', (await tryq(A, `insert into storage.objects (bucket_id, name) values ('voice', $1)`, [`${c2}/${A}/v.webm`])).ok)
+  ok('cannot upload voice as someone else', !(await tryq(A, `insert into storage.objects (bucket_id, name) values ('voice', $1)`, [`${c2}/${B}/v.webm`])).ok)
+  // verifica
+  ok('verification needs photos', !(await tryq(A, `select complete_verification('selfie')`)).ok)
+  await tryq(A, `insert into photos (owner, position, path, blurred_path) values ($1, 0, 'p', 'b')`, [A])
+  ok('verification ok with photos', (await tryq(A, `select complete_verification('selfie')`)).ok && (await db.query(`select verified from profiles where id = $1`, [A])).rows[0].verified === true)
+  // elimina account
+  ok('delete my account', (await tryq(A, `select delete_my_account()`)).ok)
+  ok('profile gone', (await db.query(`select count(*)::int c from profiles where id = $1`, [A])).rows[0].c === 0)
+  ok('no orphan messages from deleted user', (await db.query(`select count(*)::int c from messages where sender is null and kind <> 'system'`)).rows[0].c === 0)
+  ok('peer sees chat closed', (await db.query(`select status from chat_members where chat_id = $1 and user_id = $2`, [c2, B])).rows[0].status === 'closed')
+}
 
 console.log(failures ? `\n${failures} controlli falliti` : '\nTutti i controlli superati')
 process.exit(failures ? 1 : 0)

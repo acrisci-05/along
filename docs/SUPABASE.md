@@ -1,4 +1,4 @@
-# Collegare ALONG a Supabase (step 3.1)
+# Collegare ALONG a Supabase (step 3.1 e 3.2)
 
 Tempo: circa 10 minuti. Ti servono: il tuo account Supabase, Node.js 20+ e il repository sul tuo computer.
 
@@ -76,13 +76,48 @@ Scrivimi “fatto”, oppure incollami l’eventuale errore. Se vuoi che provi i
 
 ---
 
-### Cosa fa già il database (provato con `npm run db:test`, 42 controlli)
+## 7 · Attiva l’app vera (step 3.2: account, Scopri, like, chat)
+
+Da qui, con `.env.local` presente, l’app **non è più una demo**: niente persone finte, si entra con email e codice.
+
+1. Aggiorna il codice:
+   ```bash
+   git pull
+   ```
+2. Installa le nuove funzioni del database (`…_along_rpc.sql`):
+   ```bash
+   npx supabase db push --remote
+   ```
+3. Manda a Supabase le email in italiano con il **codice di 6 cifre**. Prima guarda cosa cambierebbe:
+   ```bash
+   npx supabase config diff
+   ```
+   poi applica (ti mostra le differenze e chiede conferma, rispondi `y`):
+   ```bash
+   npx supabase config push
+   ```
+   **Importante:** senza questo passo l’email di Supabase contiene un link invece del codice. In alternativa puoi farlo a mano: **Authentication → Emails → Magic Link**, oggetto `Il tuo codice ALONG: {{ .Token }}` e nel testo `{{ .Token }}` (il contenuto pronto è in `supabase/templates/codice-accesso.html`); in **Authentication → Sign In / Providers → Email** controlla che *Email OTP Length* sia **6** e *Email OTP Expiration* **600** secondi.
+4. Avvia e prova:
+   ```bash
+   npm run dev
+   ```
+   Apri <http://localhost:5173> → **Crea il tuo profilo** → la tua email → il codice che ricevi → i 3 passi del profilo. Per provare un match ti serve una seconda persona: una finestra in incognito con un’altra email.
+
+> **Limite delle email:** il mittente gratuito di Supabase manda pochi codici all’ora e solo agli indirizzi dei membri del progetto (il tuo va bene). Prima di far provare l’app ad amici collegheremo un mittente tuo (SMTP, per esempio Resend o Brevo) in **Authentication → Emails → SMTP Settings**.
+
+Senza `.env.local` l’app torna la demo con persone finte (utile per mostrarla senza account).
+
+---
+
+### Cosa fa già il database (provato con `npm run db:test`, 70 controlli)
 - Età minima **16 anni**; **16-17 e 18+ non si vedono mai** (profili, piani, foto, like, chat).
 - 16-17: solo **Amici**, **verifica obbligatoria** prima di rispondere, unirsi a piani o scrivere; piani solo **8–20** e in **luoghi pubblici**; niente vocali nelle chat 1:1.
 - **Blocchi**: chi è bloccato sparisce e non può più scrivere. **Segnalazioni** solo in scrittura (le legge la moderazione).
 - Spunta di verifica, karma e Forever **non modificabili dal browser**.
 - **Foto**: originale visibile solo a te e ai tuoi match, versione sfocata ai profili compatibili.
 - Limiti: **3 piani attivi**, **20 profili al giorno**, **3 chat attive** (5 con Forever).
+- Data di nascita esatta **non leggibile** dagli altri: vedono solo l’età.
+- Funzioni del server per match, piani, chiusura chat, timer 48h, verifica, blocco ed **eliminazione account** (cancella anche i messaggi; chi parlava con te vede la chat chiusa).
 
 ### Problemi comuni
 | Messaggio | Soluzione |
@@ -92,3 +127,6 @@ Scrivimi “fatto”, oppure incollami l’eventuale errore. Se vuoi che provi i
 | “le tabelle mancano” nella verifica | Esegui `npx supabase db push --remote` |
 | `failed to connect … 127.0.0.1:54322` / “Make sure Docker is running” | Hai dimenticato `--remote`: `npx supabase db push --remote` |
 | “Non collegato” | Controlla i nomi delle variabili in `.env.local` e riavvia `npm run dev` |
+| Nell’email c’è un link e non il codice | Fai il punto 3 della sezione 7 (`npx supabase config push` o il modello a mano) |
+| “Troppi tentativi” / l’email non arriva | Limite del mittente gratuito: aspetta qualche minuto, guarda nello spam, usa l’email del tuo account Supabase |
+| “Non riesco a collegarmi” dopo l’accesso | Mancano le nuove funzioni: `npx supabase db push --remote` |

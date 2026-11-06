@@ -172,8 +172,8 @@ export function Crew() {
                   size="sm"
                   variant={free > 0 ? 'gold' : 'outline'}
                   className="w-full"
-                  onClick={() => {
-                    if (acceptWaiting(c.id)) {
+                  onClick={async () => {
+                    if (await acceptWaiting(c.id)) {
                       toast({ tone: 'gold', title: `${u.name} è nella tua crew`, body: 'Nuovo slot attivo.' })
                       nav.openChat(c.id)
                     } else toast({ tone: 'coral', title: 'Slot pieni', body: 'Fai evolvere o chiudi con eleganza una chat per far entrare qualcuno.' })

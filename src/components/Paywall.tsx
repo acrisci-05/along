@@ -14,7 +14,7 @@ const FEATURES = [
 ]
 
 export function Paywall({ open, onClose, reason }: { open: boolean; onClose: () => void; reason?: string }) {
-  const { state, setLifetime } = useStore()
+  const { state, setLifetime, demo } = useStore()
   const [phase, setPhase] = useState<'idle' | 'paying' | 'done'>('idle')
   const [launch, setLaunch] = useState(true)
 
@@ -25,6 +25,10 @@ export function Paywall({ open, onClose, reason }: { open: boolean; onClose: () 
   const price = launch ? '14,99 €' : '19,99 €'
 
   const buy = () => {
+    if (!demo) {
+      setLifetime(true)
+      return
+    }
     setPhase('paying')
     window.setTimeout(() => {
       setLifetime(true)
@@ -105,12 +109,12 @@ export function Paywall({ open, onClose, reason }: { open: boolean; onClose: () 
               <p className="mt-1">Swipe e risposte illimitate, 3 piani attivi, 3 chat, Mappa e Senza Confini. Per sempre gratis.</p>
             </div>
 
-              <div className="mt-3 flex items-center justify-between rounded-2xl border border-dashed border-cream/15 px-3 py-2.5">
+              {demo && <div className="mt-3 flex items-center justify-between rounded-2xl border border-dashed border-cream/15 px-3 py-2.5">
                 <span className="text-sm text-cream/60">
                   <span className="font-semibold text-cream/85">Demo:</span> simula acquisto avvenuto
                 </span>
                 <Toggle checked={state.lifetime} onChange={(v) => setLifetime(v)} label="Simula stato Lifetime" tone="gold" />
-              </div>
+              </div>}
 
             <div className="sticky bottom-0 -mx-5 -mb-8 mt-2 bg-gradient-to-t from-[#221b16] via-[#221b16] to-transparent px-5 pb-6 pt-6">
               <Button className="w-full" size="lg" onClick={buy} disabled={phase === 'paying'}>
@@ -122,7 +126,7 @@ export function Paywall({ open, onClose, reason }: { open: boolean; onClose: () 
                   <>Sblocca per sempre a {price}</>
                 )}
               </Button>
-              <p className="mt-2 text-center text-xs text-cream/35">Pagamento simulato · nessun addebito reale in questa demo</p>
+              <p className="mt-2 text-center text-xs text-cream/35">{demo ? 'Pagamento simulato · nessun addebito reale in questa demo' : 'Pagamento in arrivo a breve · nessun addebito oggi'}</p>
             </div>
           </motion.div>
         )}

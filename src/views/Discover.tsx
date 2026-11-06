@@ -7,7 +7,7 @@ import { useNow, useStore } from '../store/store'
 import { DAILY_LIMIT, todayKey } from '../data/mock'
 import { isMinor } from '../lib/age'
 import { affinity, cn, planStatus, planWhen, sharedInterests } from '../lib/utils'
-import { Portrait } from '../components/Portrait'
+import { UserPicture } from '../components/Portrait'
 import { Button, Chip, Sheet, Toggle } from '../components/ui'
 import { useNeedsVerification, VerifiedBadge } from '../components/Verify'
 import { isVerified } from '../lib/verify'
@@ -30,7 +30,7 @@ const CARD_EXIT: Variants = {
 }
 
 function distanceLabel(u: User, me: User) {
-  if (u.city === me.city) return `a ${String(u.distanceKm ?? 2).replace('.', ',')} km da te`
+  if (u.city === me.city) return u.distanceKm ? `a ${String(u.distanceKm).replace('.', ',')} km da te` : `a ${u.city}`
   return `${u.city}${u.distanceKm ? ` · ${u.distanceKm.toLocaleString('it-IT')} km` : ''}`
 }
 
@@ -50,7 +50,7 @@ export function Discover({ mode, setMode }: { mode: Mode; setMode: (m: Mode) => 
 
 function Deck({ mode, setMode, onPlans }: { mode: Mode; setMode: (m: Mode) => void; onPlans: () => void }) {
   const store = useStore()
-  const { state, setPrefs, passUser, likeUser, undoSwipe, resetDeck, toast, newDay, allowed } = store
+  const { state, setPrefs, passUser, likeUser, undoSwipe, resetDeck, toast, newDay, allowed, demo } = store
   const minor = isMinor(state.me)
   const needsVerify = useNeedsVerification()
   const [dir, setDir] = useState<'left' | 'right'>('left')
@@ -184,8 +184,22 @@ function Deck({ mode, setMode, onPlans }: { mode: Mode; setMode: (m: Mode) => vo
             />
           )}
         </AnimatePresence>
-        {dayOver && <DayOver daily={daily} onNewDay={newDay} />}
-        {!top && !dayOver && (
+        {dayOver && <DayOver daily={daily} onNewDay={demo ? newDay : undefined} />}
+        {!top && !dayOver && !demo && Object.values(state.users).filter((u) => allowed(u.id) && u.city === me.city).length === 0 && (
+          <div className="absolute inset-0 grid place-items-center rounded-md border border-dashed border-line p-6 text-center">
+            <div>
+              <p className="text-xl font-bold">Sei tra i primi a {me.city}</p>
+              <p className="mt-1 text-sm text-muted">ALONG è appena partita. Invita chi vorresti trovare qui: ogni persona in più rende il mazzo più ricco. Intanto proponi un piano, chi arriva lo vede subito.</p>
+              <div className="mt-5 flex flex-col gap-2">
+                <Button onClick={() => void invite(toast)}>Invita amici</Button>
+                <Button variant="outline" onClick={nav.openCreate}>
+                  Proponi un piano
+                </Button>
+              </div>
+            </div>
+          </div>
+        )}
+        {!top && !dayOver && (demo || Object.values(state.users).some((u) => allowed(u.id) && u.city === me.city)) && (
           <div className="absolute inset-0 grid place-items-center rounded-md border border-dashed border-line p-6 text-center">
             <div>
               <p className="text-3xl" aria-hidden>
@@ -198,9 +212,15 @@ function Deck({ mode, setMode, onPlans }: { mode: Mode; setMode: (m: Mode) => vo
                 <Button variant="outline" onClick={() => setMode(mode === 'local' ? 'remote' : 'local')}>
                   {mode === 'local' ? 'Prova Senza Confini' : 'Torna vicino a te'}
                 </Button>
-                <button onClick={resetDeck} className="mt-1 text-sm font-semibold text-cream/50 hover:text-cream">
-                  Rivedi i profili saltati
-                </button>
+                {demo ? (
+                  <button onClick={resetDeck} className="mt-1 text-sm font-semibold text-cream/50 hover:text-cream">
+                    Rivedi i profili saltati
+                  </button>
+                ) : (
+                  <button onClick={() => void invite(toast)} className="mt-1 text-sm font-semibold text-cream/50 hover:text-cream">
+                    Invita amici su ALONG
+                  </button>
+                )}
               </div>
             </div>
           </div>
@@ -314,7 +334,7 @@ export function SwipeCard({
   if (behind)
     return (
       <motion.div key="behind" className="absolute inset-x-0 top-0 bottom-[72px] z-0 overflow-hidden rounded-2xl bg-surface" initial={{ scale: 0.9, y: 18, opacity: 0 }} animate={{ scale: 0.95, y: 10, opacity: 0.6 }} exit={{ opacity: 0 }} aria-hidden>
-        <Portrait look={user.look} hue={user.hue} className="h-full w-full scale-125 blur-[26px] opacity-60" />
+        <UserPicture user={user} className="h-full w-full scale-125 blur-[26px] opacity-60" />
       </motion.div>
     )
 
@@ -347,7 +367,7 @@ export function SwipeCard({
             aria-label={`${user.name}, ${user.age}${plan ? `: ${plan.title}` : ''}`}
             aria-hidden={flipped}
           >
-            <Portrait look={user.look} hue={user.hue} className="absolute inset-0 h-full w-full scale-[1.3] blur-[22px]" />
+            <UserPicture user={user} className="absolute inset-0 h-full w-full scale-[1.3] blur-[22px]" />
             <div className="absolute inset-0 bg-[linear-gradient(180deg,rgb(28_22_18/0.15)_0%,transparent_30%,rgb(28_22_18/0.75)_55%,rgb(28_22_18/0.97)_100%)]" />
 
             {/* story progress + lock */}
@@ -469,7 +489,22 @@ export function SwipeCard({
   )
 }
 
-function DayOver({ daily, onNewDay }: { daily: { seen: number; answered: number; matches: number }; onNewDay: () => void }) {
+async function invite(toast: (t: { tone: 'lime' | 'coral'; title: string; body?: string }) => void) {
+  const url = window.location.origin
+  const text = 'Su ALONG fai match su qualcosa da fare: un piano vero, non solo una chat. Ti aspetto lì.'
+  try {
+    if (navigator.share) {
+      await navigator.share({ title: 'ALONG', text, url })
+      return
+    }
+    await navigator.clipboard.writeText(`${text} ${url}`)
+    toast({ tone: 'lime', title: 'Link copiato', body: 'Incollalo dove vuoi: WhatsApp, Instagram, email.' })
+  } catch (e) {
+    if ((e as Error)?.name !== 'AbortError') toast({ tone: 'coral', title: 'Non riesco a condividere', body: url })
+  }
+}
+
+function DayOver({ daily, onNewDay }: { daily: { seen: number; answered: number; matches: number }; onNewDay?: () => void }) {
   const { state } = useStore()
   const nav = useNav()
   const now = useNow(1000)
@@ -516,9 +551,11 @@ function DayOver({ daily, onNewDay }: { daily: { seen: number; answered: number;
         <button onClick={nav.openCreate} className="h-11 rounded-full border border-line font-semibold">
           Proponi un piano per stasera
         </button>
-        <button onClick={onNewDay} className="text-xs font-semibold text-cream/50 underline-offset-2 hover:underline">
-          Demo: inizia un nuovo giorno
-        </button>
+        {onNewDay && (
+          <button onClick={onNewDay} className="text-xs font-semibold text-cream/50 underline-offset-2 hover:underline">
+            Demo: inizia un nuovo giorno
+          </button>
+        )}
       </div>
     </motion.section>
   )

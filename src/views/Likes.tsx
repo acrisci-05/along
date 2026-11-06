@@ -6,11 +6,11 @@ import { useNav } from '../nav'
 import { useNow, useStore } from '../store/store'
 import { affinity, timeAgo } from '../lib/utils'
 import { Avatar, Eyebrow } from '../components/ui'
-import { Portrait } from '../components/Portrait'
+import { UserPicture } from '../components/Portrait'
 import { useNeedsVerification, VerifiedBadge } from '../components/Verify'
 
 export function Likes() {
-  const { state, user, acceptLike, declineLike, simulateIncoming, allowed } = useStore()
+  const { state, user, acceptLike, declineLike, simulateIncoming, allowed, demo } = useStore()
   const nav = useNav()
   const now = useNow(30_000)
   const fresh = state.likesIn.filter((l) => l.status === 'new' && allowed(l.userId)).sort((a, b) => b.at - a.at)
@@ -70,9 +70,11 @@ export function Likes() {
               <button onClick={nav.openCreate} className="rounded-full bg-brand px-4 py-2 text-sm font-semibold text-ink">
                 Proponi un piano
               </button>
-              <button onClick={simulateIncoming} className="rounded-full border border-line px-4 py-2 text-sm font-semibold text-cream/80">
-                Simula risposta
-              </button>
+              {demo && (
+                <button onClick={simulateIncoming} className="rounded-full border border-line px-4 py-2 text-sm font-semibold text-cream/80">
+                  Simula risposta
+                </button>
+              )}
             </div>
           </div>
         )}
@@ -98,7 +100,7 @@ export function Likes() {
         </section>
       )}
 
-      <section className="glass rounded-3xl p-4">
+      {demo && <section className="glass rounded-3xl p-4">
         <p className="flex items-center gap-1.5 text-sm font-semibold">
           <Eye size={15} className="text-violet" /> {state.savedBy.filter(allowed).length} persone hanno salvato il tuo profilo
         </p>
@@ -124,7 +126,7 @@ export function Likes() {
             <Lock size={15} className="text-violet" />
           </button>
         )}
-      </section>
+      </section>}
     </div>
   )
 }
@@ -159,7 +161,7 @@ function LikeCard({ like, behind, onMatch, onDecline, onInfo }: { like: Like; be
   if (behind)
     return (
       <motion.div key="behind" className="absolute inset-x-0 top-0 bottom-[72px] overflow-hidden rounded-2xl bg-surface" initial={{ opacity: 0 }} animate={{ opacity: 0.5, scale: 0.95, y: 10 }} exit={{ opacity: 0 }} aria-hidden>
-        <Portrait look={u.look} hue={u.hue} className="h-full w-full scale-125 opacity-60 blur-[26px]" />
+        <UserPicture user={u} className="h-full w-full scale-125 opacity-60 blur-[26px]" />
       </motion.div>
     )
 
@@ -179,7 +181,7 @@ function LikeCard({ like, behind, onMatch, onDecline, onInfo }: { like: Like; be
         }}
       >
         <article className="relative min-h-0 flex-1 overflow-hidden rounded-2xl bg-surface text-cream" aria-label={`Risposta di ${u.name}`}>
-          <Portrait look={u.look} hue={u.hue} className="absolute inset-0 h-full w-full scale-[1.3] blur-[22px]" />
+          <UserPicture user={u} className="absolute inset-0 h-full w-full scale-[1.3] blur-[22px]" />
           <div className="absolute inset-0 bg-[linear-gradient(180deg,rgb(28_22_18/0.55)_0%,rgb(28_22_18/0.7)_40%,rgb(28_22_18/0.96)_100%)]" />
           <motion.span style={{ opacity: yes }} className="pointer-events-none absolute right-6 top-14 z-20 rotate-12 rounded-md border-2 border-brand px-3 py-1 text-xl font-extrabold text-brand">
             MATCH

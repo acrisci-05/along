@@ -30,7 +30,7 @@ export const FREE_LIMITS = { slots: 3, plans: 3, travel: 1 }
 export const LIFETIME_LIMITS = { slots: 5, plans: Infinity, travel: Infinity }
 
 export type JoinResult = { ok: true; chatId: string } | { ok: false; reason: 'slots' | 'full' | 'exists'; chatId?: string }
-export type CreateResult = { ok: true; planId: string } | { ok: false; reason: 'limit' }
+export type CreateResult = { ok: true; planId: string } | { ok: false; reason: 'limit' | 'error'; message?: string }
 
 export interface PlanDraft {
   title: string
@@ -47,7 +47,23 @@ export interface PlanDraft {
   details: Plan['details']
 }
 
-interface Store {
+type Awaitable<T> = T | Promise<T>
+
+/** Account on the real backend (absent in the local demo). */
+export interface Account {
+  phase: 'loading' | 'signedOut' | 'needsProfile' | 'ready' | 'error'
+  email?: string
+  retry: () => void
+  sendCode: (email: string) => Promise<string | null>
+  verifyCode: (code: string) => Promise<string | null>
+  signOut: () => Promise<void>
+  deleteAccount: () => Promise<string | null>
+}
+
+export interface Store {
+  /** true in the local demo (simulated people), false on the real backend */
+  demo: boolean
+  account?: Account
   state: AppState
   limits: typeof FREE_LIMITS
   activeChats: Chat[]
@@ -59,17 +75,17 @@ interface Store {
   toast: (t: Omit<Toast, 'id'>) => void
   dismissToast: (id: string) => void
   toggleSave: (planId: string) => void
-  joinPlan: (planId: string, answer: string) => JoinResult
-  messageUser: (userId: string, answer: string) => JoinResult
+  joinPlan: (planId: string, answer: string) => Awaitable<JoinResult>
+  messageUser: (userId: string, answer: string) => Awaitable<JoinResult>
   sendMessage: (chatId: string, text: string) => void
-  sendVoice: (chatId: string, duration: number, extra?: { audioUrl?: string; wave?: number[] }) => void
+  sendVoice: (chatId: string, duration: number, extra?: { audioUrl?: string; wave?: number[]; blob?: Blob }) => void
   sendTrack: (chatId: string, title: string, artist: string) => void
   closeElegantly: (chatId: string, text?: string) => void
   evolveChat: (chatId: string) => void
   stopClock: (chatId: string) => void
-  acceptWaiting: (chatId: string) => boolean
+  acceptWaiting: (chatId: string) => Awaitable<boolean>
   markRead: (chatId: string) => void
-  createPlan: (draft: PlanDraft) => CreateResult
+  createPlan: (draft: PlanDraft) => Awaitable<CreateResult>
   simulateIncoming: () => void
   setLifetime: (v: boolean) => void
   updateMe: (patch: Partial<User>) => void
@@ -88,12 +104,16 @@ interface Store {
   declineLike: (likeId: string) => void
   setPrefs: (p: Partial<Prefs>) => void
   proposeMeetup: (chatId: string, p: { title: string; when: string; place: string }) => void
-  completeOnboarding: (p: NewProfile) => void
+  acceptProposal: (chatId: string, messageId: string) => void
+  /** tells the other people in the chat that you're typing */
+  notifyTyping: (chatId: string) => void
+  completeOnboarding: (p: NewProfile) => Awaitable<string | null>
   blockUser: (userId: string) => void
   unblockUser: (userId: string) => void
   reportUser: (userId: string, reason: string, details?: string) => void
   injectSuspicious: () => void
-  verifyMe: () => void
+  /** resolves with an error message, or null when verified */
+  verifyMe: () => Awaitable<string | null>
   /** true if this person can see/meet userId (adult and 16-17 pools never mix) */
   allowed: (userId: string) => boolean
   planVisible: (plan: Plan) => boolean
@@ -120,7 +140,7 @@ export interface MatchEvent {
   fromMe: boolean
 }
 
-const Ctx = createContext<Store | null>(null)
+export const Ctx = createContext<Store | null>(null)
 
 /** Daily selection counter, rolling over at midnight. */
 function bumpDaily(d: AppState['daily'], key: 'seen' | 'answered' | 'matches') {
@@ -651,6 +671,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     const waitingChats = state.chats.filter((c) => c.status === 'waiting').sort((a, b) => a.createdAt - b.createdAt)
     const now = Date.now()
     return {
+      demo: true,
       state,
       limits,
       activeChats,
@@ -707,8 +728,10 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       unblockUser: (userId) => setState((prev) => ({ ...prev, blocked: prev.blocked.filter((x) => x !== userId) })),
       reportUser: (userId, reason, details) =>
         setState((prev) => ({ ...prev, reports: [...prev.reports, { id: uid('r'), userId, reason, details: details?.trim() || undefined, at: Date.now() }] })),
-      verifyMe: () =>
-        setState((prev) => ({ ...prev, me: { ...prev.me, verified: true, verifiedAt: Date.now(), verifiedFor: photoFingerprint(prev.me) } })),
+      verifyMe: () => {
+        setState((prev) => ({ ...prev, me: { ...prev.me, verified: true, verifiedAt: Date.now(), verifiedFor: photoFingerprint(prev.me) } }))
+        return null
+      },
       injectSuspicious: () => {
         const s = stateRef.current
         const chat = s.chats.find((c) => c.status === 'active')
@@ -725,6 +748,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         }))
         toast({ tone: 'gold', title: 'Messaggio sospetto inviato', body: `Apri la chat con ${s.users[from]?.name ?? 'la persona'} per vedere l’avviso.` })
       },
+      acceptProposal: () => {},
+      notifyTyping: () => {},
       completeOnboarding: (np) => {
         const base = createInitialState()
         const age = ageFromBirth(np.birthDate)
@@ -770,6 +795,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
           prefs: { ...base.prefs, intent: minor ? 'friends' : np.intent.includes('date') ? 'date' : 'friends', show: np.show, ageMin: minor ? 16 : Math.max(18, age - 8), ageMax: minor ? 17 : Math.min(60, age + 10) },
         })
         toast({ tone: 'lime', title: `Benvenut* su ALONG, ${me.name}`, body: minor ? 'Modalità Amici, solo con persone della tua età.' : 'Il tuo profilo è pronto. Inizia a scoprire.' })
+        return null
       },
       match,
       dismissMatch: () => setMatch(null),

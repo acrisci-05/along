@@ -9,7 +9,7 @@ export type SafetyMode = 'menu' | 'block' | 'report'
 
 /** Block / report flows, reachable from Discover, profiles and chats. */
 export function SafetySheet({ target, onClose, onViewProfile }: { target: { userId: string; mode: SafetyMode } | null; onClose: () => void; onViewProfile?: (id: string) => void }) {
-  const { user, blockUser, reportUser } = useStore()
+  const { user, blockUser, reportUser, demo } = useStore()
   const [mode, setMode] = useState<SafetyMode>('menu')
   const [reason, setReason] = useState<string>('')
   const [details, setDetails] = useState('')
@@ -38,7 +38,7 @@ export function SafetySheet({ target, onClose, onViewProfile }: { target: { user
               ? `${u.name} è stat* bloccat* e non potrà più vederti né scriverti. Il nostro team verificherà entro 24 ore.`
               : 'Non vi vedrete più da nessuna parte e le vostre chat sono chiuse. Puoi sbloccare dal profilo, in Persone bloccate.'}
           </p>
-          <p className="mt-2 text-xs text-muted">Demo: la verifica è simulata.</p>
+          {demo && <p className="mt-2 text-xs text-muted">Demo: la verifica è simulata.</p>}
           <Button className="mt-6 w-full rounded-full" onClick={onClose}>
             Fatto
           </Button>

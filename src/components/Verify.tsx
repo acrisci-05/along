@@ -110,7 +110,7 @@ function Capture({ facing, mirrored, overlay, onShot }: { facing: 'user' | 'envi
 }
 
 function Flow({ reason, onClose }: { reason?: string; onClose: () => void }) {
-  const { state, verifyMe, toast } = useStore()
+  const { state, verifyMe, toast, demo } = useStore()
   const minor = isMinor(state.me)
   const hasPhotos = (state.me.photos?.length ?? 0) > 0
   const gesture = useMemo(() => GESTURES[Math.floor(Math.random() * GESTURES.length)], [])
@@ -118,6 +118,7 @@ function Flow({ reason, onClose }: { reason?: string; onClose: () => void }) {
   const [selfie, setSelfie] = useState<string | null>(null)
   const [doc, setDoc] = useState<string | null>(null)
   const [phase, setPhase] = useState(0)
+  const [failed, setFailed] = useState<string | null>(null)
 
   const checks = ['Confronto con le tue foto', `Controllo del gesto: ${gesture.text.toLowerCase()}`, ...(minor ? ['Lettura della data di nascita dal documento'] : [])]
 
@@ -125,12 +126,13 @@ function Flow({ reason, onClose }: { reason?: string; onClose: () => void }) {
     if (step !== 'checking') return
     setPhase(0)
     const timers = checks.map((_, i) => window.setTimeout(() => setPhase(i + 1), 900 * (i + 1)))
-    const done = window.setTimeout(() => {
-      verifyMe()
+    const done = window.setTimeout(async () => {
+      const err = await verifyMe()
       // selfie and document are discarded right away
       setSelfie(null)
       setDoc(null)
-      setStep('done')
+      setFailed(err)
+      setStep(err ? 'intro' : 'done')
     }, 900 * checks.length + 600)
     return () => [...timers, done].forEach(clearTimeout)
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -174,6 +176,11 @@ function Flow({ reason, onClose }: { reason?: string; onClose: () => void }) {
                 <BadgeCheck size={40} className="text-brand" />
                 <h3 className="mt-3 text-2xl">Dimostra che sei tu</h3>
                 {reason && <p className="mt-2 rounded-xl border border-gold/40 bg-gold/10 p-3 text-sm text-gold">{reason}</p>}
+                {failed && (
+                  <p role="alert" className="mt-2 rounded-xl border border-alarm/40 bg-alarm/10 p-3 text-sm text-alarm">
+                    Verifica non riuscita: {failed}
+                  </p>
+                )}
                 <ul className="mt-4 space-y-3 text-base">
                   <li className="flex gap-3">
                     <Camera size={20} className="mt-0.5 shrink-0 text-muted" /> Scatti un selfie facendo un gesto che ti mostriamo.
@@ -190,7 +197,9 @@ function Flow({ reason, onClose }: { reason?: string; onClose: () => void }) {
                     <BadgeCheck size={20} className="mt-0.5 shrink-0 text-muted" /> Ottieni la spunta accanto al nome e compari a chi filtra “solo verificati”.
                   </li>
                 </ul>
-                <p className="mt-4 text-xs text-muted">Demo: le foto vengono scattate davvero, ma il controllo è simulato.</p>
+                <p className="mt-4 text-xs text-muted">
+                  {demo ? 'Demo: le foto vengono scattate davvero, ma il controllo è simulato.' : 'Fase di prova: il controllo è automatico e le foto della verifica non lasciano il telefono.'}
+                </p>
                 <Button size="lg" className="mt-6 w-full rounded-full" onClick={() => setStep('selfie')}>
                   Inizia
                 </Button>

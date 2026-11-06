@@ -23,7 +23,7 @@ export function GatekeeperSheet({
   dilemma?: Dilemma
   host?: User
   context: string
-  onSubmit: (answer: string) => JoinResult
+  onSubmit: (answer: string) => JoinResult | Promise<JoinResult>
   onGoChat: (chatId: string) => void
   onManageSlots: () => void
   onUpgrade: () => void
@@ -43,9 +43,12 @@ export function GatekeeperSheet({
   const valid = answer.trim().length >= 3
   const lowEffort = /^(ciao|hey|hola|hi|ehi|ok)[!. ]*$/i.test(answer.trim())
 
-  const submit = () => {
-    if (!valid || lowEffort) return
-    const r = onSubmit(answer.trim())
+  const [busy, setBusy] = useState(false)
+  const submit = async () => {
+    if (!valid || lowEffort || busy) return
+    setBusy(true)
+    const r = await onSubmit(answer.trim())
+    setBusy(false)
     if (r.ok) onGoChat(r.chatId)
     else if (r.reason === 'exists' && r.chatId) onGoChat(r.chatId)
     else setError(r)

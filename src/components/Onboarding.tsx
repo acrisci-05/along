@@ -1,6 +1,6 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState, type ReactNode } from 'react'
 import { AnimatePresence, motion } from 'motion/react'
-import { ArrowLeft, KeyRound, Lock, ShieldCheck, Timer } from 'lucide-react'
+import { ArrowLeft, KeyRound, Loader2, Lock, ShieldCheck, Timer } from 'lucide-react'
 import type { Look, User } from '../types'
 import { DILEMMA_LIST } from '../data/mock'
 import { ageFromBirth, ADULT_AGE, MIN_AGE } from '../lib/age'
@@ -10,6 +10,7 @@ import { PHOTO_MAX, PHOTO_MIN } from '../lib/photos'
 import { PhotoGallery } from './PhotoGallery'
 import { UserPicture } from './Portrait'
 import { Button } from './ui'
+import { Offline, SignIn, Splash } from './Account'
 
 const MONTHS = ['gennaio', 'febbraio', 'marzo', 'aprile', 'maggio', 'giugno', 'luglio', 'agosto', 'settembre', 'ottobre', 'novembre', 'dicembre']
 const SKINS = ['#f6d7c3', '#eec1a0', '#d9a07a', '#b97a52', '#8d5a3b', '#5e3a26']
@@ -37,8 +38,12 @@ function randomLook(): Look {
 }
 
 export function Onboarding() {
-  const { state, completeOnboarding } = useStore()
-  const [step, setStep] = useState(0)
+  const { state, completeOnboarding, account } = useStore()
+  const phase = account?.phase
+  const [step, setStep] = useState(phase === 'needsProfile' ? 1 : 0)
+  const [signingIn, setSigningIn] = useState(false)
+  const [saving, setSaving] = useState(false)
+  const [saveError, setSaveError] = useState<string | null>(null)
   // step 1
   const [name, setName] = useState('')
   const [dd, setDd] = useState('')
@@ -68,10 +73,30 @@ export function Onboarding() {
   const step2ok = !!gender && (minor || intent.length > 0)
   const step3ok = !!dilemma
 
+  // signed in without a profile yet → straight to "Chi sei"; signed out → back to the welcome
+  useEffect(() => {
+    if (phase === 'needsProfile') setStep((s) => (s === 0 ? 1 : s))
+    if (phase === 'signedOut') {
+      setStep(0)
+      setSigningIn(false)
+    }
+  }, [phase])
+
   if (state.onboarded) return null
 
-  const finish = () =>
-    completeOnboarding({
+  const shell = (children: ReactNode) => (
+    <div className="absolute inset-0 z-[90] flex flex-col bg-ink" role="dialog" aria-modal="true" aria-label="Accedi ad ALONG">
+      <div className="no-scrollbar min-h-0 flex-1 overflow-y-auto px-5 pb-6">{children}</div>
+    </div>
+  )
+  if (account && phase === 'loading') return shell(<Splash />)
+  if (account && phase === 'error') return shell(<Offline account={account} />)
+  if (account && phase === 'signedOut' && signingIn) return shell(<SignIn account={account} onBack={() => setSigningIn(false)} />)
+
+  const finish = async () => {
+    setSaving(true)
+    setSaveError(null)
+    const err = await completeOnboarding({
       name,
       birthDate,
       gender: gender || 'nb',
@@ -82,14 +107,23 @@ export function Onboarding() {
       look,
       hue,
     })
+    setSaving(false)
+    if (err) setSaveError(err)
+  }
 
   return (
     <div className="absolute inset-0 z-[90] flex flex-col bg-ink" role="dialog" aria-modal="true" aria-label="Crea il tuo profilo">
       {step > 0 && (
         <div className="flex items-center gap-3 px-4 pb-2 pt-[max(16px,env(safe-area-inset-top))] md:pt-11">
-          <button onClick={() => setStep((s) => s - 1)} className="grid size-10 place-items-center rounded-full hover:bg-surface" aria-label="Indietro">
-            <ArrowLeft size={20} />
-          </button>
+          {account && step === 1 ? (
+            <button onClick={() => void account.signOut()} className="h-10 rounded-full px-2 text-sm font-semibold text-muted hover:text-cream">
+              Esci
+            </button>
+          ) : (
+            <button onClick={() => setStep((s) => s - 1)} className="grid size-10 place-items-center rounded-full hover:bg-surface" aria-label="Indietro">
+              <ArrowLeft size={20} />
+            </button>
+          )}
           <div className="flex flex-1 gap-1.5" aria-label={`Passo ${step} di 3`}>
             {[1, 2, 3].map((i) => (
               <span key={i} className={cn('h-1 flex-1 rounded-full', i <= step ? 'bg-brand' : 'bg-surface-2')} />
@@ -121,9 +155,14 @@ export function Onboarding() {
                   ))}
                 </ul>
                 <div className="mt-auto pt-8">
-                  <Button size="lg" className="w-full rounded-full" onClick={() => setStep(1)}>
+                  <Button size="lg" className="w-full rounded-full" onClick={() => (account ? setSigningIn(true) : setStep(1))}>
                     Crea il tuo profilo
                   </Button>
+                  {account && (
+                    <button onClick={() => setSigningIn(true)} className="mt-3 w-full text-center text-sm font-semibold text-cream/70 hover:text-cream">
+                      Hai già un account? <span className="text-brand">Accedi</span>
+                    </button>
+                  )}
                   <p className="mt-3 flex items-center justify-center gap-1.5 text-xs text-muted">
                     <ShieldCheck size={13} /> Vietata ai minori di {MIN_AGE} anni. Maggiorenni e minorenni non si incontrano mai.
                   </p>
@@ -211,7 +250,9 @@ export function Onboarding() {
                       <>
                         <PhotoGallery photos={photos} onChange={setPhotos} compact />
                         {photos.length === 1 && <p className="mt-2 text-sm text-gold">Aggiungine almeno un’altra.</p>}
-                        <p className="mt-1 text-xs text-muted">Nella demo le foto restano solo su questo dispositivo.</p>
+                        <p className="mt-1 text-xs text-muted">
+                          {account ? 'Prima del match gli altri vedono solo una versione sfocata.' : 'Nella demo le foto restano solo su questo dispositivo.'}
+                        </p>
                       </>
                     ) : (
                       <div>
@@ -311,13 +352,19 @@ export function Onboarding() {
 
             {step > 0 && (
               <div className="mt-auto pt-6">
+                {saveError && step === 3 && (
+                  <p role="alert" className="mb-3 text-sm text-alarm">
+                    {saveError}
+                  </p>
+                )}
                 <Button
                   size="lg"
                   className="w-full rounded-full"
-                  disabled={step === 1 ? !step1ok : step === 2 ? !step2ok : !step3ok}
-                  onClick={() => (step < 3 ? setStep(step + 1) : finish())}
+                  disabled={(step === 1 ? !step1ok : step === 2 ? !step2ok : !step3ok) || saving}
+                  onClick={() => (step < 3 ? setStep(step + 1) : void finish())}
                 >
-                  {step < 3 ? 'Avanti' : 'Inizia a scoprire'}
+                  {saving && <Loader2 size={18} className="animate-spin" />}
+                  {step < 3 ? 'Avanti' : saving ? 'Creo il profilo…' : 'Inizia a scoprire'}
                 </Button>
               </div>
             )}
