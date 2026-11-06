@@ -5,6 +5,8 @@ import type { Category, Mode, Plan } from '../types'
 import { HABITATS, PRESET_DILEMMAS, TEMPLATES } from '../data/mock'
 import { CATEGORY_META, cn, LOCAL_CATEGORIES, REMOTE_CATEGORIES } from '../lib/utils'
 import { useStore } from '../store/store'
+import { isMinor } from '../lib/age'
+import { inMinorHours } from '../lib/safety'
 import { LivingPlanCard } from './LivingPlanCard'
 import { Button, Chip, Sheet, Toggle } from './ui'
 
@@ -105,7 +107,8 @@ export function QuickCreate({ open, onClose, onPaywall, onCreated }: { open: boo
     [title, category, mode, habitat, when, capacity, vibes, dilemma, privacy, cost, state.me.city],
   )
 
-  const canNext = [title.trim().length >= 3, habitat.length > 0, whenKey !== 'custom' || !!custom, capacity >= 2, dilemma.trim().length >= 8][step]
+  const minor = isMinor(state.me)
+  const canNext = [title.trim().length >= 3, habitat.length > 0, (whenKey !== 'custom' || !!custom) && (!minor || inMinorHours(when)), capacity >= 2, dilemma.trim().length >= 8][step]
 
   const publish = () => {
     const r = createPlan({
@@ -309,6 +312,11 @@ export function QuickCreate({ open, onClose, onPaywall, onCreated }: { open: boo
                     />
                   </label>
                 </div>
+                {minor && (
+                  <p className={cn('text-sm', inMinorHours(when) ? 'text-muted' : 'text-alarm')}>
+                    Sotto i 18 anni i piani si fanno di giorno, tra le 8 e le 20{inMinorHours(when) ? '.' : ': scegli un altro orario.'}
+                  </p>
+                )}
               </div>
             )}
 

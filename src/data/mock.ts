@@ -465,6 +465,8 @@ export function createInitialState(): AppState {
     prefs: { intent: 'date', show: 'all', ageMin: 20, ageMax: 35, readReceipts: true, typingIndicator: true },
     savedBy: ['u-irene', 'u-samuele', 'u-lea'],
     daily: { day: todayKey(), seen: 0, answered: 0, matches: 0 },
+    blocked: [],
+    reports: [],
   }
 }
 

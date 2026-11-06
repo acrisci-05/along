@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { motion } from 'motion/react'
-import { BellRing, Check, Crown, Info, KeyRound, MapPin, Pencil, RotateCcw, Sparkles } from 'lucide-react'
+import { BellRing, ShieldAlert, Check, Crown, Info, KeyRound, MapPin, Pencil, RotateCcw, Sparkles } from 'lucide-react'
 import { useNav } from '../nav'
 import { useStore } from '../store/store'
 import { cn } from '../lib/utils'
@@ -9,7 +9,7 @@ import { BadgeRow, BestieSticker, earnedBadges, KarmaMeter } from '../components
 import { Avatar, Button, Eyebrow, LifetimeBadge, RevolutTip, Sheet, Toggle } from '../components/ui'
 
 export function Profile() {
-  const { state, updateMe, setLifetime, reset, simulateIncoming, toast, setPrefs } = useStore()
+  const { state, updateMe, setLifetime, reset, simulateIncoming, toast, setPrefs, unblockUser, injectSuspicious } = useStore()
   const nav = useNav()
   const me = state.me
   const minor = isMinor(me)
@@ -215,6 +215,40 @@ export function Profile() {
 
       <RevolutTip />
 
+      {/* blocked people */}
+      <section className="space-y-2">
+        <Eyebrow>Persone bloccate</Eyebrow>
+        {state.blocked.length ? (
+          <ul className="divide-y divide-line rounded-2xl border border-line bg-surface">
+            {state.blocked.map((id) => {
+              const u = state.users[id]
+              if (!u) return null
+              const reported = state.reports.some((r) => r.userId === id)
+              return (
+                <li key={id} className="flex items-center gap-3 p-3">
+                  <Avatar user={u} size={36} blur />
+                  <div className="min-w-0 flex-1">
+                    <p className="font-semibold">{u.name}</p>
+                    <p className="text-xs text-muted">{reported ? 'Bloccat* e segnalat*' : 'Bloccat*'}</p>
+                  </div>
+                  <button
+                    onClick={() => {
+                      unblockUser(id)
+                      toast({ tone: 'cyan', title: `${u.name} sbloccat*`, body: 'Potrete di nuovo vedervi su ALONG.' })
+                    }}
+                    className="h-9 rounded-full border border-line px-3.5 text-sm font-semibold hover:border-cream/40"
+                  >
+                    Sblocca
+                  </button>
+                </li>
+              )
+            })}
+          </ul>
+        ) : (
+          <p className="rounded-2xl border border-line bg-surface p-3.5 text-sm text-muted">Non hai bloccato nessuno. Puoi bloccare o segnalare dal profilo di una persona, dalla sua card o dal menu della chat.</p>
+        )}
+      </section>
+
       {/* chat privacy */}
       <section className="space-y-2">
         <Eyebrow>Privacy in chat</Eyebrow>
@@ -253,6 +287,13 @@ export function Profile() {
               <p className="text-sm text-cream/50">Qualcuno risponde al dilemma di un tuo piano</p>
             </div>
             <BellRing size={18} className="text-violet" />
+          </button>
+          <button onClick={injectSuspicious} className="flex w-full items-center justify-between gap-3 p-3.5 text-left hover:bg-cream/[0.03]">
+            <div>
+              <p className="text-base font-semibold">Simula un messaggio sospetto</p>
+              <p className="text-sm text-muted">Arriva una richiesta di soldi in una chat attiva, per vedere l’avviso</p>
+            </div>
+            <ShieldAlert size={18} className="text-gold" />
           </button>
           <button onClick={() => setConfirmReset(true)} className="flex w-full items-center justify-between gap-3 p-3.5 text-left hover:bg-cream/[0.03]">
             <div>

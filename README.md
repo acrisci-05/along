@@ -41,3 +41,8 @@ Su desktop l'app è mostrata in una cornice smartphone, con switch per la vista 
 - Iscrizione dai **16 anni** (data di nascita obbligatoria, l’età si aggiorna da sola).
 - **16-17 anni:** solo modalità *Amici*, in un gruppo separato.
 - **Maggiorenni e minorenni non si vedono mai:** Scopri, like, piani, mappa, profili e azioni (rispondere, unirsi a un piano, accettare un like) sono filtrati e bloccati anche nello store (`src/lib/age.ts`, `allowed` / `planVisible` in `src/store/store.tsx`).
+
+## Sicurezza (demo)
+- **Blocca / Segnala** dalla card di Scopri (⋯), dal profilo e dal menu della chat. Segnalare blocca anche; la verifica del team è simulata.
+- **Avvisi sui messaggi** (`src/lib/safety.ts`): prima di inviare numero, indirizzo o social; in arrivo su richieste di soldi, codici, foto intime o di spostarsi su altre app. Sono controlli locali, euristici.
+- **16-17 anni:** piani solo tra le 8 e le 20, solo negli Habitat pubblici, niente note vocali nelle chat 1:1.

@@ -230,6 +230,26 @@ export function UserSheet({ userId, onClose }: { userId: string | null; onClose:
             </p>
             <p className="mt-1 font-display text-lg font-semibold leading-snug">{u.dilemma.question}</p>
           </div>
+          <div className="flex justify-center gap-6 pt-1 text-sm">
+            <button
+              onClick={() => {
+                onClose()
+                nav.openSafety(u.id, 'block')
+              }}
+              className="font-semibold text-muted hover:text-cream"
+            >
+              Blocca {u.name}
+            </button>
+            <button
+              onClick={() => {
+                onClose()
+                nav.openSafety(u.id, 'report')
+              }}
+              className="font-semibold text-alarm/90 hover:text-alarm"
+            >
+              Segnala
+            </button>
+          </div>
           <div className="sticky bottom-0 -mx-5 -mb-8 bg-gradient-to-t from-[#221b16] via-[#221b16] to-transparent px-5 pb-6 pt-5">
             {dm ? (
               <Button className="w-full" size="lg" onClick={() => nav.openChat(dm.id)}>

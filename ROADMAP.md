@@ -29,10 +29,12 @@ Obiettivo: un'app che si può far provare a qualcuno e che "sembra vera".
 - ✅ **1.3 Match & Like (A)** — nuovo stile scuro marrone + salvia (solo Work Sans), card a foto intera, like ricevuti a mazzo, match "biglietto doppio", proposta di uscita in 1 tap che ferma il timer
 - ✅ **1.4 Chat (B)** — intestazione pulita con biglietto dell'uscita fissato e barra del timer, azioni nel "+", fumetti verde scuro / marrone, note vocali dal microfono vero, congedo con 3 modelli + frase personale, visualizzato e "sta scrivendo" disattivabili (reciproci, come WhatsApp)
 - ✅ **1.5 Onboarding vero (C)** — benvenuto + 3 passi (chi sei con data di nascita e foto/avatar · cosa cerchi · dilemma dalla lista). Età minima 16 anni; 16-17 solo modalità Amici e in un gruppo separato: maggiorenni e minorenni non si vedono né si incontrano mai
-- 🔜 **1.6 Sicurezza base (E)** — blocca e segnala, conferma 18+, consigli per il primo incontro, condividi il piano con un amico
+- ✅ **1.6 Sicurezza base (E)** — Blocca e Segnala separati (card, profilo, chat) con motivo e conferma; avvisi su numero/indirizzo/social in uscita e su soldi/codici/foto intime/altre app in entrata; 16-17: piani solo 8–20, solo luoghi pubblici, niente vocali 1:1; persone bloccate nel profilo con Sblocca
+
+> **Fine Fase 1.** Punti aperti emersi: verifica reale dell'età/identità prima del lancio (step 2.4) e moderazione vera delle segnalazioni (step 4.5).
 
 ## Fase 2 — Profilo reale
-- ⬜ **2.1 Foto vere** — caricare 3–6 foto, ritaglio, ordine; sfocatura fino al match
+- 🔜 **2.1 Foto vere** — caricare 3–6 foto, ritaglio, ordine; sfocatura fino al match
 - ⬜ **2.2 Profilo ricco** — più dilemmi/prompt a scelta, modifica Habitat e interessi, anteprima "come ti vedono gli altri"
 - ⬜ **2.3 Bestie Vouching reale** — link che apre un modulo per il tuo amico, approvazione prima della pubblicazione
 - ⬜ **2.4 Verifica profilo** — selfie di verifica (simulata) e badge "verificato"

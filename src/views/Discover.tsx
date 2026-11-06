@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { AnimatePresence, motion, useMotionValue, useTransform, type Variants } from 'motion/react'
-import { ArrowLeft, Globe2, Info, KeyRound, LayoutList, Lock, Plane, Radio, RotateCcw, SlidersHorizontal, X } from 'lucide-react'
+import { ArrowLeft, Globe2, Info, KeyRound, LayoutList, Lock, MoreHorizontal, Plane, Radio, RotateCcw, SlidersHorizontal, X } from 'lucide-react'
 import type { Mode, Plan, User } from '../types'
 import { useNav } from '../nav'
 import { useNow, useStore } from '../store/store'
@@ -170,6 +170,7 @@ function Deck({ mode, setMode, onPlans }: { mode: Mode; setMode: (m: Mode) => vo
                 toast({ tone: 'coral', title: `Risposta inviata a ${top.name} 💌`, body: 'Se le/gli piace, è match e le foto si svelano.' })
               }}
               onInfo={() => nav.openUser(top.id)}
+              onMore={() => nav.openSafety(top.id)}
               onPlan={(id) => nav.openPlan(id)}
               onUndo={undo}
             />
@@ -251,7 +252,9 @@ function SwipeCard({
   onInfo,
   onPlan,
   onUndo,
+  onMore,
 }: {
+  onMore?: () => void
   user: User
   plan?: Plan
   me: User
@@ -335,6 +338,9 @@ function SwipeCard({
                 <span key={pg} className={cn('h-[3px] flex-1 rounded-full transition-colors', i === page ? 'bg-cream' : 'bg-cream/30')} />
               ))}
             </div>
+            <button onClick={() => !dragged.current && onMore?.()} className="absolute right-2 top-5 z-10 grid size-9 place-items-center rounded-full bg-ink/40 text-cream hover:bg-ink/60" aria-label={`Altre opzioni per ${user.name}: blocca o segnala`}>
+              <MoreHorizontal size={18} />
+            </button>
             <span className="absolute left-3 top-6 z-10 flex items-center gap-1 rounded-md bg-ink/50 px-2 py-1 text-xs font-semibold text-cream">
               <Lock size={11} /> Foto visibile dopo il match
             </span>

@@ -1,8 +1,10 @@
 import { useEffect, useRef, useState } from 'react'
 import { AnimatePresence, motion } from 'motion/react'
-import { ArrowLeft, CalendarCheck, Calculator, Check, CheckCheck, CheckCircle2, ChevronRight, Hand, KeyRound, Lock, MapPin, Mic, MoreVertical, Music2, Plus, Send, Square, Unlock, UserRound, Users, X } from 'lucide-react'
+import { ArrowLeft, Ban, CalendarCheck, Flag, ShieldAlert, Calculator, Check, CheckCheck, CheckCircle2, ChevronRight, Hand, KeyRound, Lock, MapPin, Mic, MoreVertical, Music2, Plus, Send, Square, Unlock, UserRound, Users, X } from 'lucide-react'
 import type { Chat, Message, Plan, User } from '../types'
-import { FAREWELLS } from '../data/mock'
+import { FAREWELLS, HABITATS } from '../data/mock'
+import { INCOMING_COPY, OUTGOING_COPY, scanIncoming, scanOutgoing, type OutgoingRisk } from '../lib/safety'
+import { isMinor } from '../lib/age'
 import { suggestMeetup } from '../lib/meetup'
 import { useNav } from '../nav'
 import { useNow, useStore } from '../store/store'
@@ -125,6 +127,7 @@ export function ChatRoom({ chatId, onClose }: { chatId: string; onClose: () => v
             group={peers.length > 1}
             receipts={receipts}
             last={m.id === lastMine}
+            onReport={(id) => nav.openSafety(id, 'report')}
           />
         ))}
         <AnimatePresence>
@@ -150,7 +153,7 @@ export function ChatRoom({ chatId, onClose }: { chatId: string; onClose: () => v
 
       {/* composer */}
       {!readOnly && (
-        <div className="relative z-10 border-t border-line bg-ink px-3 pb-3 pt-2">
+        <div className="border-t border-line bg-ink px-3 pb-3 pt-2">
           <Composer chat={chat} onPlus={() => setPanel('actions')} />
         </div>
       )}
@@ -212,6 +215,28 @@ export function ChatRoom({ chatId, onClose }: { chatId: string; onClose: () => v
           <button onClick={() => setPanel('farewell')} className="flex w-full items-center gap-3 rounded-xl px-2 py-2.5 text-left hover:bg-surface">
             <Hand size={18} /> Chiudi con eleganza
           </button>
+          {peers.map((p) => (
+            <div key={p.id} className="grid grid-cols-2 gap-1.5 border-t border-line pt-1.5">
+              <button
+                onClick={() => {
+                  close()
+                  nav.openSafety(p.id, 'block')
+                }}
+                className="flex items-center gap-2 rounded-xl px-2 py-2.5 text-left hover:bg-surface"
+              >
+                <Ban size={17} /> Blocca {peers.length > 1 ? p.name : ''}
+              </button>
+              <button
+                onClick={() => {
+                  close()
+                  nav.openSafety(p.id, 'report')
+                }}
+                className="flex items-center gap-2 rounded-xl px-2 py-2.5 text-left text-alarm hover:bg-surface"
+              >
+                <Flag size={17} /> Segnala {peers.length > 1 ? p.name : ''}
+              </button>
+            </div>
+          ))}
         </div>
       </Sheet>
 
@@ -498,7 +523,7 @@ function SplitBill({ chat, total, people, disabled, onSent }: { chat: Chat; tota
   )
 }
 
-function Bubble({ m, prev, author, blurred, group, receipts, last }: { m: Message; prev?: Message; author?: User; blurred: boolean; group: boolean; receipts: boolean; last: boolean }) {
+function Bubble({ m, prev, author, blurred, group, receipts, last, onReport }: { m: Message; prev?: Message; author?: User; blurred: boolean; group: boolean; receipts: boolean; last: boolean; onReport: (userId: string) => void }) {
   const mine = m.from === 'me'
   if (m.kind === 'system')
     return (
@@ -587,25 +612,44 @@ function Bubble({ m, prev, author, blurred, group, receipts, last }: { m: Messag
           {mine && receipts && (m.seen ? <CheckCheck size={14} className="text-brand" aria-label="Visualizzato" /> : <Check size={14} aria-label="Inviato" />)}
         </p>
         {mine && receipts && last && m.seen && <p className="px-1 text-xs text-muted">Visualizzato</p>}
+        {!mine && author && m.kind === 'text' && m.text && scanIncoming(m.text) && (
+          <div className="mt-1.5 max-w-[19rem] rounded-xl border border-gold/40 bg-gold/10 p-2.5 text-left" role="alert">
+            <p className="flex items-center gap-1.5 text-xs font-bold text-gold">
+              <ShieldAlert size={14} /> Attenzione
+            </p>
+            <p className="mt-0.5 text-sm text-cream/85">{INCOMING_COPY[scanIncoming(m.text)!]}</p>
+            <button onClick={() => onReport(author.id)} className="mt-1.5 text-sm font-semibold text-alarm hover:underline">
+              Segnala {author.name}
+            </button>
+          </div>
+        )}
       </div>
     </motion.div>
   )
 }
 
 function Composer({ chat, onPlus }: { chat: Chat; onPlus: () => void }) {
-  const { sendMessage, sendVoice, toast } = useStore()
+  const { sendMessage, sendVoice, toast, state } = useStore()
   const [text, setText] = useState('')
+  const [risk, setRisk] = useState<OutgoingRisk | null>(null)
+  const noVoice = isMinor(state.me) && chat.peerIds.length === 1
   const [rec, setRec] = useState<null | { start: number; real: boolean }>(null)
   const [levels, setLevels] = useState<number[]>(() => Array(24).fill(2))
   const media = useRef<{ recorder?: MediaRecorder; stream?: MediaStream; chunks: Blob[]; ctx?: AudioContext; raf?: number; samples: number[] }>({ chunks: [], samples: [] })
   const now = useNow(250)
   const elapsed = rec ? Math.floor((now - rec.start) / 1000) : 0
 
-  const send = () => {
+  const send = (force = false) => {
     const t = text.trim()
     if (!t) return
+    const r = scanOutgoing(t)
+    if (r && !force) {
+      setRisk(r)
+      return
+    }
     sendMessage(chat.id, t)
     setText('')
+    setRisk(null)
   }
 
   const cleanup = () => {
@@ -721,8 +765,8 @@ function Composer({ chat, onPlus }: { chat: Chat; onPlus: () => void }) {
           className="h-11 w-full rounded-full border border-line bg-surface px-4 text-base placeholder:text-cream/35 focus:border-brand/60 focus:outline-none"
         />
       </label>
-      {text.trim() ? (
-        <button type="submit" className="grid size-11 shrink-0 place-items-center rounded-full bg-brand text-ink" aria-label="Invia">
+      {text.trim() || noVoice ? (
+        <button type="submit" disabled={!text.trim()} className="grid size-11 shrink-0 place-items-center rounded-full bg-brand text-ink disabled:bg-surface disabled:text-cream/30" aria-label="Invia">
           <Send size={18} />
         </button>
       ) : (
@@ -730,16 +774,43 @@ function Composer({ chat, onPlus }: { chat: Chat; onPlus: () => void }) {
           <Mic size={19} />
         </button>
       )}
+      <Sheet open={!!risk} onClose={() => setRisk(null)} title={risk ? OUTGOING_COPY[risk].title : undefined}>
+        {risk && (
+          <div>
+            <p className="text-sm text-muted">{OUTGOING_COPY[risk].body}</p>
+            <p className="mt-3 rounded-xl bg-surface p-3 text-base">“{text.trim()}”</p>
+            <div className="mt-4 grid grid-cols-2 gap-2">
+              <Button type="button" variant="ghost" onClick={() => setRisk(null)}>
+                Modifica
+              </Button>
+              <Button type="button" onClick={() => send(true)}>
+                Invia comunque
+              </Button>
+            </div>
+          </div>
+        )}
+      </Sheet>
     </form>
   )
 }
 
+const DAYS = ['oggi', 'domani', 'dopodomani', 'sabato', 'domenica']
+const HOURS = Array.from({ length: 25 }, (_, i) => `${String(8 + Math.floor(i / 2)).padStart(2, '0')}:${i % 2 ? '30' : '00'}`)
+
 function ProposalSheet({ open, onClose, initial, onSend }: { open: boolean; onClose: () => void; initial: { title: string; when: string; place: string }; onSend: (p: { title: string; when: string; place: string }) => void }) {
+  const { state } = useStore()
+  const minor = isMinor(state.me)
+  const publicPlaces = Object.keys(HABITATS)
+  const [day, setDay] = useState('domani')
+  const [hour, setHour] = useState('17:00')
   const [p, setP] = useState(initial)
   useEffect(() => {
-    if (open) setP(initial)
+    if (open) setP(minor ? { ...initial, place: publicPlaces.includes(initial.place) ? initial.place : publicPlaces[0], when: `${day} alle ${hour}` } : initial)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open])
+  useEffect(() => {
+    if (minor) setP((x) => ({ ...x, when: `${day} alle ${hour}` }))
+  }, [minor, day, hour])
   const field = (k: 'title' | 'when' | 'place', label: string) => (
     <label className="block">
       <span className="text-sm font-semibold text-muted">{label}</span>
@@ -752,8 +823,42 @@ function ProposalSheet({ open, onClose, initial, onSend }: { open: boolean; onCl
       <p className="text-sm text-muted">Già compilata con il suo piano. Cambia quello che vuoi e invia: quando accetta, il timer si ferma.</p>
       <div className="mt-4 space-y-3">
         {field('title', 'Cosa')}
-        {field('when', 'Quando')}
-        {field('place', 'Dove')}
+        {minor ? (
+          <>
+            <div className="grid grid-cols-2 gap-2">
+              <label>
+                <span className="text-sm font-semibold text-muted">Giorno</span>
+                <select value={day} onChange={(e) => setDay(e.target.value)} className="mt-1 h-11 w-full rounded-xl border border-line bg-ink px-3 text-cream focus:border-brand focus:outline-none">
+                  {DAYS.map((d) => (
+                    <option key={d}>{d}</option>
+                  ))}
+                </select>
+              </label>
+              <label>
+                <span className="text-sm font-semibold text-muted">Ora</span>
+                <select value={hour} onChange={(e) => setHour(e.target.value)} className="mt-1 h-11 w-full rounded-xl border border-line bg-ink px-3 text-cream focus:border-brand focus:outline-none">
+                  {HOURS.map((h) => (
+                    <option key={h}>{h}</option>
+                  ))}
+                </select>
+              </label>
+            </div>
+            <label className="block">
+              <span className="text-sm font-semibold text-muted">Dove (solo luoghi pubblici)</span>
+              <select value={p.place} onChange={(e) => setP({ ...p, place: e.target.value })} className="mt-1 h-11 w-full rounded-xl border border-line bg-ink px-3 text-cream focus:border-brand focus:outline-none">
+                {publicPlaces.map((h) => (
+                  <option key={h}>{h}</option>
+                ))}
+              </select>
+            </label>
+            <p className="text-xs text-gold">Sotto i 18 anni le uscite si fanno di giorno (8–20) e in luoghi pubblici.</p>
+          </>
+        ) : (
+          <>
+            {field('when', 'Quando')}
+            {field('place', 'Dove')}
+          </>
+        )}
       </div>
       <Button className="mt-5 w-full rounded-full" size="lg" disabled={!valid} onClick={() => onSend({ title: p.title.trim(), when: p.when.trim(), place: p.place.trim() })}>
         <CalendarCheck size={18} /> Invia proposta

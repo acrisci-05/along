@@ -207,6 +207,16 @@ export interface AppState {
   prefs: Prefs
   savedBy: string[]
   daily: Daily
+  blocked: string[]
+  reports: Report[]
+}
+
+export interface Report {
+  id: string
+  userId: string
+  reason: string
+  details?: string
+  at: number
 }
 
 export interface Daily {

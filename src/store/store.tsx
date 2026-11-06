@@ -2,6 +2,7 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useRef, use
 import type { AppState, Chat, Like, Message, Plan, Prefs, Toast, User } from '../types'
 import { AUTO_REPLIES, createInitialState, DEMO_VERSION, FAREWELL, INCOMING_POOL, SAMPLE_ANSWERS, todayKey } from '../data/mock'
 import { ageFromBirth, isMinor, sameAgeGroup } from '../lib/age'
+import { inMinorHours } from '../lib/safety'
 import { affinity, H, planStatus, randomWave, uid } from '../lib/utils'
 
 const KEY = 'along:state'
@@ -86,6 +87,10 @@ interface Store {
   setPrefs: (p: Partial<Prefs>) => void
   proposeMeetup: (chatId: string, p: { title: string; when: string; place: string }) => void
   completeOnboarding: (p: NewProfile) => void
+  blockUser: (userId: string) => void
+  unblockUser: (userId: string) => void
+  reportUser: (userId: string, reason: string, details?: string) => void
+  injectSuspicious: () => void
   /** true if this person can see/meet userId (adult and 16-17 pools never mix) */
   allowed: (userId: string) => boolean
   planVisible: (plan: Plan) => boolean
@@ -206,11 +211,14 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     (id: string) => {
       if (id === 'me' || id === 'system') return true
       const u = state.users[id]
-      return !!u && sameAgeGroup(state.me, u)
+      return !!u && sameAgeGroup(state.me, u) && !state.blocked.includes(id)
     },
-    [state.me, state.users],
+    [state.me, state.users, state.blocked],
   )
-  const planVisible = useCallback((p: Plan) => allowed(p.hostId) && p.participants.every(allowed), [allowed])
+  const planVisible = useCallback(
+    (p: Plan) => allowed(p.hostId) && p.participants.every(allowed) && (!isMinor(state.me) || p.mode === 'remote' || inMinorHours(p.when)),
+    [allowed, state.me],
+  )
 
   const announcePromoted = useCallback(
     (promoted: Chat[]) => {
@@ -338,6 +346,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       if (!plan) return { ok: false, reason: 'full' }
       const okAge = [plan.hostId, ...plan.participants].every((id) => id === 'me' || (s.users[id] && sameAgeGroup(s.me, s.users[id])))
       if (!okAge) return { ok: false, reason: 'full' }
+      if (isMinor(s.me) && !inMinorHours(plan.when)) return { ok: false, reason: 'full' }
       if (plan.participants.length >= plan.capacity && !plan.participants.includes('me')) return { ok: false, reason: 'full' }
       const peers = plan.participants.filter((id) => id !== 'me')
       return startChat({ planId, peerIds: peers.length ? peers : [plan.hostId], mode: plan.mode, title: plan.title, question: plan.dilemma.question, answer })
@@ -679,6 +688,38 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       setOnboarded: () => setState((prev) => ({ ...prev, onboarded: true })),
       allowed,
       planVisible,
+      blockUser: (userId) => {
+        const now = Date.now()
+        const s = stateRef.current
+        const marked = s.chats.map((c) =>
+          c.peerIds.includes(userId) && (c.status === 'active' || c.status === 'waiting')
+            ? { ...c, status: 'closed' as const, closedReason: 'Persona bloccata', incoming: undefined, messages: [...c.messages, { id: uid('m'), from: 'system', kind: 'system' as const, text: 'Hai bloccato questa persona. La chat è chiusa.', at: now }] }
+            : c,
+        )
+        const closedActive = s.chats.some((c) => c.status === 'active' && c.peerIds.includes(userId))
+        const { chats, promoted } = closedActive ? promote(marked, s.lifetime ? LIFETIME_LIMITS.slots : FREE_LIMITS.slots, now) : { chats: marked, promoted: [] as Chat[] }
+        setState({ ...s, chats, blocked: s.blocked.includes(userId) ? s.blocked : [...s.blocked, userId], likesIn: s.likesIn.filter((l) => l.userId !== userId) })
+        announcePromoted(promoted)
+      },
+      unblockUser: (userId) => setState((prev) => ({ ...prev, blocked: prev.blocked.filter((x) => x !== userId) })),
+      reportUser: (userId, reason, details) =>
+        setState((prev) => ({ ...prev, reports: [...prev.reports, { id: uid('r'), userId, reason, details: details?.trim() || undefined, at: Date.now() }] })),
+      injectSuspicious: () => {
+        const s = stateRef.current
+        const chat = s.chats.find((c) => c.status === 'active')
+        if (!chat) {
+          toast({ tone: 'coral', title: 'Nessuna chat attiva', body: 'Apri una conversazione per provare l’avviso.' })
+          return
+        }
+        const from = chat.peerIds[0]
+        setState((prev) => ({
+          ...prev,
+          chats: prev.chats.map((c) =>
+            c.id === chat.id ? { ...c, unread: c.unread + 1, messages: [...c.messages, { id: uid('m'), from, kind: 'text' as const, text: 'Ehi, mi faresti una ricarica di 20 euro su PayPal? Te li ridò stasera, promesso', at: Date.now() }] } : c,
+          ),
+        }))
+        toast({ tone: 'gold', title: 'Messaggio sospetto inviato', body: `Apri la chat con ${s.users[from]?.name ?? 'la persona'} per vedere l’avviso.` })
+      },
       completeOnboarding: (np) => {
         const base = createInitialState()
         const age = ageFromBirth(np.birthDate)
@@ -760,7 +801,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         setState({ ...createInitialState(), onboarded: false })
       },
     }
-  }, [state, limits, typing, toasts, user, toast, dismissToast, joinPlan, messageUser, pushMine, finishChat, stopClock, acceptWaiting, createPlan, simulateIncomingFor, setLifetime, match, likeUser, acceptLike, proposeMeetup, allowed, planVisible])
+  }, [state, limits, typing, toasts, user, toast, dismissToast, joinPlan, messageUser, pushMine, finishChat, stopClock, acceptWaiting, createPlan, simulateIncomingFor, setLifetime, match, likeUser, acceptLike, proposeMeetup, allowed, planVisible, announcePromoted])
 
   return <Ctx.Provider value={store}>{children}</Ctx.Provider>
 }

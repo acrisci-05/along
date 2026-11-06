@@ -8,6 +8,7 @@ import { cn } from './lib/utils'
 import { Discover } from './views/Discover'
 import { Likes } from './views/Likes'
 import { MatchOverlay } from './components/MatchOverlay'
+import { SafetySheet, type SafetyMode } from './components/Safety'
 import { Onboarding } from './components/Onboarding'
 import { Radar } from './views/Radar'
 import { MyPlans } from './views/MyPlans'
@@ -47,6 +48,7 @@ export default function App() {
   const [gate, setGate] = useState<{ kind: 'plan' | 'user'; id: string } | null>(null)
   const [creating, setCreating] = useState(false)
   const [paywall, setPaywall] = useState<{ open: boolean; reason?: string }>({ open: false })
+  const [safety, setSafety] = useState<{ userId: string; mode: SafetyMode } | null>(null)
   const [frame, setFrame] = useState<'phone' | 'wide'>(() => readPref('along:frame', 'phone'))
   const scrollRef = useRef<HTMLDivElement>(null)
 
@@ -94,6 +96,7 @@ export default function App() {
       },
       openCreate: () => setCreating(true),
       openPaywall: (reason) => setPaywall({ open: true, reason }),
+      openSafety: (userId, mode = 'menu') => setSafety({ userId, mode }),
       openGatekeeperForUser: (id) => {
         setUserId(null)
         setGate({ kind: 'user', id })
@@ -118,7 +121,7 @@ export default function App() {
   }
 
   const wide = frame === 'wide'
-  const overlayOpen = !!(planId || userId || gate || creating || paywall.open || chatId || !state.onboarded || store.match)
+  const overlayOpen = !!(planId || userId || gate || creating || paywall.open || chatId || !state.onboarded || store.match || safety)
 
   return (
     <MotionConfig reducedMotion="user">
@@ -334,6 +337,14 @@ export default function App() {
               onCreated={() => setTab('plans')}
             />
             <Paywall open={paywall.open} reason={paywall.reason} onClose={() => setPaywall({ open: false })} />
+            <SafetySheet
+              target={safety}
+              onClose={() => setSafety(null)}
+              onViewProfile={(id) => {
+                setPlanId(null)
+                setUserId(id)
+              }}
+            />
             <MatchOverlay />
             <Onboarding />
           </div>
