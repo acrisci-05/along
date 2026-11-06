@@ -8,6 +8,7 @@ import { cn } from './lib/utils'
 import { Discover } from './views/Discover'
 import { Likes } from './views/Likes'
 import { MatchOverlay } from './components/MatchOverlay'
+import { Onboarding } from './components/Onboarding'
 import { Radar } from './views/Radar'
 import { MyPlans } from './views/MyPlans'
 import { Crew } from './views/Crew'
@@ -17,7 +18,7 @@ import { PlanDetailSheet, UserSheet } from './components/Overlays'
 import { GatekeeperSheet } from './components/Gatekeeper'
 import { QuickCreate } from './components/QuickCreate'
 import { Paywall } from './components/Paywall'
-import { Avatar, Button, RevolutTip, Sheet } from './components/ui'
+import { Avatar, RevolutTip } from './components/ui'
 
 const TABS: Array<{ id: Tab | 'create'; label: string; icon: typeof Flame }> = [
   { id: 'explore', label: 'Scopri', icon: Flame },
@@ -367,46 +368,5 @@ function FrameSwitch({ frame, setFrame }: { frame: 'phone' | 'wide'; setFrame: (
         </button>
       ))}
     </div>
-  )
-}
-
-const RULES = [
-  { emoji: '🔑', title: 'Swipe = rispondi', body: 'A destra non basta un pollice: rispondi al suo dilemma. Il match nasce da una frase, non da una foto.' },
-  { emoji: '🌫️', title: 'Foto sfocate fino al match', body: 'Vedi chi è, cosa propone e cosa dice il suo migliore amico. Il volto si svela solo quando è scintilla.' },
-  { emoji: '⏳', title: '48 ore per vedersi', body: 'Ogni match vicino ha 48h per diventare un’uscita vera. Massimo 3 chat attive: niente collezionisti di match.' },
-]
-
-function Onboarding() {
-  const { state, setOnboarded } = useStore()
-  return (
-    <Sheet open={!state.onboarded} onClose={setOnboarded}>
-      <div className="space-y-5">
-        <div>
-          <p className="serif text-sm text-brand">Benvenut* su ALONG</p>
-          <h2 className="mt-1 text-2xl font-bold leading-[1.02]">
-            Meno swipe a vuoto.
-            <br />
-            <span className="text-gradient-neon">Più uscite vere.</span>
-          </h2>
-          <p className="mt-2 text-base text-cream/65">Date o nuove amicizie, sempre attorno a qualcosa da fare insieme. Tre regole:</p>
-        </div>
-        <ul className="space-y-2">
-          {RULES.map((r, i) => (
-            <motion.li key={r.title} initial={{ opacity: 0, x: -12 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.15 + i * 0.08 }} className="glass flex gap-3 rounded-2xl p-3">
-              <span className="text-2xl" aria-hidden>
-                {r.emoji}
-              </span>
-              <div>
-                <p className="font-display font-bold">{r.title}</p>
-                <p className="text-sm text-cream/60">{r.body}</p>
-              </div>
-            </motion.li>
-          ))}
-        </ul>
-        <Button className="w-full" size="lg" onClick={setOnboarded}>
-          Inizia a scoprire
-        </Button>
-      </div>
-    </Sheet>
   )
 }

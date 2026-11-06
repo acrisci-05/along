@@ -3,7 +3,7 @@ import { useEffect, useId, useRef, useState, type ButtonHTMLAttributes, type Rea
 import { Lock, Pause, Play, X } from 'lucide-react'
 import type { User } from '../../types'
 import { cn, type BeamTone } from '../../lib/utils'
-import { Portrait } from '../Portrait'
+import { UserPicture } from '../Portrait'
 import { useRevealed } from '../../store/store'
 
 /* ---------------- Button ---------------- */
@@ -88,7 +88,7 @@ export function Avatar({
   lockIcon = true,
 }: {
   lockIcon?: boolean
-  user: Pick<User, 'id' | 'name' | 'hue' | 'look'>
+  user: Pick<User, 'id' | 'name' | 'hue' | 'look' | 'photo'>
   size?: number
   blur?: boolean
   className?: string
@@ -104,7 +104,7 @@ export function Avatar({
       role="img"
     >
       <div className={cn('absolute inset-0 transition-[filter,transform] duration-700', blur && 'scale-125 blur-[6px]')}>
-        <Portrait look={user.look} hue={user.hue} crop="avatar" className="h-full w-full" />
+        <UserPicture user={user} crop="avatar" className="h-full w-full" />
       </div>
       {blur && lockIcon && (
         <div className="absolute inset-0 grid place-items-center bg-ink/25">

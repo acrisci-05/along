@@ -28,8 +28,8 @@ Obiettivo: un'app che si può far provare a qualcuno e che "sembra vera".
 - ✅ **1.2 Scopri (A)** — card-locandina a 3 pagine-storia (Locandina · In comune · Affidabilità), Bestie solo dopo il match, selezione di 20 profili al giorno con locandina "Per oggi è tutto", animazione "poster che si stacca"
 - ✅ **1.3 Match & Like (A)** — nuovo stile scuro marrone + salvia (solo Work Sans), card a foto intera, like ricevuti a mazzo, match "biglietto doppio", proposta di uscita in 1 tap che ferma il timer
 - ✅ **1.4 Chat (B)** — intestazione pulita con biglietto dell'uscita fissato e barra del timer, azioni nel "+", fumetti verde scuro / marrone, note vocali dal microfono vero, congedo con 3 modelli + frase personale, visualizzato e "sta scrivendo" disattivabili (reciproci, come WhatsApp)
-- 🔜 **1.5 Onboarding vero (C)** — creare il proprio profilo: nome, età, cosa cerchi, interessi, Habitat, dilemma (non più "Alex")
-- ⬜ **1.6 Sicurezza base (E)** — blocca e segnala, conferma 18+, consigli per il primo incontro, condividi il piano con un amico
+- ✅ **1.5 Onboarding vero (C)** — benvenuto + 3 passi (chi sei con data di nascita e foto/avatar · cosa cerchi · dilemma dalla lista). Età minima 16 anni; 16-17 solo modalità Amici e in un gruppo separato: maggiorenni e minorenni non si vedono né si incontrano mai
+- 🔜 **1.6 Sicurezza base (E)** — blocca e segnala, conferma 18+, consigli per il primo incontro, condividi il piano con un amico
 
 ## Fase 2 — Profilo reale
 - ⬜ **2.1 Foto vere** — caricare 3–6 foto, ritaglio, ordine; sfocatura fino al match

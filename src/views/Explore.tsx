@@ -36,7 +36,7 @@ export function FrequencySwitch({ mode, onChange }: { mode: Mode; onChange: (m: 
 }
 
 export function Explore({ mode, setMode }: { mode: Mode; setMode: (m: Mode) => void }) {
-  const { state, user, toggleSave } = useStore()
+  const { state, user, toggleSave, allowed, planVisible } = useStore()
   const nav = useNav()
   const now = useNow(30_000)
   const [habitat, setHabitat] = useState<string | 'all'>('all')
@@ -44,7 +44,7 @@ export function Explore({ mode, setMode }: { mode: Mode; setMode: (m: Mode) => v
 
   const localPlans = useMemo(() => {
     return state.plans
-      .filter((p) => p.mode === 'local' && p.city === state.me.city && p.hostId !== 'me')
+      .filter((p) => p.mode === 'local' && p.city === state.me.city && p.hostId !== 'me' && planVisible(p))
       .filter((p) => habitat === 'all' || p.habitat === habitat)
       .filter((p) => cat === 'all' || p.category === cat)
       .sort((a, b) => {
@@ -52,23 +52,24 @@ export function Explore({ mode, setMode }: { mode: Mode; setMode: (m: Mode) => v
         const eb = planStatus(b, now) === 'EXPIRED' ? 1 : 0
         return ea - eb || a.when - b.when
       })
-  }, [state.plans, state.me.city, habitat, cat, now])
+  }, [state.plans, state.me.city, habitat, cat, now, planVisible])
 
   const remotePlans = useMemo(() => {
     return state.plans
-      .filter((p) => p.mode === 'remote' && p.hostId !== 'me')
+      .filter((p) => p.mode === 'remote' && p.hostId !== 'me' && planVisible(p))
       .filter((p) => cat === 'all' || p.category === cat)
       .map((p) => ({ p, a: affinity(state.me, user(p.hostId)) }))
       .sort((x, y) => y.a - x.a)
-  }, [state.plans, state.me, user, cat])
+  }, [state.plans, state.me, user, cat, planVisible])
 
   const people = useMemo(
     () =>
       Object.values(state.users)
+        .filter((u) => allowed(u.id))
         .map((u) => ({ u, a: affinity(state.me, u) }))
         .sort((x, y) => y.a - x.a)
         .slice(0, 6),
-    [state.users, state.me],
+    [state.users, state.me, allowed],
   )
 
   const cats = mode === 'local' ? LOCAL_CATEGORIES : REMOTE_CATEGORIES
@@ -209,7 +210,7 @@ function EmptyState({ onCreate }: { onCreate: () => void }) {
 }
 
 export function TravelBridge() {
-  const { state, addTravel, removeTravel, limits, user, toggleSave } = useStore()
+  const { state, addTravel, removeTravel, limits, user, toggleSave, allowed, planVisible } = useStore()
   const nav = useNav()
   const [dest, setDest] = useState('')
   const suggestions = ['Barcellona', 'Valencia', 'Bologna', 'Lisbona', 'Berlino']
@@ -223,12 +224,13 @@ export function TravelBridge() {
   }
 
   const matches = state.plans.filter((p) =>
+    planVisible(p) &&
     state.travelDestinations.some((d) => {
       const k = d.toLowerCase()
       return p.city.toLowerCase() === k || p.details.destination?.toLowerCase() === k
     }),
   )
-  const locals = Object.values(state.users).filter((u) => state.travelDestinations.some((d) => u.city.toLowerCase() === d.toLowerCase() || u.travel?.toLowerCase() === d.toLowerCase()))
+  const locals = Object.values(state.users).filter((u) => allowed(u.id) && state.travelDestinations.some((d) => u.city.toLowerCase() === d.toLowerCase() || u.travel?.toLowerCase() === d.toLowerCase()))
 
   return (
     <div className="relative overflow-hidden rounded-3xl border border-cyan/20 bg-surface p-4">

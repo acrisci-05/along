@@ -48,6 +48,10 @@ export interface User {
   gender: Gender
   intent: Intent[]
   look: Look
+  /** ISO date (YYYY-MM-DD); age is derived from it */
+  birthDate?: string
+  /** compressed data: URL of an uploaded photo (local demo only) */
+  photo?: string
   distanceKm?: number
 }
 

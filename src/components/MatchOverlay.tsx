@@ -3,7 +3,7 @@ import { CalendarCheck, Hourglass, MapPin, MessageCircle } from 'lucide-react'
 import { useNav } from '../nav'
 import { useStore } from '../store/store'
 import { suggestMeetup } from '../lib/meetup'
-import { Portrait } from './Portrait'
+import { Portrait, UserPicture } from './Portrait'
 import { Button } from './ui'
 
 /** Match moment: two ticket halves (you + them) slide together and get stamped. */
@@ -44,7 +44,7 @@ export function MatchOverlay() {
                 className="ticket-left flex-1 rounded-l-2xl bg-surface p-3"
               >
                 <div className="aspect-[4/5] overflow-hidden rounded-xl">
-                  <Portrait look={state.me.look} hue={state.me.hue} className="h-full w-full" />
+                  <UserPicture user={state.me} className="h-full w-full" />
                 </div>
                 <p className="mt-2 text-base font-bold text-cream">{state.me.name}</p>
                 <p className="text-xs text-muted">{state.me.city}</p>

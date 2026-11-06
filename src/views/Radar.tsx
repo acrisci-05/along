@@ -18,7 +18,7 @@ const KIND_COLOR: Record<string, string> = {
 }
 
 export function Radar() {
-  const { state, user, toggleSave } = useStore()
+  const { state, user, toggleSave, planVisible } = useStore()
   const nav = useNav()
   const now = useNow(30_000)
   const [view, setView] = useState<'map' | 'list'>('map')
@@ -30,7 +30,7 @@ export function Radar() {
     if (selected) window.setTimeout(() => detailRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 120)
   }, [selected])
 
-  const live = useMemo(() => state.plans.filter((p) => p.mode === 'local' && p.city === state.me.city && planStatus(p, now) !== 'EXPIRED'), [state.plans, state.me.city, now])
+  const live = useMemo(() => state.plans.filter((p) => p.mode === 'local' && p.city === state.me.city && planStatus(p, now) !== 'EXPIRED' && planVisible(p)), [state.plans, state.me.city, now, planVisible])
 
   const byHabitat = useMemo(() => {
     const m: Record<string, number> = {}

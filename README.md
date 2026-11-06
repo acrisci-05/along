@@ -36,3 +36,8 @@ npm run preview    # serve la build
 
 Impostazioni demo (Profilo): toggle Lifetime, "Simula richiesta in arrivo", "Ripristina Dati Demo".
 Su desktop l'app è mostrata in una cornice smartphone, con switch per la vista estesa (navbar superiore).
+
+## Regole d’età
+- Iscrizione dai **16 anni** (data di nascita obbligatoria, l’età si aggiorna da sola).
+- **16-17 anni:** solo modalità *Amici*, in un gruppo separato.
+- **Maggiorenni e minorenni non si vedono mai:** Scopri, like, piani, mappa, profili e azioni (rispondere, unirsi a un piano, accettare un like) sono filtrati e bloccati anche nello store (`src/lib/age.ts`, `allowed` / `planVisible` in `src/store/store.tsx`).

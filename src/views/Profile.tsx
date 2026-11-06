@@ -4,6 +4,7 @@ import { BellRing, Check, Crown, Info, KeyRound, MapPin, Pencil, RotateCcw, Spar
 import { useNav } from '../nav'
 import { useStore } from '../store/store'
 import { cn } from '../lib/utils'
+import { isMinor } from '../lib/age'
 import { BadgeRow, BestieSticker, earnedBadges, KarmaMeter } from '../components/Bestie'
 import { Avatar, Button, Eyebrow, LifetimeBadge, RevolutTip, Sheet, Toggle } from '../components/ui'
 
@@ -11,6 +12,7 @@ export function Profile() {
   const { state, updateMe, setLifetime, reset, simulateIncoming, toast, setPrefs } = useStore()
   const nav = useNav()
   const me = state.me
+  const minor = isMinor(me)
   const [editing, setEditing] = useState(false)
   const [confirmReset, setConfirmReset] = useState(false)
   const [draft, setDraft] = useState({ name: me.name, bio: me.bio, dilemma: me.dilemma.question })
@@ -53,7 +55,19 @@ export function Profile() {
             <Pencil size={16} />
           </button>
         </div>
-        <p className="mt-3 text-base leading-snug text-cream/80">{me.bio}</p>
+        {me.bio ? (
+          <p className="mt-3 text-base leading-snug text-cream/80">{me.bio}</p>
+        ) : (
+          <button
+            onClick={() => {
+              setDraft({ name: me.name, bio: me.bio, dilemma: me.dilemma.question })
+              setEditing(true)
+            }}
+            className="mt-3 text-left text-sm text-muted underline-offset-2 hover:underline"
+          >
+            Aggiungi due righe su di te
+          </button>
+        )}
         <div className="mt-3">
           <BadgeRow badges={badges} />
         </div>
@@ -85,17 +99,19 @@ export function Profile() {
               <button
                 key={k}
                 aria-pressed={active}
+                disabled={minor && k === 'date'}
                 onClick={() => {
                   const next = active ? me.intent.filter((i) => i !== k) : [...me.intent, k]
                   if (next.length) updateMe({ intent: next })
                 }}
-                className={cn('h-11 rounded-2xl text-sm font-semibold transition', active ? on : 'border border-cream/10 text-cream/55')}
+                className={cn('h-11 rounded-2xl text-sm font-semibold transition disabled:opacity-40', active ? on : 'border border-cream/10 text-cream/55')}
               >
                 {l}
               </button>
             )
           })}
         </div>
+        {minor && <p className="text-sm text-gold">Hai {me.age} anni: fino ai 18 anni ALONG è solo per nuove amicizie, con persone di 16 e 17 anni.</p>}
         <button onClick={() => nav.setTab('plans')} className="flex w-full items-center justify-between rounded-2xl bg-cream/[0.04] px-3 py-2.5 text-left hover:bg-cream/[0.08]">
           <span>
             <span className="block text-sm font-semibold">I miei piani</span>
@@ -129,7 +145,29 @@ export function Profile() {
             })}
           </div>
         </div>
-        {me.bestie && <BestieSticker vouch={me.bestie} name={me.name} finish={finish} onShare={() => toast({ tone: 'violet', title: 'Link per il bestie pronto', body: 'Incollalo nella chat col tuo migliore amico.' })} />}
+        {me.bestie ? (
+          <BestieSticker vouch={me.bestie} name={me.name} finish={finish} onShare={() => toast({ tone: 'violet', title: 'Link per il bestie pronto', body: 'Incollalo nella chat col tuo migliore amico.' })} />
+        ) : (
+          <div className="mt-2 rounded-2xl border border-dashed border-line p-4">
+            <p className="text-base font-semibold">Il tuo sticker è ancora vuoto</p>
+            <p className="mt-1 text-sm text-muted">Chiedi al tuo migliore amico di scrivere il tuo peggior difetto al primo incontro, perché uscirci comunque e la tua red flag innocua. Si vede solo dopo il match.</p>
+            <button
+              onClick={async () => {
+                const url = `${location.origin}${location.pathname}#vouch/${encodeURIComponent(me.name.toLowerCase())}`
+                try {
+                  if (navigator.share) await navigator.share({ title: 'Recensiscimi su ALONG', url })
+                  else await navigator.clipboard.writeText(url)
+                } catch {
+                  /* cancelled */
+                }
+                toast({ tone: 'violet', title: 'Link per il bestie pronto', body: 'Mandalo al tuo migliore amico.' })
+              }}
+              className="mt-3 h-10 rounded-full border border-line px-4 text-sm font-semibold hover:border-cream/40"
+            >
+              Chiedi al tuo bestie
+            </button>
+          </div>
+        )}
       </section>
 
       {/* interests */}
@@ -137,6 +175,7 @@ export function Profile() {
         <div>
           <Eyebrow>Passioni</Eyebrow>
           <div className="mt-2 flex flex-wrap gap-1.5">
+            {!me.interests.length && <p className="text-sm text-muted">Nessuna passione ancora. Le aggiungerai presto dal profilo.</p>}
             {me.interests.map((i) => (
               <span key={i} className="rounded-md border border-violet/30 bg-violet/10 px-2.5 py-1 text-sm text-violet">
                 {i}
@@ -147,6 +186,7 @@ export function Profile() {
         <div>
           <Eyebrow>Habitat dichiarati</Eyebrow>
           <div className="mt-2 flex flex-wrap gap-1.5">
+            {!me.habitats.length && <p className="text-sm text-muted">Nessun Habitat ancora.</p>}
             {me.habitats.map((h) => (
               <span key={h} className="rounded-md border border-cyan/30 bg-cyan/10 px-2.5 py-1 text-sm text-cyan">
                 📍 {h}

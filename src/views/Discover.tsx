@@ -5,6 +5,7 @@ import type { Mode, Plan, User } from '../types'
 import { useNav } from '../nav'
 import { useNow, useStore } from '../store/store'
 import { DAILY_LIMIT, todayKey } from '../data/mock'
+import { isMinor } from '../lib/age'
 import { affinity, cn, planStatus, planWhen, sharedInterests } from '../lib/utils'
 import { Portrait } from '../components/Portrait'
 import { Button, Chip, Sheet } from '../components/ui'
@@ -47,7 +48,8 @@ export function Discover({ mode, setMode }: { mode: Mode; setMode: (m: Mode) => 
 
 function Deck({ mode, setMode, onPlans }: { mode: Mode; setMode: (m: Mode) => void; onPlans: () => void }) {
   const store = useStore()
-  const { state, setPrefs, passUser, likeUser, undoSwipe, resetDeck, toast, newDay } = store
+  const { state, setPrefs, passUser, likeUser, undoSwipe, resetDeck, toast, newDay, allowed } = store
+  const minor = isMinor(state.me)
   const [dir, setDir] = useState<'left' | 'right'>('left')
   const daily = state.daily.day === todayKey() ? state.daily : { day: todayKey(), seen: 0, answered: 0, matches: 0 }
   const dayOver = daily.seen >= DAILY_LIMIT
@@ -61,7 +63,7 @@ function Deck({ mode, setMode, onPlans }: { mode: Mode; setMode: (m: Mode) => vo
     const pending = new Set(state.likesIn.filter((l) => l.status === 'new').map((l) => l.userId))
     const travelCities = state.travelDestinations.map((d) => d.toLowerCase())
     return Object.values(state.users)
-      .filter((u) => !state.swipes[u.id] && !busy.has(u.id) && !pending.has(u.id))
+      .filter((u) => allowed(u.id) && !state.swipes[u.id] && !busy.has(u.id) && !pending.has(u.id))
       .filter((u) => u.intent.includes(prefs.intent))
       .filter((u) => prefs.show === 'all' || u.gender === prefs.show)
       .filter((u) => u.age >= prefs.ageMin && u.age <= prefs.ageMax)
@@ -70,7 +72,7 @@ function Deck({ mode, setMode, onPlans }: { mode: Mode; setMode: (m: Mode) => vo
         return mode === 'local' ? near : u.city !== me.city
       })
       .sort((a, b) => affinity(me, b) - affinity(me, a))
-  }, [state.users, state.swipes, state.chats, state.likesIn, state.travelDestinations, prefs, me, mode])
+  }, [state.users, state.swipes, state.chats, state.likesIn, state.travelDestinations, prefs, me, mode, allowed])
 
   const top = dayOver ? undefined : deck[0]
   const next = dayOver ? undefined : deck[1]
@@ -97,6 +99,8 @@ function Deck({ mode, setMode, onPlans }: { mode: Mode; setMode: (m: Mode) => vo
               key={k}
               role="radio"
               aria-checked={prefs.intent === k}
+              disabled={minor && k === 'date'}
+              title={minor && k === 'date' ? 'Disponibile dai 18 anni' : undefined}
               onClick={() => setPrefs({ intent: k })}
               className={cn('h-9 rounded-xl text-sm font-semibold transition', prefs.intent === k ? (k === 'date' ? 'bg-brand text-ink' : 'bg-brand text-ink') : 'text-cream/60')}
             >
@@ -218,11 +222,11 @@ function Deck({ mode, setMode, onPlans }: { mode: Mode; setMode: (m: Mode) => vo
             </p>
             <label className="flex items-center gap-3 text-sm text-cream/55">
               min
-              <input type="range" min={18} max={prefs.ageMax} value={prefs.ageMin} onChange={(e) => setPrefs({ ageMin: Number(e.target.value) })} className="flex-1" />
+              <input type="range" min={minor ? 16 : 18} max={prefs.ageMax} value={prefs.ageMin} onChange={(e) => setPrefs({ ageMin: Number(e.target.value) })} className="flex-1" />
             </label>
             <label className="mt-2 flex items-center gap-3 text-sm text-cream/55">
               max
-              <input type="range" min={prefs.ageMin} max={60} value={prefs.ageMax} onChange={(e) => setPrefs({ ageMax: Number(e.target.value) })} className="flex-1" />
+              <input type="range" min={prefs.ageMin} max={minor ? 17 : 60} value={prefs.ageMax} onChange={(e) => setPrefs({ ageMax: Number(e.target.value) })} className="flex-1" />
             </label>
           </div>
           <Button className="w-full" onClick={() => setFilters(false)}>

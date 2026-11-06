@@ -1,6 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import type { AppState, Chat, Like, Message, Plan, Prefs, Toast, User } from '../types'
-import { AUTO_REPLIES, createInitialState, DEMO_VERSION, FAREWELL, INCOMING_POOL, todayKey } from '../data/mock'
+import { AUTO_REPLIES, createInitialState, DEMO_VERSION, FAREWELL, INCOMING_POOL, SAMPLE_ANSWERS, todayKey } from '../data/mock'
+import { ageFromBirth, isMinor, sameAgeGroup } from '../lib/age'
 import { affinity, H, planStatus, randomWave, uid } from '../lib/utils'
 
 const KEY = 'along:state'
@@ -10,7 +11,11 @@ function load(): AppState {
     const raw = localStorage.getItem(KEY)
     if (raw) {
       const parsed = JSON.parse(raw) as AppState
-      if (parsed.version === DEMO_VERSION) return { ...createInitialState(), ...parsed }
+      if (parsed.version === DEMO_VERSION) {
+        const merged = { ...createInitialState(), ...parsed }
+        if (merged.me.birthDate) merged.me = { ...merged.me, age: ageFromBirth(merged.me.birthDate) }
+        return merged
+      }
     }
   } catch {
     /* storage unavailable */
@@ -80,6 +85,22 @@ interface Store {
   declineLike: (likeId: string) => void
   setPrefs: (p: Partial<Prefs>) => void
   proposeMeetup: (chatId: string, p: { title: string; when: string; place: string }) => void
+  completeOnboarding: (p: NewProfile) => void
+  /** true if this person can see/meet userId (adult and 16-17 pools never mix) */
+  allowed: (userId: string) => boolean
+  planVisible: (plan: Plan) => boolean
+}
+
+export interface NewProfile {
+  name: string
+  birthDate: string
+  gender: User['gender']
+  intent: User['intent']
+  show: Prefs['show']
+  dilemma: string
+  photo?: string
+  look: User['look']
+  hue: number
 }
 
 export interface MatchEvent {
@@ -180,6 +201,16 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     (id: string): User => (id === 'me' ? state.me : state.users[id] ?? { ...state.me, id, name: 'Utente', emoji: '👤' }),
     [state.me, state.users],
   )
+
+  const allowed = useCallback(
+    (id: string) => {
+      if (id === 'me' || id === 'system') return true
+      const u = state.users[id]
+      return !!u && sameAgeGroup(state.me, u)
+    },
+    [state.me, state.users],
+  )
+  const planVisible = useCallback((p: Plan) => allowed(p.hostId) && p.participants.every(allowed), [allowed])
 
   const announcePromoted = useCallback(
     (promoted: Chat[]) => {
@@ -302,8 +333,11 @@ export function StoreProvider({ children }: { children: ReactNode }) {
 
   const joinPlan = useCallback(
     (planId: string, answer: string): JoinResult => {
-      const plan = stateRef.current.plans.find((p) => p.id === planId)
+      const s = stateRef.current
+      const plan = s.plans.find((p) => p.id === planId)
       if (!plan) return { ok: false, reason: 'full' }
+      const okAge = [plan.hostId, ...plan.participants].every((id) => id === 'me' || (s.users[id] && sameAgeGroup(s.me, s.users[id])))
+      if (!okAge) return { ok: false, reason: 'full' }
       if (plan.participants.length >= plan.capacity && !plan.participants.includes('me')) return { ok: false, reason: 'full' }
       const peers = plan.participants.filter((id) => id !== 'me')
       return startChat({ planId, peerIds: peers.length ? peers : [plan.hostId], mode: plan.mode, title: plan.title, question: plan.dilemma.question, answer })
@@ -443,12 +477,22 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         ...s.likesIn.filter((l) => l.status === 'new').map((l) => l.userId),
         ...s.chats.filter((c) => c.status === 'active' || c.status === 'waiting').flatMap((c) => c.peerIds),
       ])
-      const candidate = INCOMING_POOL.find((x) => !taken.has(x.userId)) ?? pick(INCOMING_POOL)
+      const question = plan?.dilemma.question ?? s.me.dilemma.question
+      const samples = SAMPLE_ANSWERS[question]
+      const pool = isMinor(s.me)
+        ? Object.values(s.users).filter((x) => isMinor(x)).map((x) => ({ userId: x.id, answer: samples ? pick(samples) : 'Bella domanda! Te lo racconto di persona.' }))
+        : INCOMING_POOL.map((x) => ({ ...x, answer: samples ? pick(samples) : x.answer }))
+      const fresh = pool.filter((x) => !taken.has(x.userId) && s.users[x.userId] && sameAgeGroup(s.me, s.users[x.userId]))
+      if (!fresh.length) {
+        toast({ tone: 'gold', title: 'Nessun nuovo profilo', body: 'Hai già ricevuto risposte da tutte le persone della demo.' })
+        return
+      }
+      const candidate = pick(fresh)
       const u = s.users[candidate.userId]
       const like: Like = {
         id: uid('l'),
         userId: candidate.userId,
-        question: plan?.dilemma.question ?? s.me.dilemma.question,
+        question,
         answer: candidate.answer,
         at: Date.now(),
         status: 'new',
@@ -500,6 +544,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       const now = Date.now()
       const s0 = stateRef.current
       const u = s0.users[userId]
+      if (!u || !sameAgeGroup(s0.me, u)) return
       setState((prev) => ({
         ...prev,
         swipes: { ...prev.swipes, [userId]: 'like' },
@@ -535,7 +580,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     (likeId: string) => {
       const s = stateRef.current
       const like = s.likesIn.find((l) => l.id === likeId)
-      if (!like) return
+      if (!like || !sameAgeGroup(s.me, s.users[like.userId])) return
       const { chat, full } = openMatch(like.userId, { question: like.question, answer: like.answer, fromMe: false }, s)
       setState({ ...s, chats: [chat, ...s.chats], likesIn: s.likesIn.map((l) => (l.id === likeId ? { ...l, status: 'accepted' } : l)), swipes: { ...s.swipes, [like.userId]: 'like' }, daily: bumpDaily(s.daily, 'matches') })
       setMatch({ userId: like.userId, chatId: chat.id, waiting: full, answer: like.answer, question: like.question, fromMe: false })
@@ -632,6 +677,54 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       },
       removeTravel: (dest) => setState((prev) => ({ ...prev, travelDestinations: prev.travelDestinations.filter((d) => d !== dest) })),
       setOnboarded: () => setState((prev) => ({ ...prev, onboarded: true })),
+      allowed,
+      planVisible,
+      completeOnboarding: (np) => {
+        const base = createInitialState()
+        const age = ageFromBirth(np.birthDate)
+        const minor = age < 18
+        const me: User = {
+          ...base.me,
+          name: np.name.trim(),
+          age,
+          birthDate: np.birthDate,
+          gender: np.gender,
+          intent: minor ? ['friends'] : np.intent,
+          dilemma: { question: np.dilemma, options: [] },
+          photo: np.photo,
+          look: np.look,
+          hue: np.hue,
+          bio: '',
+          interests: [],
+          habitats: [],
+          bestie: undefined,
+          karma: 100,
+          badges: [],
+        }
+        const users = base.users
+        const peers = Object.values(users).filter((u) => sameAgeGroup(me, u))
+        const samples = SAMPLE_ANSWERS[np.dilemma] ?? ['Bella domanda! Te lo racconto di persona.', 'Ci devo pensare, ma ho già un’idea.']
+        const likers = (minor ? peers : peers.filter((u) => ['u-federico', 'u-aurora', 'u-omar'].includes(u.id))).slice(0, 2)
+        const now = Date.now()
+        setTyping({})
+        setMatch(null)
+        setState({
+          ...base,
+          me,
+          onboarded: true,
+          chats: [],
+          plans: base.plans.filter((p) => p.hostId !== 'me').map((p) => ({ ...p, participants: p.participants.filter((id) => id !== 'me') })),
+          saved: [],
+          likesIn: likers.map((u, i) => ({ id: uid('l'), userId: u.id, question: np.dilemma, answer: samples[i % samples.length], at: now - (i + 1) * 47 * 60_000, status: 'new' as const })),
+          likesOut: [],
+          swipes: {},
+          swipeHistory: [],
+          savedBy: peers.slice(0, 2).map((u) => u.id),
+          stats: { replyTimes: [], voiceSent: 0, textSent: 0, elegantCloses: 0, ghosted: 0, clocksStopped: 0 },
+          prefs: { ...base.prefs, intent: minor ? 'friends' : np.intent.includes('date') ? 'date' : 'friends', show: np.show, ageMin: minor ? 16 : Math.max(18, age - 8), ageMax: minor ? 17 : Math.min(60, age + 10) },
+        })
+        toast({ tone: 'lime', title: `Benvenut* su ALONG, ${me.name}`, body: minor ? 'Modalità Amici, solo con persone della tua età.' : 'Il tuo profilo è pronto. Inizia a scoprire.' })
+      },
       match,
       dismissMatch: () => setMatch(null),
       likeUser,
@@ -657,18 +750,17 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         setState((prev) => ({ ...prev, likesIn: prev.likesIn.map((l) => (l.id === likeId ? { ...l, status: 'declined' } : l)), me: { ...prev.me, karma: prev.me.karma + 3 } }))
         toast({ tone: 'lime', title: '“Non stavolta” inviato con gentilezza', body: '+3 Karma. Nessuno resta appeso.' })
       },
-      setPrefs: (p) => setState((prev) => ({ ...prev, prefs: { ...prev.prefs, ...p } })),
+      setPrefs: (p) => setState((prev) => ({ ...prev, prefs: { ...prev.prefs, ...p, ...(isMinor(prev.me) ? { intent: 'friends' as const } : {}) } })),
       proposeMeetup,
       reset: () => {
         timers.current.forEach((t) => clearTimeout(t))
         timers.current = []
         setTyping({})
         setMatch(null)
-        setState({ ...createInitialState(), onboarded: true })
-        toast({ tone: 'cyan', title: 'Dati demo ripristinati', body: 'Tutto è tornato allo stato iniziale.' })
+        setState({ ...createInitialState(), onboarded: false })
       },
     }
-  }, [state, limits, typing, toasts, user, toast, dismissToast, joinPlan, messageUser, pushMine, finishChat, stopClock, acceptWaiting, createPlan, simulateIncomingFor, setLifetime, match, likeUser, acceptLike, proposeMeetup])
+  }, [state, limits, typing, toasts, user, toast, dismissToast, joinPlan, messageUser, pushMine, finishChat, stopClock, acceptWaiting, createPlan, simulateIncomingFor, setLifetime, match, likeUser, acceptLike, proposeMeetup, allowed, planVisible])
 
   return <Ctx.Provider value={store}>{children}</Ctx.Provider>
 }

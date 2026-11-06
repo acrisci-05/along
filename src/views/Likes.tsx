@@ -9,10 +9,10 @@ import { Avatar, Eyebrow } from '../components/ui'
 import { Portrait } from '../components/Portrait'
 
 export function Likes() {
-  const { state, user, acceptLike, declineLike, simulateIncoming } = useStore()
+  const { state, user, acceptLike, declineLike, simulateIncoming, allowed } = useStore()
   const nav = useNav()
   const now = useNow(30_000)
-  const fresh = state.likesIn.filter((l) => l.status === 'new').sort((a, b) => b.at - a.at)
+  const fresh = state.likesIn.filter((l) => l.status === 'new' && allowed(l.userId)).sort((a, b) => b.at - a.at)
   const [dir, setDir] = useState<'left' | 'right'>('left')
   const pending = state.likesOut.filter((l) => l.status === 'pending')
 
@@ -94,11 +94,11 @@ export function Likes() {
 
       <section className="glass rounded-3xl p-4">
         <p className="flex items-center gap-1.5 text-sm font-semibold">
-          <Eye size={15} className="text-violet" /> {state.savedBy.length} persone hanno salvato il tuo profilo
+          <Eye size={15} className="text-violet" /> {state.savedBy.filter(allowed).length} persone hanno salvato il tuo profilo
         </p>
         {state.lifetime ? (
           <div className="mt-3 flex flex-wrap gap-2">
-            {state.savedBy.map((id) => {
+            {state.savedBy.filter(allowed).map((id) => {
               const u = user(id)
               return (
                 <button key={id} onClick={() => nav.openUser(id)} className="flex items-center gap-1.5 rounded-md bg-cream/5 py-1 pl-1 pr-3 text-sm hover:bg-cream/10">
@@ -110,7 +110,7 @@ export function Likes() {
         ) : (
           <button onClick={() => nav.openPaywall('Scopri chi ha salvato il tuo profilo prima ancora di rispondere. Incluso in ALONG Forever, per sempre.')} className="mt-3 flex w-full items-center gap-3 rounded-2xl bg-violet/10 p-2.5 text-left">
             <div className="flex -space-x-2">
-              {state.savedBy.slice(0, 4).map((id) => (
+              {state.savedBy.filter(allowed).slice(0, 4).map((id) => (
                 <Avatar key={id} user={user(id)} size={30} blur ring lockIcon={false} />
               ))}
             </div>

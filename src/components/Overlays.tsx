@@ -7,10 +7,11 @@ import { BadgeRow, BestieSticker } from './Bestie'
 import { LivingPlanCard } from './LivingPlanCard'
 
 export function PlanDetailSheet({ planId, onClose, onJoin }: { planId: string | null; onClose: () => void; onJoin: (planId: string) => void }) {
-  const { state, user, toggleSave } = useStore()
+  const { state, user, toggleSave, planVisible } = useStore()
   const nav = useNav()
   const now = useNow(30_000)
-  const plan = state.plans.find((p) => p.id === planId)
+  const found = state.plans.find((p) => p.id === planId)
+  const plan = found && planVisible(found) ? found : undefined
   const chat = plan && state.chats.find((c) => c.planId === plan.id && (c.status === 'active' || c.status === 'waiting') && !c.incoming)
 
   return (
@@ -153,10 +154,10 @@ export function PlanDetailSheet({ planId, onClose, onJoin }: { planId: string | 
 }
 
 export function UserSheet({ userId, onClose }: { userId: string | null; onClose: () => void }) {
-  const { state, user, toggleSave } = useStore()
+  const { state, user, toggleSave, allowed, planVisible } = useStore()
   const revealed = useRevealed()
   const nav = useNav()
-  const u = userId ? user(userId) : null
+  const u = userId && allowed(userId) ? user(userId) : null
   const dm = u && state.chats.find((c) => c.peerIds.length === 1 && c.peerIds[0] === u.id && (c.status === 'active' || c.status === 'waiting'))
   const pending = u && state.likesOut.some((l) => l.userId === u.id && l.status === 'pending')
   return (
@@ -212,11 +213,11 @@ export function UserSheet({ userId, onClose }: { userId: string | null; onClose:
               </div>
             ))}
 
-          {state.plans.filter((p) => p.hostId === u.id).length > 0 && (
+          {state.plans.filter((p) => p.hostId === u.id && planVisible(p)).length > 0 && (
             <div className="space-y-2">
               <Eyebrow>Piani di {u.name}</Eyebrow>
               {state.plans
-                .filter((p) => p.hostId === u.id)
+                .filter((p) => p.hostId === u.id && planVisible(p))
                 .map((p) => (
                   <LivingPlanCard key={p.id} plan={p} users={p.participants.map(user)} saved={state.saved.includes(p.id)} onSave={() => toggleSave(p.id)} onOpen={() => nav.openPlan(p.id)} />
                 ))}

@@ -196,7 +196,37 @@ const users: User[] = [
     bestie: { worstFlaw: 'Risponde dopo tre giorni. Ma con un vocale di 9 minuti.', whyGoOut: 'Ti fa venire voglia di prenotare un volo. Subito.', redFlag: 'Ha una mappa con le spille di tutti i posti dove ha pianto.', by: 'Inès, amica di Erasmus' },
     karma: 198, badges: ['voice'],
     gender: 'f', intent: ['friends', 'date'], distanceKm: 2200, look: { skin: 2, hair: 'wavy', hairColor: '#b07a3f', shirt: '#06B6D4' },
-  }
+  },
+  {
+    id: 'u-matteo', name: 'Matteo', age: 17, city: 'Napoli', hue: 205, emoji: '⚽',
+    bio: 'Quinto anno di liceo scientifico. Calcetto il sabato e videogiochi la sera. Cerco gente per il torneo di quartiere.',
+    interests: ['calcetto', 'videogiochi', 'serie tv', 'musica', 'padel'],
+    habitats: ['Parco della Floridiana', 'Palestra Vomero Fit'],
+    dilemma: { question: 'Rigore decisivo: tiri centrale o all’angolo?', options: ['Centrale', 'All’angolo', 'Lo lascio tirare a un altro'] },
+    bestie: { worstFlaw: 'Commenta ogni partita come un telecronista.', whyGoOut: 'Ti coinvolge sempre, anche se non sai giocare.', redFlag: 'Ha un salvadanaio solo per le figurine.', by: 'Pietro, compagno di classe' },
+    karma: 168, badges: ['fast'],
+    gender: 'm', intent: ['friends'], distanceKm: 2.2, look: { skin: 1, hair: 'short', hairColor: '#3b2416', shirt: '#2f5d8a' },
+  },
+  {
+    id: 'u-ludovica', name: 'Ludovica', age: 16, city: 'Napoli', hue: 320, emoji: '🎨',
+    bio: 'Disegno fumetti e leggo manga. Cerco qualcuno per andare al Comicon o anche solo per disegnare insieme al parco.',
+    interests: ['fumetti', 'disegno', 'anime', 'libri', 'musica'],
+    habitats: ['Parco della Floridiana', 'Biblioteca Nazionale'],
+    dilemma: { question: 'Supereroe o cattivo dei fumetti: chi saresti?', options: ['Supereroe', 'Cattivo con buone ragioni'] },
+    bestie: { worstFlaw: 'Ti disegna mentre parli. Senza dirtelo.', whyGoOut: 'Ha sempre un’idea nuova per il pomeriggio.', redFlag: 'Ha 40 matite e le chiama per nome.', by: 'Sara, migliore amica' },
+    karma: 175, badges: ['zero'],
+    gender: 'f', intent: ['friends'], distanceKm: 1.4, look: { skin: 0, hair: 'bob', hairColor: '#6b3a1f', shirt: '#a3445e' },
+  },
+  {
+    id: 'u-gaia', name: 'Gaia', age: 17, city: 'Napoli', hue: 160, emoji: '🏐',
+    bio: 'Pallavolo tre volte a settimana, il resto del tempo musica e gelato. Organizzo uscite di gruppo, mai da sola.',
+    interests: ['pallavolo', 'musica', 'serie tv', 'camminate', 'fotografia'],
+    habitats: ['Lungomare Caracciolo', 'Palestra Vomero Fit'],
+    dilemma: { question: 'Gelato: cono o coppetta?', options: ['Cono', 'Coppetta', 'Due gusti, due coni'] },
+    bestie: { worstFlaw: 'Organizza tutto con tre settimane di anticipo.', whyGoOut: 'Con lei il gruppo non si perde mai nessuno.', redFlag: 'Ha una playlist per ogni stato d’animo.', by: 'Chiara, compagna di squadra' },
+    karma: 190, badges: ['fast', 'zero'],
+    gender: 'f', intent: ['friends'], distanceKm: 3.0, look: { skin: 2, hair: 'long', hairColor: '#2a1d14', shirt: '#3f7d5e' },
+  },
 ]
 
 export function createMe(): User {
@@ -334,6 +364,18 @@ const plans = (now: number): Plan[] => [
     participants: ['u-lea'], vibes: ['Una canzone a testa', 'Magari un volo'],
     dilemma: { question: 'Mi mandi una canzone che sa di estate senza dire il titolo?', options: [] }, details: { destination: 'Lisbona', timezone: 'WET (UTC+0)' }, privacy: true, interested: [], createdAt: now - 20 * H,
   },
+  {
+    id: 'p-calcetto', hostId: 'u-matteo', title: 'Calcetto del sabato, mancano due', category: 'sport', mode: 'local', city: 'Napoli',
+    habitat: 'Palestra Vomero Fit', district: 'Vomero', when: day(2, 15, 30), capacity: 10,
+    participants: ['u-matteo', 'u-gaia'], vibes: ['Squadre miste', 'Merenda dopo'],
+    dilemma: { question: 'Rigore decisivo: tiri centrale o all’angolo?', options: ['Centrale', 'All’angolo', 'Lo lascio tirare a un altro'] }, details: { level: 'Tutti i livelli' }, privacy: false, interested: [], createdAt: now - 6 * H,
+  },
+  {
+    id: 'p-disegno', hostId: 'u-ludovica', title: 'Disegno al parco + gelato', category: 'walk', mode: 'local', city: 'Napoli',
+    habitat: 'Parco della Floridiana', district: 'Vomero', when: day(1, 16, 0), capacity: 5,
+    participants: ['u-ludovica'], vibes: ['Porta il tuo album', 'Gelato alle 18'],
+    dilemma: { question: 'Supereroe o cattivo dei fumetti: chi saresti?', options: ['Supereroe', 'Cattivo con buone ragioni'] }, details: {}, privacy: false, interested: [], createdAt: now - 8 * H,
+  },
 ]
 
 const msg = (from: string, text: string, at: number, extra: Partial<Chat['messages'][number]> = {}) => ({
@@ -442,6 +484,65 @@ export const PRESET_DILEMMAS = [
   'Alba o tramonto? E perché proprio quello?',
   'Una cosa che sai fare benissimo e nessuno se lo aspetta?',
 ]
+
+export const DILEMMA_LIST: Array<{ tone: string; items: string[] }> = [
+  {
+    tone: 'Divertenti',
+    items: [
+      'Se prendiamo una pizza, cosa non deve MAI esserci sopra?',
+      'Sei su un’isola deserta con un solo album: quale porti?',
+      'Il film che hai visto più volte senza vergognarti?',
+      'Superpotere inutile ma bellissimo: quale scegli?',
+    ],
+  },
+  {
+    tone: 'Profondi',
+    items: [
+      'Hai 2 ore libere in una città sconosciuta senza telefono: cosa fai?',
+      'Una cosa che sai fare benissimo e nessuno se lo aspetta?',
+      'Il consiglio più utile che hai ricevuto?',
+      'Alba o tramonto? E perché proprio quello?',
+    ],
+  },
+  {
+    tone: 'Napoletani',
+    items: [
+      'Pizza fritta o margherita al forno a legna?',
+      'Lungomare a piedi o funicolare per il Vomero?',
+      'Sfogliatella riccia o frolla? Pensaci bene.',
+      'La canzone napoletana che canti sotto la doccia?',
+    ],
+  },
+  {
+    tone: 'Per uscire',
+    items: [
+      'Primo incontro: museo vuoto o mercato rumoroso?',
+      'Piano preciso o improvvisazione totale?',
+      'Colazione lunga o aperitivo al tramonto?',
+      'Concerto in prima fila o al bar in fondo a parlare?',
+    ],
+  },
+]
+
+/** Sample answers per dilemma, used for simulated incoming likes after onboarding. */
+export const SAMPLE_ANSWERS: Record<string, string[]> = {
+  'Se prendiamo una pizza, cosa non deve MAI esserci sopra?': ['L’ananas. Su questo non si tratta.', 'La panna. Chi la mette va denunciato.'],
+  'Sei su un’isola deserta con un solo album: quale porti?': ['Kind of Blue, per le notti lunghe.', 'Un best of di Pino Daniele, per non sentire nostalgia.'],
+  'Il film che hai visto più volte senza vergognarti?': ['Ritorno al futuro. Almeno venti volte.', 'Il favoloso mondo di Amélie, ogni inverno.'],
+  'Superpotere inutile ma bellissimo: quale scegli?': ['Trovare sempre parcheggio al primo giro.', 'Sapere sempre che ore sono senza guardare.'],
+  'Hai 2 ore libere in una città sconosciuta senza telefono: cosa fai?': ['Cerco un mercato e mangio quello che mangiano i locali.', 'Mi siedo in un bar e attacco bottone con chi c’è.'],
+  'Una cosa che sai fare benissimo e nessuno se lo aspetta?': ['Il ragù della domenica, alla napoletana vera.', 'Fischiare con due dita, fortissimo.'],
+  'Il consiglio più utile che hai ricevuto?': ['Chiedi sempre, il no ce l’hai già.', 'Non rispondere alle email quando sei arrabbiat*.'],
+  'Alba o tramonto? E perché proprio quello?': ['Tramonto, perché la giornata è ancora tutta da raccontare.', 'Alba: la città è tua e nessuno ti disturba.'],
+  'Pizza fritta o margherita al forno a legna?': ['Fritta, con la ricotta. Senza discussioni.', 'Margherita, ma solo se il cornicione è giusto.'],
+  'Lungomare a piedi o funicolare per il Vomero?': ['Lungomare, fino a Mergellina.', 'Funicolare, e poi panorama da Sant’Elmo.'],
+  'Sfogliatella riccia o frolla? Pensaci bene.': ['Riccia, calda, con lo zucchero a velo dappertutto.', 'Frolla. So che è impopolare.'],
+  'La canzone napoletana che canti sotto la doccia?': ['Napule è, tutta, anche gli assoli.', 'Malafemmena, con la voce impostata.'],
+  'Primo incontro: museo vuoto o mercato rumoroso?': ['Mercato rumoroso, poi museo per riposarsi.', 'Museo vuoto: si parla meglio.'],
+  'Piano preciso o improvvisazione totale?': ['Piano preciso, ma con un buco per l’imprevisto.', 'Improvvisazione, e un posto di riserva.'],
+  'Colazione lunga o aperitivo al tramonto?': ['Aperitivo, con il mare davanti.', 'Colazione lunga, la domenica è sacra.'],
+  'Concerto in prima fila o al bar in fondo a parlare?': ['Prima fila, voglio sentire il basso nello stomaco.', 'Al bar in fondo: le chiacchiere migliori.'],
+}
 
 export const FAREWELL = 'È stato un piacere conoscerti, ma non sento la scintilla giusta. Ti auguro il meglio!'
 

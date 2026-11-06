@@ -91,3 +91,9 @@ export function Portrait({ look, hue, crop = 'card', className }: { look: Look; 
     </svg>
   )
 }
+
+/** Real uploaded photo if present, otherwise the illustrated portrait. */
+export function UserPicture({ user, crop = 'card', className }: { user: { look: Look; hue: number; photo?: string; name?: string }; crop?: 'card' | 'avatar'; className?: string }) {
+  if (user.photo) return <img src={user.photo} alt="" className={`${className ?? ''} object-cover`} draggable={false} />
+  return <Portrait look={user.look} hue={user.hue} crop={crop} className={className} />
+}
