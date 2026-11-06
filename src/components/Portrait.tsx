@@ -1,4 +1,4 @@
-import { useId } from 'react'
+import { useId, useState } from 'react'
 import type { Look } from '../types'
 
 const SKIN = ['#f6d7c3', '#eec1a0', '#d9a07a', '#b97a52', '#8d5a3b', '#5e3a26']
@@ -93,7 +93,51 @@ export function Portrait({ look, hue, crop = 'card', className }: { look: Look; 
 }
 
 /** Real uploaded photo if present, otherwise the illustrated portrait. */
-export function UserPicture({ user, crop = 'card', className }: { user: { look: Look; hue: number; photo?: string; name?: string }; crop?: 'card' | 'avatar'; className?: string }) {
-  if (user.photo) return <img src={user.photo} alt="" className={`${className ?? ''} object-cover`} draggable={false} />
+export function UserPicture({ user, crop = 'card', className }: { user: { look: Look; hue: number; photo?: string; photos?: string[]; name?: string }; crop?: 'card' | 'avatar'; className?: string }) {
+  const src = user.photos?.[0] ?? user.photo
+  if (src) return <img src={src} alt="" className={`${className ?? ''} object-cover`} draggable={false} />
   return <Portrait look={user.look} hue={user.hue} crop={crop} className={className} />
+}
+
+const SHIRT_ALT = ['#24473a', '#7a3b2e', '#c9a227', '#2f5d8a', '#6b4f7a', '#f2ebdf']
+
+/** Gallery for a profile: real photos if any, otherwise 3 illustrated variants (demo stand-ins). */
+export function galleryItems(user: { look: Look; hue: number; photos?: string[]; photo?: string }) {
+  const real = user.photos?.length ? user.photos : user.photo ? [user.photo] : []
+  if (real.length) return real.map((src) => ({ src }))
+  return [0, 1, 2].map((i) => ({
+    look: i === 0 ? user.look : { ...user.look, shirt: SHIRT_ALT[(user.hue + i * 2) % SHIRT_ALT.length] },
+    hue: (user.hue + i * 47) % 360,
+  }))
+}
+
+export function PhotoCarousel({ user }: { user: { look: Look; hue: number; photos?: string[]; photo?: string; name: string } }) {
+  const items = galleryItems(user)
+  const [i, setI] = useState(0)
+  return (
+    <div className="relative overflow-hidden rounded-2xl bg-surface">
+      <div
+        className="no-scrollbar flex snap-x snap-mandatory overflow-x-auto"
+        onScroll={(e) => {
+          const el = e.currentTarget
+          setI(Math.round(el.scrollLeft / el.clientWidth))
+        }}
+        aria-label={`Foto di ${user.name}`}
+        role="group"
+      >
+        {items.map((it, k) => (
+          <div key={k} className="aspect-[4/5] w-full shrink-0 snap-center">
+            {'src' in it ? <img src={it.src} alt={`Foto ${k + 1} di ${user.name}`} className="h-full w-full object-cover" /> : <Portrait look={it.look} hue={it.hue} className="h-full w-full" />}
+          </div>
+        ))}
+      </div>
+      {items.length > 1 && (
+        <div className="pointer-events-none absolute inset-x-0 top-2 flex justify-center gap-1.5" aria-hidden>
+          {items.map((_, k) => (
+            <span key={k} className={`h-1 rounded-full transition-all ${k === i ? 'w-5 bg-cream' : 'w-2.5 bg-cream/40'}`} />
+          ))}
+        </div>
+      )}
+    </div>
+  )
 }

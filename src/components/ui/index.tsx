@@ -88,7 +88,7 @@ export function Avatar({
   lockIcon = true,
 }: {
   lockIcon?: boolean
-  user: Pick<User, 'id' | 'name' | 'hue' | 'look' | 'photo'>
+  user: Pick<User, 'id' | 'name' | 'hue' | 'look' | 'photo' | 'photos'>
   size?: number
   blur?: boolean
   className?: string

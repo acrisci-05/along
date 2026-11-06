@@ -1,11 +1,13 @@
-import { useMemo, useRef, useState } from 'react'
+import { useMemo, useState } from 'react'
 import { AnimatePresence, motion } from 'motion/react'
-import { ArrowLeft, Camera, KeyRound, Lock, Palette, ShieldCheck, Timer, X } from 'lucide-react'
+import { ArrowLeft, KeyRound, Lock, ShieldCheck, Timer } from 'lucide-react'
 import type { Look, User } from '../types'
 import { DILEMMA_LIST } from '../data/mock'
 import { ageFromBirth, ADULT_AGE, MIN_AGE } from '../lib/age'
 import { cn } from '../lib/utils'
 import { useStore } from '../store/store'
+import { PHOTO_MAX, PHOTO_MIN } from '../lib/photos'
+import { PhotoGallery } from './PhotoGallery'
 import { UserPicture } from './Portrait'
 import { Button } from './ui'
 
@@ -34,28 +36,6 @@ function randomLook(): Look {
   return { skin: Math.floor(Math.random() * 6), hair: r(HAIRS)[0], hairColor: r(HAIR_COLORS), shirt: r(SHIRTS) }
 }
 
-/** Downscale an image file to a ~480px JPEG data URL so it fits in localStorage. */
-async function compressImage(file: File): Promise<string> {
-  const url = URL.createObjectURL(file)
-  try {
-    const img = await new Promise<HTMLImageElement>((res, rej) => {
-      const i = new Image()
-      i.onload = () => res(i)
-      i.onerror = rej
-      i.src = url
-    })
-    const max = 480
-    const scale = Math.min(1, max / Math.max(img.width, img.height))
-    const c = document.createElement('canvas')
-    c.width = Math.round(img.width * scale)
-    c.height = Math.round(img.height * scale)
-    c.getContext('2d')!.drawImage(img, 0, 0, c.width, c.height)
-    return c.toDataURL('image/jpeg', 0.8)
-  } finally {
-    URL.revokeObjectURL(url)
-  }
-}
-
 export function Onboarding() {
   const { state, completeOnboarding } = useStore()
   const [step, setStep] = useState(0)
@@ -64,12 +44,10 @@ export function Onboarding() {
   const [dd, setDd] = useState('')
   const [mm, setMm] = useState('')
   const [yy, setYy] = useState('')
-  const [photo, setPhoto] = useState<string | undefined>()
+  const [mode, setMode] = useState<'photos' | 'avatar'>('photos')
+  const [photos, setPhotos] = useState<string[]>([])
   const [look, setLook] = useState<Look>(randomLook)
   const [hue] = useState(() => Math.floor(Math.random() * 360))
-  const [editAvatar, setEditAvatar] = useState(false)
-  const [photoError, setPhotoError] = useState('')
-  const fileRef = useRef<HTMLInputElement>(null)
   // step 2
   const [gender, setGender] = useState<User['gender'] | ''>('')
   const [intent, setIntent] = useState<User['intent']>(['date', 'friends'])
@@ -86,7 +64,7 @@ export function Onboarding() {
   const tooYoung = age !== null && age < MIN_AGE
   const minor = age !== null && age >= MIN_AGE && age < ADULT_AGE
 
-  const step1ok = name.trim().length >= 2 && age !== null && !tooYoung
+  const step1ok = name.trim().length >= 2 && age !== null && !tooYoung && (mode === 'avatar' || photos.length >= PHOTO_MIN)
   const step2ok = !!gender && (minor || intent.length > 0)
   const step3ok = !!dilemma
 
@@ -100,22 +78,10 @@ export function Onboarding() {
       intent: minor ? ['friends'] : intent,
       show,
       dilemma,
-      photo,
+      photos: mode === 'photos' ? photos : [],
       look,
       hue,
     })
-
-  const onFile = async (f?: File) => {
-    if (!f) return
-    setPhotoError('')
-    if (!f.type.startsWith('image/')) return setPhotoError('Scegli un’immagine (JPG, PNG o HEIC convertita).')
-    try {
-      setPhoto(await compressImage(f))
-      setEditAvatar(false)
-    } catch {
-      setPhotoError('Non riesco a leggere questa immagine. Prova con un’altra.')
-    }
-  }
 
   return (
     <div className="absolute inset-0 z-[90] flex flex-col bg-ink" role="dialog" aria-modal="true" aria-label="Crea il tuo profilo">
@@ -220,70 +186,45 @@ export function Onboarding() {
                 </fieldset>
 
                 <div className="mt-6">
-                  <p className="text-sm font-semibold">Foto profilo</p>
-                  <div className="mt-2 flex items-center gap-4">
-                    <div className="relative size-24 shrink-0 overflow-hidden rounded-full bg-surface">
-                      <UserPicture user={{ look, hue, photo }} crop="avatar" className="h-full w-full" />
-                      {photo && (
-                        <button onClick={() => setPhoto(undefined)} className="absolute right-0 top-0 grid size-7 place-items-center rounded-full bg-ink/80" aria-label="Rimuovi foto">
-                          <X size={14} />
-                        </button>
-                      )}
-                    </div>
-                    <div className="grid flex-1 gap-2">
-                      <button onClick={() => fileRef.current?.click()} className="flex h-11 items-center justify-center gap-2 rounded-full border border-line font-semibold hover:border-cream/40">
-                        <Camera size={17} /> {photo ? 'Cambia foto' : 'Carica una foto'}
-                      </button>
-                      <button
-                        onClick={() => {
-                          setPhoto(undefined)
-                          setEditAvatar((v) => !v)
-                        }}
-                        className="flex h-11 items-center justify-center gap-2 rounded-full border border-line font-semibold hover:border-cream/40"
-                        aria-expanded={editAvatar}
-                      >
-                        <Palette size={17} /> {editAvatar ? 'Chiudi avatar' : 'Crea un avatar'}
-                      </button>
-                    </div>
-                  </div>
-                  <input ref={fileRef} type="file" accept="image/*" className="sr-only" aria-label="Carica una foto profilo" onChange={(e) => onFile(e.target.files?.[0])} />
-                  {photoError && <p className="mt-2 text-sm text-alarm">{photoError}</p>}
-                  <p className="mt-2 text-xs text-muted">Puoi saltare: useremo questo avatar e potrai cambiarlo dal profilo. Nella demo la foto resta solo su questo dispositivo.</p>
-
-                  <AnimatePresence>
-                    {editAvatar && (
-                      <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden">
-                        <div className="mt-4 space-y-4 rounded-2xl border border-line p-4">
-                          <Swatches label="Pelle" values={SKINS} selected={SKINS[look.skin]} onPick={(c) => setLook({ ...look, skin: SKINS.indexOf(c) })} />
-                          <div>
-                            <p className="text-sm font-semibold text-muted">Capelli</p>
-                            <div className="mt-1.5 flex flex-wrap gap-1.5">
-                              {HAIRS.map(([k, l]) => (
-                                <button key={k} onClick={() => setLook({ ...look, hair: k })} aria-pressed={look.hair === k} className={cn('h-9 rounded-md border px-3 text-sm', look.hair === k ? 'border-brand bg-forest' : 'border-line')}>
-                                  {l}
-                                </button>
-                              ))}
-                            </div>
-                          </div>
-                          <Swatches label="Colore capelli" values={HAIR_COLORS} selected={look.hairColor} onPick={(c) => setLook({ ...look, hairColor: c })} />
-                          <Swatches label="Maglia" values={SHIRTS} selected={look.shirt} onPick={(c) => setLook({ ...look, shirt: c })} />
-                          <div className="flex gap-2">
-                            {(
-                              [
-                                ['glasses', 'Occhiali'],
-                                ['beard', 'Barba'],
-                                ['earring', 'Orecchino'],
-                              ] as const
-                            ).map(([k, l]) => (
-                              <button key={k} onClick={() => setLook({ ...look, [k]: !look[k] })} aria-pressed={!!look[k]} className={cn('h-9 rounded-md border px-3 text-sm', look[k] ? 'border-brand bg-forest' : 'border-line')}>
-                                {l}
-                              </button>
-                            ))}
-                          </div>
-                        </div>
-                      </motion.div>
+                  <div className="flex items-baseline justify-between">
+                    <p className="text-sm font-semibold">Le tue foto</p>
+                    {mode === 'photos' && (
+                      <span className="text-xs text-muted">
+                        {photos.length}/{PHOTO_MAX} · minimo {PHOTO_MIN}
+                      </span>
                     )}
-                  </AnimatePresence>
+                  </div>
+                  <div className="mt-2 grid grid-cols-2 gap-1 rounded-xl bg-surface p-1" role="radiogroup" aria-label="Foto o avatar">
+                    {(
+                      [
+                        ['photos', 'Foto'],
+                        ['avatar', 'Avatar illustrato'],
+                      ] as const
+                    ).map(([k, l]) => (
+                      <button key={k} role="radio" aria-checked={mode === k} onClick={() => setMode(k)} className={cn('h-9 rounded-lg text-sm font-semibold', mode === k ? 'bg-cream text-ink' : 'text-cream/70')}>
+                        {l}
+                      </button>
+                    ))}
+                  </div>
+                  <div className="mt-3">
+                    {mode === 'photos' ? (
+                      <>
+                        <PhotoGallery photos={photos} onChange={setPhotos} compact />
+                        {photos.length === 1 && <p className="mt-2 text-sm text-gold">Aggiungine almeno un’altra.</p>}
+                        <p className="mt-1 text-xs text-muted">Nella demo le foto restano solo su questo dispositivo.</p>
+                      </>
+                    ) : (
+                      <div>
+                        <div className="flex items-center gap-4">
+                          <div className="size-20 shrink-0 overflow-hidden rounded-full bg-surface">
+                            <UserPicture user={{ look, hue }} crop="avatar" className="h-full w-full" />
+                          </div>
+                          <p className="text-sm text-muted">Senza foto compari un po’ meno in Scopri. Puoi aggiungerle quando vuoi dal profilo.</p>
+                        </div>
+                        <AvatarEditor look={look} onChange={setLook} />
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
             )}
@@ -412,5 +353,38 @@ function Choice({ label, value, options, onPick }: { label: string; value: strin
         ))}
       </div>
     </fieldset>
+  )
+}
+
+export function AvatarEditor({ look, onChange }: { look: Look; onChange: (l: Look) => void }) {
+  return (
+    <div className="mt-4 space-y-4 rounded-2xl border border-line p-4">
+      <Swatches label="Pelle" values={SKINS} selected={SKINS[look.skin]} onPick={(c) => onChange({ ...look, skin: SKINS.indexOf(c) })} />
+      <div>
+        <p className="text-sm font-semibold text-muted">Capelli</p>
+        <div className="mt-1.5 flex flex-wrap gap-1.5">
+          {HAIRS.map(([k, l]) => (
+            <button key={k} onClick={() => onChange({ ...look, hair: k })} aria-pressed={look.hair === k} className={cn('h-9 rounded-md border px-3 text-sm', look.hair === k ? 'border-brand bg-forest' : 'border-line')}>
+              {l}
+            </button>
+          ))}
+        </div>
+      </div>
+      <Swatches label="Colore capelli" values={HAIR_COLORS} selected={look.hairColor} onPick={(c) => onChange({ ...look, hairColor: c })} />
+      <Swatches label="Maglia" values={SHIRTS} selected={look.shirt} onPick={(c) => onChange({ ...look, shirt: c })} />
+      <div className="flex gap-2">
+        {(
+          [
+            ['glasses', 'Occhiali'],
+            ['beard', 'Barba'],
+            ['earring', 'Orecchino'],
+          ] as const
+        ).map(([k, l]) => (
+          <button key={k} onClick={() => onChange({ ...look, [k]: !look[k] })} aria-pressed={!!look[k]} className={cn('h-9 rounded-md border px-3 text-sm', look[k] ? 'border-brand bg-forest' : 'border-line')}>
+            {l}
+          </button>
+        ))}
+      </div>
+    </div>
   )
 }

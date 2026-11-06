@@ -50,8 +50,10 @@ export interface User {
   look: Look
   /** ISO date (YYYY-MM-DD); age is derived from it */
   birthDate?: string
-  /** compressed data: URL of an uploaded photo (local demo only) */
+  /** compressed data: URL of an uploaded photo (local demo only). Legacy single photo; see `photos`. */
   photo?: string
+  /** 4:5 cropped JPEG data: URLs, first = main photo. 0 = avatar mode, otherwise 2..6 */
+  photos?: string[]
   distanceKm?: number
 }
 

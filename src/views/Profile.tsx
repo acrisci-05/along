@@ -5,6 +5,8 @@ import { useNav } from '../nav'
 import { useStore } from '../store/store'
 import { cn } from '../lib/utils'
 import { isMinor } from '../lib/age'
+import { PHOTO_MAX, PHOTO_MIN } from '../lib/photos'
+import { PhotoGallery } from '../components/PhotoGallery'
 import { BadgeRow, BestieSticker, earnedBadges, KarmaMeter } from '../components/Bestie'
 import { Avatar, Button, Eyebrow, LifetimeBadge, RevolutTip, Sheet, Toggle } from '../components/ui'
 
@@ -72,6 +74,8 @@ export function Profile() {
           <BadgeRow badges={badges} />
         </div>
       </section>
+
+      <ProfilePhotos />
 
       {/* gatekeeper */}
       <section className="rounded-3xl bg-forest p-4 text-cream">
@@ -351,5 +355,75 @@ export function Profile() {
         </div>
       </Sheet>
     </div>
+  )
+}
+
+function ProfilePhotos() {
+  const { state, updateMe, toast } = useStore()
+  const saved = state.me.photos ?? []
+  const [draft, setDraft] = useState<string[]>(saved)
+  const [open, setOpen] = useState(saved.length > 0)
+  const [confirmAvatar, setConfirmAvatar] = useState(false)
+
+  const change = (p: string[]) => {
+    setDraft(p)
+    if (p.length === 0 || p.length >= PHOTO_MIN) updateMe({ photos: p })
+  }
+
+  return (
+    <section className="space-y-2">
+      <div className="flex items-baseline justify-between">
+        <Eyebrow>Le tue foto</Eyebrow>
+        {open && (
+          <span className="text-xs text-muted">
+            {draft.length}/{PHOTO_MAX} · minimo {PHOTO_MIN}
+          </span>
+        )}
+      </div>
+      {!open ? (
+        <div className="rounded-2xl border border-line bg-surface p-4">
+          <p className="text-base font-semibold">Profilo senza foto</p>
+          <p className="mt-1 text-sm text-muted">Stai usando l’avatar illustrato: compari un po’ meno in Scopri. Con almeno {PHOTO_MIN} foto torni in prima fila. Restano sfocate fino al match.</p>
+          <button onClick={() => setOpen(true)} className="mt-3 h-10 rounded-full bg-brand px-4 text-sm font-bold text-ink">
+            Aggiungi foto
+          </button>
+        </div>
+      ) : (
+        <div className="rounded-2xl border border-line bg-surface p-3.5">
+          <PhotoGallery photos={draft} onChange={change} />
+          {draft.length === 1 && <p className="mt-2 text-sm text-gold">Aggiungine almeno un’altra per pubblicarle.</p>}
+          <p className="mt-2 text-xs text-muted">Prima del match gli altri vedono solo la principale, sfocata. Dopo il match vedono tutte le foto.</p>
+          {saved.length >= PHOTO_MIN && (
+            <button onClick={() => setConfirmAvatar(true)} className="mt-2 text-sm font-semibold text-muted underline-offset-2 hover:text-cream hover:underline">
+              Usa l’avatar invece delle foto
+            </button>
+          )}
+          {saved.length === 0 && draft.length === 0 && (
+            <button onClick={() => setOpen(false)} className="mt-2 text-sm font-semibold text-muted hover:text-cream">
+              Annulla
+            </button>
+          )}
+        </div>
+      )}
+      <Sheet open={confirmAvatar} onClose={() => setConfirmAvatar(false)} title="Passare all’avatar?">
+        <p className="text-sm text-muted">Le tue foto verranno rimosse da questo dispositivo e userai l’avatar illustrato. Compari un po’ meno in Scopri.</p>
+        <div className="mt-4 grid grid-cols-2 gap-2">
+          <Button variant="ghost" onClick={() => setConfirmAvatar(false)}>
+            Annulla
+          </Button>
+          <Button
+            variant="danger"
+            onClick={() => {
+              change([])
+              setOpen(false)
+              setConfirmAvatar(false)
+              toast({ tone: 'cyan', title: 'Ora usi l’avatar', body: 'Puoi tornare alle foto quando vuoi.' })
+            }}
+          >
+            Rimuovi le foto
+          </Button>
+        </div>
+      </Sheet>
+    </section>
   )
 }

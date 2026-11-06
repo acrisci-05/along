@@ -153,6 +153,7 @@ export default function App() {
 
           {/* device */}
           <div
+            id="phone-root"
             className={cn(
               'relative z-10 mx-auto flex h-dvh w-full flex-col overflow-hidden bg-ink',
               !wide && 'md:h-[min(880px,calc(100dvh-48px))] md:w-[402px] md:rounded-[54px] md:border-[11px] md:border-[#2a221c] md:shadow-[0_0_0_1px_rgb(255_255_255/0.06),0_40px_120px_-20px_rgb(0_0_0/0.9),0_0_80px_-30px_rgb(139_92_246/0.5)]',

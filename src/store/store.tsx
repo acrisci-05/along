@@ -15,6 +15,7 @@ function load(): AppState {
       if (parsed.version === DEMO_VERSION) {
         const merged = { ...createInitialState(), ...parsed }
         if (merged.me.birthDate) merged.me = { ...merged.me, age: ageFromBirth(merged.me.birthDate) }
+        if (merged.me.photo && !merged.me.photos) merged.me = { ...merged.me, photos: [merged.me.photo], photo: undefined }
         return merged
       }
     }
@@ -103,7 +104,7 @@ export interface NewProfile {
   intent: User['intent']
   show: Prefs['show']
   dilemma: string
-  photo?: string
+  photos: string[]
   look: User['look']
   hue: number
 }
@@ -732,7 +733,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
           gender: np.gender,
           intent: minor ? ['friends'] : np.intent,
           dilemma: { question: np.dilemma, options: [] },
-          photo: np.photo,
+          photo: undefined,
+          photos: np.photos,
           look: np.look,
           hue: np.hue,
           bio: '',

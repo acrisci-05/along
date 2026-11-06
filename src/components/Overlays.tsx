@@ -4,6 +4,7 @@ import { useNow, useRevealed, useStore } from '../store/store'
 import { affinity, CATEGORY_META, cn, planStatus, planWhen, sharedInterests, STATUS_STYLE } from '../lib/utils'
 import { Avatar, Button, Eyebrow, LifetimeBadge, Sheet } from './ui'
 import { BadgeRow, BestieSticker } from './Bestie'
+import { PhotoCarousel } from './Portrait'
 import { LivingPlanCard } from './LivingPlanCard'
 
 export function PlanDetailSheet({ planId, onClose, onJoin }: { planId: string | null; onClose: () => void; onJoin: (planId: string) => void }) {
@@ -164,6 +165,7 @@ export function UserSheet({ userId, onClose }: { userId: string | null; onClose:
     <Sheet open={!!u} onClose={onClose}>
       {u && (
         <div className="space-y-5">
+          {revealed(u.id) && <PhotoCarousel user={u} />}
           <div className="flex items-center gap-4">
             <Avatar user={u} size={84} />
             <div className="min-w-0">
