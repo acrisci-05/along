@@ -93,8 +93,8 @@ export function Portrait({ look, hue, crop = 'card', className }: { look: Look; 
 }
 
 /** Real uploaded photo if present, otherwise the illustrated portrait. */
-export function UserPicture({ user, crop = 'card', className }: { user: { look: Look; hue: number; photo?: string; photos?: string[]; name?: string }; crop?: 'card' | 'avatar'; className?: string }) {
-  const src = user.photos?.[0] ?? user.photo
+export function UserPicture({ user, crop = 'card', className }: { user: { look: Look; hue: number; photos?: string[]; name?: string }; crop?: 'card' | 'avatar'; className?: string }) {
+  const src = user.photos?.[0]
   if (src) return <img src={src} alt="" className={`${className ?? ''} object-cover`} draggable={false} />
   return <Portrait look={user.look} hue={user.hue} crop={crop} className={className} />
 }
@@ -102,16 +102,15 @@ export function UserPicture({ user, crop = 'card', className }: { user: { look: 
 const SHIRT_ALT = ['#24473a', '#7a3b2e', '#c9a227', '#2f5d8a', '#6b4f7a', '#f2ebdf']
 
 /** Gallery for a profile: real photos if any, otherwise 3 illustrated variants (demo stand-ins). */
-export function galleryItems(user: { look: Look; hue: number; photos?: string[]; photo?: string }) {
-  const real = user.photos?.length ? user.photos : user.photo ? [user.photo] : []
-  if (real.length) return real.map((src) => ({ src }))
+export function galleryItems(user: { look: Look; hue: number; photos?: string[] }): Array<{ src: string } | { look: Look; hue: number }> {
+  if (user.photos?.length) return user.photos.map((src) => ({ src }))
   return [0, 1, 2].map((i) => ({
     look: i === 0 ? user.look : { ...user.look, shirt: SHIRT_ALT[(user.hue + i * 2) % SHIRT_ALT.length] },
     hue: (user.hue + i * 47) % 360,
   }))
 }
 
-export function PhotoCarousel({ user }: { user: { look: Look; hue: number; photos?: string[]; photo?: string; name: string } }) {
+export function PhotoCarousel({ user }: { user: { look: Look; hue: number; photos?: string[]; name: string } }) {
   const items = galleryItems(user)
   const [i, setI] = useState(0)
   return (

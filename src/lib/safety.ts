@@ -48,11 +48,3 @@ export const REPORT_REASONS = [
   'Ha un’età diversa da quella dichiarata',
   'Altro',
 ] as const
-
-/** 16-17: daytime only */
-export const MINOR_HOURS = { from: 8, to: 20 }
-export const inMinorHours = (ts: number) => {
-  const d = new Date(ts)
-  const h = d.getHours() + d.getMinutes() / 60
-  return h >= MINOR_HOURS.from && h <= MINOR_HOURS.to
-}

@@ -128,6 +128,16 @@ Gmail va benissimo per i test (circa 500 email al giorno). Per il lancio passere
 
 ---
 
+## 9 · Aggiornamento “app più semplice” (Fase 3B)
+
+Dopo `git pull`, applica la nuova migrazione (like con un tocco, Questo o quello, foto visibili, niente timer, 3 chat per tutti):
+```bash
+npx supabase db push --remote
+```
+Poi riavvia `npm run dev`.
+
+---
+
 ### Cosa fa già il database (provato con `npm run db:test`, 70 controlli)
 - Età minima **16 anni**; **16-17 e 18+ non si vedono mai** (profili, piani, foto, like, chat).
 - 16-17: solo **Amici**, **verifica obbligatoria** prima di rispondere, unirsi a piani o scrivere; piani solo **8–20** e in **luoghi pubblici**; niente vocali nelle chat 1:1.

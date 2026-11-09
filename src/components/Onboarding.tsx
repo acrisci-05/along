@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { AnimatePresence, motion } from 'motion/react'
-import { ArrowLeft, KeyRound, Loader2, Lock, ShieldCheck, Timer } from 'lucide-react'
-import type { Look, User } from '../types'
-import { DILEMMA_LIST } from '../data/mock'
+import { ArrowLeft, Loader2, ShieldCheck } from 'lucide-react'
+import type { Look, ThisOrThat, User } from '../types'
+import { ThisOrThatEditor, validThisOrThat } from './ThisOrThatEditor'
 import { ageFromBirth, ADULT_AGE, MIN_AGE } from '../lib/age'
 import { cn } from '../lib/utils'
 import { useStore } from '../store/store'
@@ -26,12 +26,6 @@ const HAIRS: Array<[Look['hair'], string]> = [
 const HAIR_COLORS = ['#0d0907', '#2a1d14', '#5a3a22', '#b07a3f', '#d6a65c', '#8e8e8e']
 const SHIRTS = ['#24473a', '#2f5d8a', '#7a3b2e', '#c9a227', '#6b4f7a', '#f2ebdf']
 
-const RULES = [
-  { icon: KeyRound, title: 'Rispondi, non scorrere', body: 'Per farti notare rispondi al suo dilemma. Il match nasce da una frase.' },
-  { icon: Lock, title: 'Foto svelate al match', body: 'Prima conta cosa dici e cosa proponi. Il volto si vede dopo.' },
-  { icon: Timer, title: '48 ore per vedersi', body: 'Ogni match vicino ha 48 ore per diventare un’uscita vera. Massimo 3 chat insieme.' },
-]
-
 function randomLook(): Look {
   const r = <T,>(a: T[]) => a[Math.floor(Math.random() * a.length)]
   return { skin: Math.floor(Math.random() * 6), hair: r(HAIRS)[0], hairColor: r(HAIR_COLORS), shirt: r(SHIRTS) }
@@ -41,7 +35,7 @@ export function Onboarding() {
   const { state, completeOnboarding, account } = useStore()
   const phase = account?.phase
   const [step, setStep] = useState(phase === 'needsProfile' ? 1 : 0)
-  const [signingIn, setSigningIn] = useState(!!account?.notice)
+  const [signingIn, setSigningIn] = useState<false | 'signup' | 'login'>(account?.notice ? 'login' : false)
   const prevPhase = useRef(phase)
   const [saving, setSaving] = useState(false)
   const [saveError, setSaveError] = useState<string | null>(null)
@@ -59,8 +53,7 @@ export function Onboarding() {
   const [intent, setIntent] = useState<User['intent']>(['date', 'friends'])
   const [show, setShow] = useState<'all' | 'f' | 'm'>('all')
   // step 3
-  const [tone, setTone] = useState(0)
-  const [dilemma, setDilemma] = useState('')
+  const [tot, setTot] = useState<ThisOrThat | undefined>()
 
   const thisYear = new Date().getFullYear()
   const years = useMemo(() => Array.from({ length: 70 }, (_, i) => thisYear - MIN_AGE + 1 - i), [thisYear])
@@ -72,7 +65,7 @@ export function Onboarding() {
 
   const step1ok = name.trim().length >= 2 && age !== null && !tooYoung && (mode === 'avatar' || photos.length >= PHOTO_MIN)
   const step2ok = !!gender && (minor || intent.length > 0)
-  const step3ok = !!dilemma
+  const step3ok = validThisOrThat(tot)
 
   // signed in without a profile yet → straight to "Chi sei"; signed out → back to the welcome
   useEffect(() => {
@@ -93,7 +86,7 @@ export function Onboarding() {
   )
   if (account && phase === 'loading') return shell(<Splash />)
   if (account && phase === 'error') return shell(<Offline account={account} />)
-  if (account && phase === 'signedOut' && signingIn) return shell(<SignIn account={account} onBack={() => setSigningIn(false)} />)
+  if (account && phase === 'signedOut' && signingIn) return shell(<SignIn account={account} intent={signingIn} onBack={() => setSigningIn(false)} />)
 
   const finish = async () => {
     setSaving(true)
@@ -104,7 +97,7 @@ export function Onboarding() {
       gender: gender || 'nb',
       intent: minor ? ['friends'] : intent,
       show,
-      dilemma,
+      thisOrThat: { question: tot!.question.trim(), a: tot!.a.trim(), b: tot!.b.trim() },
       photos: mode === 'photos' ? photos : [],
       look,
       hue,
@@ -139,43 +132,16 @@ export function Onboarding() {
         <AnimatePresence mode="wait">
           <motion.div key={step} initial={{ opacity: 0, x: 24 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -24 }} transition={{ duration: 0.2 }} className="flex min-h-full flex-col">
             {step === 0 && (
-              <div className="flex min-h-full flex-col pt-[max(40px,env(safe-area-inset-top))] md:pt-16">
-                <p className="text-3xl font-extrabold tracking-[-0.05em] text-brand">along</p>
-                <h1 className="mt-6 text-2xl leading-tight">L’app d’incontri dove fai match su qualcosa da fare.</h1>
-                <p className="mt-2 text-base text-muted">Date o nuove amicizie, sempre attorno a un piano concreto. Tre regole:</p>
-                <ul className="mt-6 space-y-4">
-                  {RULES.map((r) => (
-                    <li key={r.title} className="flex gap-3.5">
-                      <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-surface">
-                        <r.icon size={18} className="text-brand" />
-                      </span>
-                      <span>
-                        <span className="block text-base font-bold">{r.title}</span>
-                        <span className="block text-sm text-muted">{r.body}</span>
-                      </span>
-                    </li>
-                  ))}
-                </ul>
-                <div className="mt-auto pt-8">
-                  <Button size="lg" className="w-full rounded-full" onClick={() => (account ? setSigningIn(true) : setStep(1))}>
-                    Crea il tuo profilo
-                  </Button>
-                  {account && (
-                    <button onClick={() => setSigningIn(true)} className="mt-3 w-full text-center text-sm font-semibold text-cream/70 hover:text-cream">
-                      Hai già un account? <span className="text-brand">Accedi</span>
-                    </button>
-                  )}
-                  <p className="mt-3 flex items-center justify-center gap-1.5 text-xs text-muted">
-                    <ShieldCheck size={13} /> Vietata ai minori di {MIN_AGE} anni. Maggiorenni e minorenni non si incontrano mai.
-                  </p>
-                </div>
-              </div>
+              <Welcome
+                onSignup={() => (account ? setSigningIn('signup') : setStep(1))}
+                onLogin={account ? () => setSigningIn('login') : undefined}
+              />
             )}
 
             {step === 1 && (
               <div className="pt-4">
                 <h2 className="text-2xl">Chi sei</h2>
-                <p className="mt-1 text-sm text-muted">Il nome e l’età si vedono sul profilo. La foto resta sfocata fino al match.</p>
+                <p className="mt-1 text-sm text-muted">Nome, età e foto sono quello che gli altri vedono per primo.</p>
 
                 <label className="mt-6 block">
                   <span className="text-sm font-semibold">Nome</span>
@@ -253,7 +219,7 @@ export function Onboarding() {
                         <PhotoGallery photos={photos} onChange={setPhotos} compact />
                         {photos.length === 1 && <p className="mt-2 text-sm text-gold">Aggiungine almeno un’altra.</p>}
                         <p className="mt-1 text-xs text-muted">
-                          {account ? 'Prima del match gli altri vedono solo una versione sfocata.' : 'Nella demo le foto restano solo su questo dispositivo.'}
+                          {account ? 'La prima foto è quella principale.' : 'Nella demo le foto restano solo su questo dispositivo.'}
                         </p>
                       </>
                     ) : (
@@ -333,21 +299,10 @@ export function Onboarding() {
 
             {step === 3 && (
               <div className="pt-4">
-                <h2 className="text-2xl">Il tuo dilemma</h2>
-                <p className="mt-1 text-sm text-muted">Chi vuole scriverti dovrà prima rispondere a questa domanda. Scegline una.</p>
-                <div className="no-scrollbar -mx-5 mt-5 flex gap-2 overflow-x-auto px-5" role="tablist" aria-label="Tono del dilemma">
-                  {DILEMMA_LIST.map((g, i) => (
-                    <button key={g.tone} role="tab" aria-selected={tone === i} onClick={() => setTone(i)} className={cn('h-9 shrink-0 rounded-md border px-3 text-sm font-semibold', tone === i ? 'border-cream bg-cream text-ink' : 'border-line text-cream/75')}>
-                      {g.tone}
-                    </button>
-                  ))}
-                </div>
-                <div className="mt-3 space-y-2" role="radiogroup" aria-label="Dilemmi">
-                  {DILEMMA_LIST[tone].items.map((q) => (
-                    <button key={q} role="radio" aria-checked={dilemma === q} onClick={() => setDilemma(q)} className={cn('w-full rounded-xl border p-3.5 text-left text-base', dilemma === q ? 'border-brand bg-forest font-semibold' : 'border-line hover:border-cream/30')}>
-                      {q}
-                    </button>
-                  ))}
+                <h2 className="text-2xl">Questo o quello</h2>
+                <p className="mt-1 text-sm text-muted">Una domanda con due risposte, sul tuo profilo. Chi ti mette like può sceglierne una: è il vostro primo argomento.</p>
+                <div className="mt-5">
+                  <ThisOrThatEditor value={tot} onChange={setTot} />
                 </div>
               </div>
             )}
@@ -434,6 +389,57 @@ export function AvatarEditor({ look, onChange }: { look: Look; onChange: (l: Loo
           </button>
         ))}
       </div>
+    </div>
+  )
+}
+
+const LETTERS = ['a', 'l', 'o', 'n', 'g']
+
+/** First screen: the logo writes itself, then “Registrati” / “Ho già un account”. */
+function Welcome({ onSignup, onLogin }: { onSignup: () => void; onLogin?: () => void }) {
+  return (
+    <div className="relative flex flex-1 flex-col pt-[max(40px,env(safe-area-inset-top))] md:pt-16">
+      <motion.div
+        aria-hidden
+        className="pointer-events-none absolute left-1/2 top-[30%] size-72 -translate-x-1/2 rounded-full bg-brand/15 blur-3xl"
+        initial={{ opacity: 0, scale: 0.6 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 1.4, ease: 'easeOut' }}
+      />
+      <div className="relative my-auto text-center">
+        <h1 className="flex justify-center text-[64px] font-extrabold leading-none tracking-[-0.06em] text-brand" aria-label="along">
+          {LETTERS.map((l, i) => (
+            <motion.span
+              key={i}
+              aria-hidden
+              initial={{ opacity: 0, y: 28, filter: 'blur(8px)' }}
+              animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+              transition={{ delay: 0.15 + i * 0.09, duration: 0.5, ease: [0.2, 0.8, 0.2, 1] }}
+            >
+              {l}
+            </motion.span>
+          ))}
+        </h1>
+        <motion.p initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.8, duration: 0.5 }} className="mt-3 text-xl text-cream">
+          Persone vere, vicine.
+        </motion.p>
+        <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1.0, duration: 0.5 }} className="mt-1 text-sm text-muted">
+          Date o nuove amicizie, senza trucchi a pagamento.
+        </motion.p>
+      </div>
+      <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 1.15, type: 'spring', stiffness: 200, damping: 24 }} className="relative pb-2 pt-8">
+        <Button size="lg" className="w-full rounded-full" onClick={onSignup}>
+          Registrati
+        </Button>
+        {onLogin && (
+          <button onClick={onLogin} className="mt-2 h-12 w-full rounded-full text-base font-semibold text-cream hover:bg-surface">
+            Ho già un account
+          </button>
+        )}
+        <p className="mt-3 flex items-center justify-center gap-1.5 text-xs text-muted">
+          <ShieldCheck size={13} /> Vietata ai minori di {MIN_AGE} anni. Maggiorenni e minorenni non si incontrano mai.
+        </p>
+      </motion.div>
     </div>
   )
 }

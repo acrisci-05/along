@@ -73,7 +73,7 @@ export function SafetySheet({ target, onClose, onViewProfile }: { target: { user
 
       {u && !done && mode === 'block' && (
         <div>
-          <p className="text-sm text-muted">{u.name} non potrà più vederti né scriverti, e non vedrai più i suoi piani. Le vostre chat verranno chiuse. Non riceverà nessuna notifica.</p>
+          <p className="text-sm text-muted">{u.name} non potrà più vederti né scriverti, e non vedrai più il suo profilo. Le vostre chat verranno chiuse. Non riceverà nessuna notifica.</p>
           <div className="mt-5 grid grid-cols-2 gap-2">
             <Button variant="ghost" onClick={onClose}>
               Annulla

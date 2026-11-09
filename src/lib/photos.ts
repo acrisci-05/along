@@ -27,6 +27,6 @@ export function cropToDataUrl(img: HTMLImageElement, sx: number, sy: number, sw:
   return c.toDataURL('image/jpeg', 0.78)
 }
 
-export function mainPhoto(u: { photos?: string[]; photo?: string }) {
-  return u.photos?.[0] ?? u.photo
+export function mainPhoto(u: { photos?: string[] }) {
+  return u.photos?.[0]
 }

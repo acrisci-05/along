@@ -1,10 +1,9 @@
 import { AnimatePresence, motion } from 'motion/react'
 import { useEffect, useId, useRef, useState, type ButtonHTMLAttributes, type ReactNode } from 'react'
-import { Lock, Pause, Play, X } from 'lucide-react'
+import { Pause, Play, X } from 'lucide-react'
 import type { User } from '../../types'
-import { cn, type BeamTone } from '../../lib/utils'
+import { cn } from '../../lib/utils'
 import { UserPicture } from '../Portrait'
-import { useRevealed } from '../../store/store'
 
 /* ---------------- Button ---------------- */
 type Variant = 'primary' | 'coral' | 'violet' | 'ghost' | 'outline' | 'gold' | 'danger'
@@ -79,73 +78,10 @@ export function Chip({
 }
 
 /* ---------------- Avatar ---------------- */
-export function Avatar({
-  user,
-  size = 40,
-  blur: blurProp,
-  className,
-  ring,
-  lockIcon = true,
-}: {
-  lockIcon?: boolean
-  user: Pick<User, 'id' | 'name' | 'hue' | 'look' | 'photo' | 'photos'>
-  size?: number
-  blur?: boolean
-  className?: string
-  ring?: boolean
-}) {
-  const revealed = useRevealed()
-  const blur = blurProp ?? !revealed(user.id)
+export function Avatar({ user, size = 40, className, ring }: { user: Pick<User, 'id' | 'name' | 'hue' | 'look' | 'photos'>; size?: number; className?: string; ring?: boolean }) {
   return (
-    <div
-      className={cn('relative shrink-0 overflow-hidden rounded-full bg-ink', ring && 'ring-2 ring-ink', className)}
-      style={{ width: size, height: size }}
-      aria-label={blur ? `Foto di ${user.name} sfocata` : `Foto di ${user.name}`}
-      role="img"
-    >
-      <div className={cn('absolute inset-0 transition-[filter,transform] duration-700', blur && 'scale-125 blur-[6px]')}>
-        <UserPicture user={user} crop="avatar" className="h-full w-full" />
-      </div>
-      {blur && lockIcon && (
-        <div className="absolute inset-0 grid place-items-center bg-ink/25">
-          <Lock size={Math.max(10, size * 0.28)} className="text-cream/80" aria-hidden />
-        </div>
-      )}
-    </div>
-  )
-}
-
-export function BeamAvatar({ tone, children, label }: { tone: BeamTone; children: ReactNode; label?: string }) {
-  return (
-    <div className="beam" data-tone={tone} title={label} aria-label={label}>
-      <div className="rounded-full bg-ink p-[2px]">{children}</div>
-    </div>
-  )
-}
-
-export function AvatarStack({ users, max = 4, size = 28, blur, capacity }: { users: User[]; max?: number; size?: number; blur?: boolean; capacity?: number }) {
-  const shown = users.slice(0, max)
-  const empty = capacity ? Math.max(0, Math.min(capacity, max + 2) - users.length) : 0
-  return (
-    <div className="flex items-center">
-      {shown.map((u, i) => (
-        <motion.div key={u.id} initial={{ scale: 0.4, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ delay: i * 0.04 }} style={{ marginLeft: i ? -size * 0.32 : 0 }}>
-          <Avatar user={u} size={size} blur={blur} ring />
-        </motion.div>
-      ))}
-      {users.length > max && (
-        <div className="grid place-items-center rounded-full bg-slate-card text-xs font-semibold ring-2 ring-ink" style={{ width: size, height: size, marginLeft: -size * 0.32 }}>
-          +{users.length - max}
-        </div>
-      )}
-      {Array.from({ length: empty }).map((_, i) => (
-        <div
-          key={`e${i}`}
-          className="rounded-full border border-dashed border-cream/25 bg-ink"
-          style={{ width: size, height: size, marginLeft: -size * 0.32 + (i === 0 && users.length ? size * 0.5 : 0) }}
-          aria-hidden
-        />
-      ))}
+    <div className={cn('relative shrink-0 overflow-hidden rounded-full bg-ink', ring && 'ring-2 ring-ink', className)} style={{ width: size, height: size }} aria-label={`Foto di ${user.name}`} role="img">
+      <UserPicture user={user} crop="avatar" className="h-full w-full" />
     </div>
   )
 }
@@ -173,10 +109,10 @@ export function Sheet({
     const onKey = (e: KeyboardEvent) => e.key === 'Escape' && onClose()
     window.addEventListener('keydown', onKey)
     const prev = document.activeElement as HTMLElement | null
-    window.setTimeout(() => ref.current?.focus(), 30)
+    window.setTimeout(() => ref.current?.focus({ preventScroll: true }), 30)
     return () => {
       window.removeEventListener('keydown', onKey)
-      prev?.focus?.()
+      prev?.focus?.({ preventScroll: true })
     }
   }, [open, onClose])
 
@@ -249,7 +185,7 @@ export function Eyebrow({ children, className }: { children: ReactNode; classNam
 export function LifetimeBadge({ small }: { small?: boolean }) {
   return (
     <span className={cn('inline-flex items-center gap-1 rounded-sm bg-brand font-display font-extrabold uppercase tracking-wide text-ink poster-shadow', small ? 'px-2 py-0.5 text-[10px]' : 'px-2.5 py-1 text-xs')}>
-      ✦ Founding Member · Lifetime
+      ♥ Sostenitore
     </span>
   )
 }

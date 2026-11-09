@@ -8,8 +8,8 @@ export const GESTURES = [
 ]
 
 /** Short fingerprint of the main photo, to suspend the badge when it changes. */
-export function photoFingerprint(u: Pick<User, 'photos' | 'photo'>): string | undefined {
-  const src = u.photos?.[0] ?? u.photo
+export function photoFingerprint(u: Pick<User, 'photos'>): string | undefined {
+  const src = u.photos?.[0]
   if (!src) return undefined
   let h = 0
   for (let i = 0; i < src.length; i += 97) h = (h * 31 + src.charCodeAt(i)) | 0

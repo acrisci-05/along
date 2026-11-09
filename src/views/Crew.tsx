@@ -1,27 +1,27 @@
 import { useState } from 'react'
 import { AnimatePresence, motion } from 'motion/react'
-import { Archive, ChevronDown, Hourglass, Lock, Mic, Sparkles, Timer } from 'lucide-react'
+import { Archive, ChevronDown, Hourglass } from 'lucide-react'
 import type { Chat } from '../types'
 import { useNav } from '../nav'
 import { useNow, useStore } from '../store/store'
-import { cn, formatCountdown, timeAgo, timerTone, TONE_TEXT } from '../lib/utils'
-import { Avatar, BeamAvatar, Button, Eyebrow } from '../components/ui'
+import { cn, timeAgo } from '../lib/utils'
+import { Avatar, Button, Eyebrow } from '../components/ui'
 
-export function lastPreview(chat: Chat, name: (id: string) => string) {
+export function lastPreview(chat: Chat) {
   const m = chat.messages[chat.messages.length - 1]
-  if (!m) return 'Nuova connessione'
-  const who = m.from === 'me' ? 'Tu: ' : m.from === 'system' ? '' : `${name(m.from)}: `
-  if (m.kind === 'voice') return `${who}🎙️ Nota vocale`
-  if (m.kind === 'dilemma') return `${who}🔑 ${m.text}`
-  if (m.kind === 'track') return `${who}🎵 ${m.text}`
-  if (m.kind === 'proposal') return `${who}Proposta: ${m.proposal?.title ?? 'uscita'}`
+  if (!m) return 'Nuovo match: scrivi tu per primo'
+  const who = m.from === 'me' ? 'Tu: ' : ''
+  if (m.kind === 'voice') return `${who}Nota vocale`
+  if (m.kind === 'dilemma') return `${who}${m.question ? `${m.question} ` : ''}${m.text}`
+  if (m.kind === 'track') return `${who}Brano: ${m.text}`
+  if (m.kind === 'farewell') return `${who}Congedo gentile`
   return `${who}${m.text ?? ''}`
 }
 
 export function Crew() {
   const { state, activeChats, waitingChats, limits, user, acceptWaiting, toast } = useStore()
   const nav = useNav()
-  const now = useNow(1000)
+  const now = useNow(30_000)
   const [showArchive, setShowArchive] = useState(false)
   const archived = state.chats.filter((c) => c.status === 'closed' || c.status === 'evolved' || c.status === 'expired')
   const free = limits.slots - activeChats.length
@@ -29,26 +29,17 @@ export function Crew() {
   return (
     <div className="space-y-5 pb-6">
       <header>
-        <Eyebrow>Chat · Focus Mode</Eyebrow>
-        <h1 className="mt-1 text-2xl font-bold leading-none">
-          Pochi match, <span className="text-brand">uscite vere</span>
+        <Eyebrow>Chat</Eyebrow>
+        <h1 className="mt-1 text-2xl font-bold leading-[1.05]">
+          Poche chat, <span className="text-brand">vere</span>
         </h1>
+        <p className="mt-1 text-sm text-muted">Al massimo {limits.slots} conversazioni insieme: le altre aspettano in Sala d’Attesa.</p>
       </header>
 
-      {/* slot meter */}
-      <section className="glass rounded-3xl p-4" aria-label="Slot chat attivi">
-        <div className="flex items-center justify-between">
-          <p className="text-sm font-semibold">
-            Slot attivi <span className="tabular-nums text-brand">{activeChats.length}</span>/{limits.slots}
-          </p>
-          {!state.lifetime ? (
-            <button onClick={() => nav.openPaywall('Espandi a 5 slot chat attivi in contemporanea, per sempre. Pagamento unico.')} className="text-sm font-semibold text-violet hover:underline">
-              5 slot con Forever →
-            </button>
-          ) : (
-            <span className="text-sm font-semibold text-gradient-neon">Lifetime · 5 slot</span>
-          )}
-        </div>
+      <section className="rounded-2xl bg-surface p-4" aria-label="Chat attive">
+        <p className="text-sm font-semibold">
+          Chat attive <span className="tabular-nums text-brand">{activeChats.length}</span>/{limits.slots}
+        </p>
         <div className="mt-3 flex gap-2">
           {Array.from({ length: limits.slots }).map((_, i) => {
             const c = activeChats[i]
@@ -56,22 +47,19 @@ export function Crew() {
               <motion.button
                 key={c?.id ?? `empty-${i}`}
                 layout
+                whileTap={{ scale: 0.95 }}
                 onClick={() => (c ? nav.openChat(c.id) : nav.setTab('explore'))}
-                className={cn('flex flex-1 flex-col items-center gap-1.5 rounded-2xl border py-3', c ? 'border-cream/10 bg-ink/40' : 'border-dashed border-cream/15')}
-                aria-label={c ? `Apri chat ${c.title}` : 'Slot libero'}
+                className={cn('flex flex-1 flex-col items-center gap-1.5 rounded-2xl border py-3', c ? 'border-line bg-ink/40' : 'border-dashed border-cream/15')}
+                aria-label={c ? `Apri chat con ${c.title}` : 'Posto libero'}
               >
                 {c ? (
                   <>
-                    <BeamAvatar tone={timerTone(c, now)}>
-                      <Avatar user={user(c.peerIds[0])} size={36} />
-                    </BeamAvatar>
-                    <span className={cn('text-xs font-semibold tabular-nums', TONE_TEXT[timerTone(c, now)])}>
-                      {c.mode === 'remote' ? 'capsule' : c.clockStopped ? 'confermato' : formatCountdown((c.deadline ?? now) - now)}
-                    </span>
+                    <Avatar user={user(c.peerIds[0])} size={40} />
+                    <span className="max-w-full truncate px-1 text-xs font-semibold">{c.title}</span>
                   </>
                 ) : (
                   <>
-                    <span className="grid size-[42px] place-items-center rounded-full bg-cream/5 text-cream/30">+</span>
+                    <span className="grid size-10 place-items-center rounded-full bg-cream/5 text-cream/30">+</span>
                     <span className="text-xs text-cream/35">libero</span>
                   </>
                 )}
@@ -81,119 +69,83 @@ export function Crew() {
         </div>
       </section>
 
-      {/* active chats */}
       <section className="space-y-2">
-        <Eyebrow>Conversazioni attive</Eyebrow>
+        <Eyebrow>Conversazioni</Eyebrow>
         <AnimatePresence initial={false}>
-          {activeChats.map((c) => {
-            const tone = timerTone(c, now)
-            const peers = c.peerIds.map(user)
-            return (
-              <motion.button
-                layout
-                key={c.id}
-                initial={{ opacity: 0, x: -12 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: 40, height: 0 }}
-                onClick={() => nav.openChat(c.id)}
-                className="glass flex w-full items-center gap-3 rounded-3xl p-3 text-left transition hover:border-cream/20"
-              >
-                <BeamAvatar tone={tone} label={`Timer ${tone}`}>
-                  <Avatar user={peers[0]} size={46} />
-                </BeamAvatar>
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-center gap-2">
-                    <p className="truncate font-display text-base font-bold">{peers.map((p) => p.name).join(', ')}</p>
-                    {c.unread > 0 && <span className="grid size-5 place-items-center rounded-full bg-brand text-xs font-bold text-ink">{c.unread}</span>}
-                  </div>
-                  <p className="truncate text-sm text-cream/45">{c.title}</p>
-                  <p className="truncate text-sm text-cream/70">{lastPreview(c, (id) => user(id).name)}</p>
+          {activeChats.map((c, i) => (
+            <motion.button
+              layout
+              key={c.id}
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0, transition: { delay: i * 0.04 } }}
+              exit={{ opacity: 0, x: 40 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={() => nav.openChat(c.id)}
+              className="flex w-full items-center gap-3 rounded-2xl bg-surface p-3 text-left transition-colors hover:bg-surface-2"
+            >
+              <Avatar user={user(c.peerIds[0])} size={48} />
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center gap-2">
+                  <p className="truncate text-base font-bold">{c.title}</p>
+                  {c.unread > 0 && <span className="grid size-5 place-items-center rounded-full bg-brand text-xs font-bold text-ink">{c.unread}</span>}
                 </div>
-                <div className="shrink-0 text-right">
-                  {c.mode === 'remote' ? (
-                    <span className="inline-flex items-center gap-1 rounded-md bg-violet/15 px-2 py-0.5 text-xs font-semibold text-violet">
-                      <Mic size={11} /> Pen-Pal
-                    </span>
-                  ) : c.clockStopped ? (
-                    <span className="rounded-md bg-brand/15 px-2 py-0.5 text-xs font-semibold text-brand">✓ Confermato</span>
-                  ) : (
-                    <span className={cn('inline-flex items-center gap-1 text-sm font-bold tabular-nums', TONE_TEXT[tone])}>
-                      <Timer size={12} /> {formatCountdown((c.deadline ?? now) - now)}
-                    </span>
-                  )}
-                </div>
-              </motion.button>
-            )
-          })}
+                <p className={cn('truncate text-sm', c.unread ? 'font-semibold text-cream' : 'text-cream/60')}>{lastPreview(c)}</p>
+              </div>
+              <span className="shrink-0 text-xs text-muted">{timeAgo(c.messages.at(-1)?.at ?? c.createdAt, now)}</span>
+            </motion.button>
+          ))}
         </AnimatePresence>
-        {!activeChats.length && <p className="rounded-2xl border border-dashed border-cream/15 p-4 text-center text-sm text-cream/50">Nessuna chat attiva. Rispondi a un dilemma per iniziare.</p>}
+        {!activeChats.length && (
+          <p className="rounded-2xl border border-dashed border-cream/15 p-4 text-center text-sm text-cream/50">Nessuna chat. Metti like in Scopri: quando è reciproco, si apre qui.</p>
+        )}
       </section>
 
-      {/* waiting room */}
-      <section className="space-y-2">
-        <div className="flex items-baseline justify-between">
-          <Eyebrow className="text-gold/80">Sala d’Attesa · {waitingChats.length}</Eyebrow>
-          {free <= 0 && waitingChats.length > 0 && <span className="text-xs text-cream/45">libera uno slot per farli entrare</span>}
-        </div>
-        {waitingChats.map((c, i) => {
-          const u = user(c.peerIds[0])
-          return (
-            <motion.div
-              key={c.id}
-              layout
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.05 }}
-              className="relative overflow-hidden rounded-3xl border border-gold/35 bg-gold/10 p-3.5"
-            >
-              <div className="absolute -right-6 -top-6 size-24 rounded-full bg-gold/20 blur-2xl" aria-hidden />
-              <div className="relative flex items-center gap-3">
-                <div className="relative">
-                  <Avatar user={u} size={44} blur lockIcon={false} />
-                  <span className="absolute -bottom-1 -right-1 grid size-5 place-items-center rounded-full bg-gold text-ink">
-                    <Lock size={11} />
-                  </span>
+      {(waitingChats.length > 0 || free <= 0) && (
+        <section className="space-y-2">
+          <div className="flex items-baseline justify-between">
+            <Eyebrow className="text-gold/80">Sala d’Attesa · {waitingChats.length}</Eyebrow>
+            {free <= 0 && waitingChats.length > 0 && <span className="text-xs text-cream/45">chiudi una chat per farli entrare</span>}
+          </div>
+          {waitingChats.map((c, i) => {
+            const u = user(c.peerIds[0])
+            return (
+              <motion.div key={c.id} layout initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }} className="rounded-2xl border border-gold/30 bg-gold/10 p-3.5">
+                <div className="flex items-center gap-3">
+                  <Avatar user={u} size={44} />
+                  <div className="min-w-0 flex-1">
+                    <p className="text-base font-bold text-gold">
+                      {u.name}, {u.age}
+                    </p>
+                    <p className="truncate text-sm text-cream/60">
+                      È un match · {timeAgo(c.createdAt, now)} fa
+                      {c.incoming?.pick ? ` · ha scelto “${c.incoming.pick}”` : ''}
+                    </p>
+                  </div>
+                  <Hourglass size={16} className="text-gold/70" />
                 </div>
-                <div className="min-w-0 flex-1">
-                  <p className="font-display text-base font-bold text-gold">
-                    {u.name}, {u.age}
-                  </p>
-                  <p className="truncate text-sm text-cream/55">per “{c.title}” · {timeAgo(c.createdAt, now)} fa</p>
-                </div>
-                <Hourglass size={16} className="text-gold/70" />
-              </div>
-              {c.incoming && (
-                <p className="relative mt-2.5 rounded-2xl bg-ink/50 p-2.5 text-sm text-cream/80">
-                  <span className="block text-xs font-semibold uppercase tracking-wider text-gold/70">Ha risposto al dilemma</span>“{c.incoming.answer}”
-                </p>
-              )}
-              <div className="relative mt-2.5">
                 <Button
                   size="sm"
                   variant={free > 0 ? 'gold' : 'outline'}
-                  className="w-full"
+                  className="mt-2.5 w-full"
                   onClick={async () => {
-                    if (await acceptWaiting(c.id)) {
-                      toast({ tone: 'gold', title: `${u.name} è nella tua crew`, body: 'Nuovo slot attivo.' })
-                      nav.openChat(c.id)
-                    } else toast({ tone: 'coral', title: 'Slot pieni', body: 'Fai evolvere o chiudi con eleganza una chat per far entrare qualcuno.' })
+                    if (await acceptWaiting(c.id)) nav.openChat(c.id)
+                    else toast({ tone: 'coral', title: 'Chat al completo', body: `Hai già ${limits.slots} chat attive: chiudine una con gentilezza per far entrare ${u.name}.` })
                   }}
                 >
-                  {free > 0 ? 'Fai entrare' : `🔒 In attesa di uno slot (${activeChats.length}/${limits.slots})`}
+                  {free > 0 ? 'Apri la chat' : `In attesa di un posto (${activeChats.length}/${limits.slots})`}
                 </Button>
-              </div>
-            </motion.div>
-          )
-        })}
-        {!waitingChats.length && <p className="rounded-2xl border border-dashed border-gold/20 p-4 text-center text-sm text-cream/45">La Sala d’Attesa è vuota. Respira. 🌿</p>}
-      </section>
+              </motion.div>
+            )
+          })}
+          {!waitingChats.length && <p className="rounded-2xl border border-dashed border-gold/20 p-4 text-center text-sm text-cream/45">Nessuno in attesa.</p>}
+        </section>
+      )}
 
-      {/* archive */}
       {archived.length > 0 && (
         <section>
           <button onClick={() => setShowArchive((s) => !s)} className="flex w-full items-center justify-between rounded-2xl px-1 py-2 text-left" aria-expanded={showArchive}>
-            <span className="flex items-center gap-1.5 text-sm font-semibold uppercase tracking-[0.16em] text-cream/45">
-              <Archive size={14} /> Archivio · {archived.length}
+            <span className="flex items-center gap-1.5 text-sm font-semibold text-cream/50">
+              <Archive size={14} /> Chat chiuse · {archived.length}
             </span>
             <ChevronDown size={16} className={cn('text-cream/45 transition', showArchive && 'rotate-180')} />
           </button>
@@ -204,18 +156,8 @@ export function Crew() {
                   <li key={c.id}>
                     <button onClick={() => nav.openChat(c.id)} className="flex w-full items-center gap-3 rounded-2xl bg-cream/[0.03] p-2.5 text-left opacity-75 hover:opacity-100">
                       <Avatar user={user(c.peerIds[0])} size={34} />
-                      <div className="min-w-0 flex-1">
-                        <p className="truncate text-sm font-semibold">{c.peerIds.map((id) => user(id).name).join(', ')}</p>
-                        <p className="truncate text-xs text-cream/45">{c.title}</p>
-                      </div>
-                      <span
-                        className={cn(
-                          'rounded-md px-2 py-0.5 text-xs font-semibold',
-                          c.status === 'evolved' ? 'bg-cyan/15 text-cyan' : c.status === 'expired' ? 'bg-alarm/15 text-alarm' : 'bg-cream/10 text-cream/60',
-                        )}
-                      >
-                        {c.status === 'evolved' ? 'Evoluta 🎉' : c.status === 'expired' ? 'Scaduta' : 'Chiusa con eleganza'}
-                      </span>
+                      <p className="min-w-0 flex-1 truncate text-sm font-semibold">{c.title}</p>
+                      <span className="rounded-md bg-cream/10 px-2 py-0.5 text-xs font-semibold text-cream/60">{c.closedReason ?? 'Chiusa'}</span>
                     </button>
                   </li>
                 ))}
@@ -224,10 +166,6 @@ export function Crew() {
           </AnimatePresence>
         </section>
       )}
-
-      <p className="flex items-center justify-center gap-1.5 text-center text-xs text-cream/35">
-        <Sparkles size={12} /> Chiudere con eleganza vale +15 Karma. Il ghosting non vale niente.
-      </p>
     </div>
   )
 }

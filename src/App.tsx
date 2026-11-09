@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactElement } from 'react'
 import { AnimatePresence, MotionConfig, motion } from 'motion/react'
-import { Flame, Heart, Map as MapIcon, MessagesSquare, Monitor, Plus, Smartphone, Sparkles, X } from 'lucide-react'
-import type { Mode } from './types'
+import { Flame, Heart, MessagesSquare, Monitor, Smartphone, UserRound, X } from 'lucide-react'
 import { NavCtx, type Nav, type Tab } from './nav'
 import { useStore } from './store/store'
 import { cn } from './lib/utils'
@@ -10,27 +9,21 @@ import { Likes } from './views/Likes'
 import { MatchOverlay } from './components/MatchOverlay'
 import { SafetySheet, type SafetyMode } from './components/Safety'
 import { VerifyFlow } from './components/Verify'
-import { isMinor } from './lib/age'
-import { isVerified } from './lib/verify'
 import { Onboarding } from './components/Onboarding'
-import { Radar } from './views/Radar'
-import { MyPlans } from './views/MyPlans'
 import { Crew } from './views/Crew'
 import { Profile } from './views/Profile'
 import { ChatRoom } from './views/ChatRoom'
-import { PlanDetailSheet, UserSheet } from './components/Overlays'
-import { GatekeeperSheet } from './components/Gatekeeper'
-import { QuickCreate } from './components/QuickCreate'
+import { UserSheet } from './components/Overlays'
 import { Paywall } from './components/Paywall'
-import { Avatar, RevolutTip } from './components/ui'
+import { RevolutTip } from './components/ui'
 
-const TABS: Array<{ id: Tab | 'create'; label: string; icon: typeof Flame }> = [
+const TABS: Array<{ id: Tab; label: string; icon: typeof Flame }> = [
   { id: 'explore', label: 'Scopri', icon: Flame },
-  { id: 'radar', label: 'Mappa', icon: MapIcon },
-  { id: 'create', label: 'Proponi', icon: Plus },
   { id: 'likes', label: 'Like', icon: Heart },
   { id: 'crew', label: 'Chat', icon: MessagesSquare },
+  { id: 'profile', label: 'Profilo', icon: UserRound },
 ]
+const TAB_ORDER: Tab[] = TABS.map((t) => t.id)
 
 function readPref<T extends string>(key: string, fallback: T): T {
   try {
@@ -42,14 +35,14 @@ function readPref<T extends string>(key: string, fallback: T): T {
 
 export default function App() {
   const store = useStore()
-  const { state, activeChats, waitingChats, user, joinPlan, limits, toasts, dismissToast } = store
-  const [tab, setTabState] = useState<Tab>(() => readPref<Tab>('along:tab', 'explore'))
-  const [mode, setMode] = useState<Mode>('local')
-  const [planId, setPlanId] = useState<string | null>(null)
+  const { state, activeChats, waitingChats, toasts, dismissToast } = store
+  const [tab, setTabState] = useState<Tab>(() => {
+    const saved = readPref<Tab>('along:tab', 'explore')
+    return TAB_ORDER.includes(saved) ? saved : 'explore'
+  })
+  const [dir, setDir] = useState(1)
   const [userId, setUserId] = useState<string | null>(null)
   const [chatId, setChatId] = useState<string | null>(null)
-  const [gate, setGate] = useState<{ kind: 'plan' | 'user'; id: string } | null>(null)
-  const [creating, setCreating] = useState(false)
   const [paywall, setPaywall] = useState<{ open: boolean; reason?: string }>({ open: false })
   const [safety, setSafety] = useState<{ userId: string; mode: SafetyMode } | null>(null)
   const [verify, setVerify] = useState<{ reason?: string } | null>(null)
@@ -65,16 +58,12 @@ export default function App() {
     }
   }, [tab, frame])
 
-  const closeSheets = () => {
-    setPlanId(null)
-    setUserId(null)
-    setGate(null)
-  }
-
   const setTab = useCallback((t: Tab) => {
-    setTabState(t)
+    setTabState((prev) => {
+      setDir(TAB_ORDER.indexOf(t) >= TAB_ORDER.indexOf(prev) ? 1 : -1)
+      return t
+    })
     setChatId(null)
-    setPlanId(null)
     setUserId(null)
     scrollRef.current?.scrollTo({ top: 0 })
   }, [])
@@ -83,50 +72,34 @@ export default function App() {
     () => ({
       tab,
       setTab,
-      openPlan: (id) => {
-        setUserId(null)
-        setPlanId(id)
-      },
       openUser: (id) => {
         if (id === 'me') return setTab('profile')
-        setPlanId(null)
         setUserId(id)
       },
       openChat: (id) => {
-        setPlanId(null)
         setUserId(null)
-        setGate(null)
         setChatId(id)
       },
-      openCreate: () => setCreating(true),
       openPaywall: (reason) => setPaywall({ open: true, reason }),
       openSafety: (userId, mode = 'menu') => setSafety({ userId, mode }),
       openVerify: (reason) => setVerify({ reason }),
-      openGatekeeperForUser: (id) => {
-        setUserId(null)
-        setGate({ kind: 'user', id })
-      },
     }),
     [tab, setTab],
   )
 
-  const gatePlan = gate?.kind === 'plan' ? state.plans.find((p) => p.id === gate.id) : undefined
-  const gateUser = gate ? (gate.kind === 'plan' ? (gatePlan ? user(gatePlan.hostId) : undefined) : user(gate.id)) : undefined
   const crewBadge = activeChats.reduce((n, c) => n + (c.unread ? 1 : 0), 0) + waitingChats.length
   const likesBadge = state.likesIn.filter((l) => l.status === 'new').length
   const badgeFor = (id: string) => (id === 'crew' ? crewBadge : id === 'likes' ? likesBadge : 0)
 
   const views: Record<Tab, ReactElement> = {
-    explore: <Discover mode={mode} setMode={setMode} />,
+    explore: <Discover />,
     likes: <Likes />,
-    radar: <Radar />,
-    plans: <MyPlans />,
     crew: <Crew />,
     profile: <Profile />,
   }
 
   const wide = frame === 'wide'
-  const overlayOpen = !!(planId || userId || gate || creating || paywall.open || chatId || !state.onboarded || store.match || safety || verify)
+  const overlayOpen = !!(userId || paywall.open || chatId || !state.onboarded || store.match || safety || verify)
 
   return (
     <MotionConfig reducedMotion="user">
@@ -140,15 +113,13 @@ export default function App() {
           {/* desktop side panel */}
           <aside className={cn('relative z-10 hidden max-w-sm flex-col gap-6 lg:flex', wide && 'lg:hidden')}>
             <Logo big />
-            <p className="font-display text-3xl font-bold leading-[0.98] text-cream">
-              Less scrolling.
+            <p className="font-display text-3xl font-bold leading-[1.05] text-cream">
+              Persone vere,
               <br />
-              <span className="text-brand">More doing.</span>
-              <br />
-              <span className="text-gradient-neon">Find your people.</span>
+              <span className="text-brand">vicine.</span>
             </p>
             <p className="text-base leading-relaxed text-cream/60">
-              L’app d’incontri dove fai match su qualcosa da fare. Swipe = rispondi a un dilemma, foto svelate solo al match, 48 ore per vedersi davvero. Date o amici, decidi tu.
+              Date o nuove amicizie, una persona alla volta. Like con un tocco, massimo 3 chat insieme e nessun trucco a pagamento.
             </p>
             <FrameSwitch frame={frame} setFrame={setFrame} />
             <div className="w-fit">
@@ -177,49 +148,37 @@ export default function App() {
               </button>
               {wide && (
                 <nav className="hidden items-center gap-1 md:flex" aria-label="Navigazione principale">
-                  {TABS.map((t) =>
-                    t.id === 'create' ? (
-                      <button key={t.id} onClick={() => setCreating(true)} className="ml-1 inline-flex h-9 items-center gap-1 rounded-md bg-brand px-3 text-sm font-semibold text-ink">
-                        <Plus size={15} /> Crea
-                      </button>
-                    ) : (
-                      <button
-                        key={t.id}
-                        onClick={() => setTab(t.id as Tab)}
-                        aria-current={tab === t.id ? 'page' : undefined}
-                        className={cn('h-9 rounded-md px-3 text-sm font-medium', tab === t.id ? 'bg-cream/10 text-cream' : 'text-cream/55 hover:text-cream')}
-                      >
-                        {t.label}
-                      </button>
-                    ),
-                  )}
+                  {TABS.map((t) => (
+                    <button
+                      key={t.id}
+                      onClick={() => setTab(t.id)}
+                      aria-current={tab === t.id ? 'page' : undefined}
+                      className={cn('h-9 rounded-md px-3 text-sm font-medium', tab === t.id ? 'bg-cream/10 text-cream' : 'text-cream/55 hover:text-cream')}
+                    >
+                      {t.label}
+                    </button>
+                  ))}
                 </nav>
               )}
-              <div className="flex items-center gap-2">
-                <span className="rounded-md border border-line px-2.5 py-1 font-display text-sm font-bold tabular-nums text-cream/85" aria-label={`Karma ${state.me.karma}`}>
-                  ⚡ {state.me.karma}
-                </span>
-                {!state.lifetime && (
-                  <button onClick={() => setPaywall({ open: true })} className="grid size-9 place-items-center rounded-full border border-line text-brand" aria-label="ALONG Forever">
-                    <Sparkles size={15} />
-                  </button>
-                )}
-                <button
-                  onClick={() => setTab('profile')}
-                  className={cn('rounded-full p-[2px]', state.lifetime || tab === 'profile' ? 'bg-brand' : 'bg-line')}
-                  aria-label="Il mio profilo"
-                >
-                  <span className="block rounded-full bg-ink p-[2px]">
-                    <Avatar user={state.me} size={30} />
-                  </span>
-                </button>
-              </div>
             </header>
 
             {/* content */}
             <main ref={scrollRef} inert={overlayOpen} className="no-scrollbar relative z-10 min-h-0 flex-1 overflow-y-auto px-4 pt-2">
-              <AnimatePresence mode="wait">
-                <motion.div key={tab} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -6 }} transition={{ duration: 0.2 }} className={cn('flex min-h-full flex-col', tab === 'explore' ? 'pb-[76px]' : 'pb-24', wide && 'md:pb-8')}>
+              <AnimatePresence mode="wait" custom={dir} initial={false}>
+                <motion.div
+                  key={tab}
+                  custom={dir}
+                  variants={{
+                    enter: (d: number) => ({ opacity: 0, x: 18 * d }),
+                    center: { opacity: 1, x: 0 },
+                    exit: (d: number) => ({ opacity: 0, x: -12 * d }),
+                  }}
+                  initial="enter"
+                  animate="center"
+                  exit="exit"
+                  transition={{ duration: 0.22, ease: [0.25, 0.1, 0.25, 1] }}
+                  className={cn('flex min-h-full flex-col', tab === 'explore' ? 'pb-[76px]' : 'pb-24', wide && 'md:pb-8')}
+                >
                   {views[tab]}
                 </motion.div>
               </AnimatePresence>
@@ -233,37 +192,37 @@ export default function App() {
             >
               <div className="flex items-center justify-between">
                 {TABS.map((t) => {
-                  if (t.id === 'create')
-                    return (
-                      <motion.button
-                        key={t.id}
-                        whileTap={{ scale: 0.9 }}
-                        onClick={() => setCreating(true)}
-                        className="grid h-11 w-14 place-items-center rounded-md bg-brand text-ink"
-                        aria-label="Proponi un piano"
-                      >
-                        <Plus size={24} strokeWidth={2.8} />
-                      </motion.button>
-                    )
                   const active = tab === t.id
                   const Icon = t.icon
                   return (
-                    <button
+                    <motion.button
                       key={t.id}
-                      onClick={() => setTab(t.id as Tab)}
-                      className="relative flex w-16 flex-col items-center gap-0.5 py-1.5"
+                      whileTap={{ scale: 0.9 }}
+                      onClick={() => setTab(t.id)}
+                      className="relative flex flex-1 flex-col items-center gap-0.5 py-1.5"
                       aria-current={active ? 'page' : undefined}
                       aria-label={badgeFor(t.id) > 0 ? `${t.label} (${badgeFor(t.id)} novità)` : t.label}
                     >
-                      {active && <motion.span layoutId="nav-dot" className="absolute -top-1.5 h-[3px] w-8 bg-brand" />}
+                      {active && <motion.span layoutId="nav-dot" transition={{ type: 'spring', stiffness: 500, damping: 38 }} className="absolute -top-1.5 h-[3px] w-8 rounded-full bg-brand" />}
                       <span className="relative">
                         <Icon size={21} className={active ? 'text-cream' : 'text-cream/45'} strokeWidth={active ? 2.4 : 2} />
-                        {badgeFor(t.id) > 0 && (
-                          <span className="absolute -right-2.5 -top-1.5 grid h-4 min-w-4 place-items-center rounded-full bg-brand px-1 text-[10px] font-bold leading-none text-ink">{badgeFor(t.id)}</span>
-                        )}
+                        <AnimatePresence>
+                          {badgeFor(t.id) > 0 && (
+                            <motion.span
+                              key={badgeFor(t.id)}
+                              initial={{ scale: 0.4, opacity: 0 }}
+                              animate={{ scale: 1, opacity: 1 }}
+                              exit={{ scale: 0.4, opacity: 0 }}
+                              transition={{ type: 'spring', stiffness: 600, damping: 22 }}
+                              className="absolute -right-2.5 -top-1.5 grid h-4 min-w-4 place-items-center rounded-full bg-brand px-1 text-[10px] font-bold leading-none text-ink"
+                            >
+                              {badgeFor(t.id)}
+                            </motion.span>
+                          )}
+                        </AnimatePresence>
                       </span>
-                      <span className={cn('font-display text-[10px] font-bold uppercase tracking-wide', active ? 'text-cream' : 'text-cream/40')}>{t.label}</span>
-                    </button>
+                      <span className={cn('text-[11px] font-semibold', active ? 'text-cream' : 'text-cream/45')}>{t.label}</span>
+                    </motion.button>
                   )
                 })}
               </div>
@@ -300,61 +259,12 @@ export default function App() {
             {/* overlays */}
             <AnimatePresence>{chatId && <ChatRoom key={chatId} chatId={chatId} onClose={() => setChatId(null)} />}</AnimatePresence>
 
-            <PlanDetailSheet
-              planId={planId}
-              onClose={() => setPlanId(null)}
-              onJoin={(id) => {
-                setPlanId(null)
-                setGate({ kind: 'plan', id })
-              }}
-            />
             <UserSheet userId={userId} onClose={() => setUserId(null)} />
-            <GatekeeperSheet
-              open={!!gate}
-              onClose={() => setGate(null)}
-              dilemma={gate?.kind === 'plan' ? gatePlan?.dilemma : gateUser?.dilemma}
-              host={gateUser}
-              context={gate?.kind === 'plan' ? `“${gatePlan?.title}”` : `una chat con ${gateUser?.name}`}
-              onSubmit={(answer) => {
-                if (isMinor(state.me) && !isVerified(state.me)) {
-                  setGate(null)
-                  setVerify({ reason: 'Sotto i 18 anni devi verificare il profilo prima di scrivere o unirti a un piano.' })
-                  return { ok: true, chatId: '' }
-                }
-                if (gate!.kind === 'plan') return joinPlan(gate!.id, answer)
-                store.likeUser(gate!.id, answer)
-                store.toast({ tone: 'coral', title: `Risposta inviata a ${gateUser?.name} 💌`, body: 'Se le/gli piace, è match e le foto si svelano.' })
-                return { ok: true, chatId: '' }
-              }}
-              onGoChat={(id) => (id ? nav.openChat(id) : setGate(null))}
-              onManageSlots={() => {
-                closeSheets()
-                setTab('crew')
-              }}
-              onUpgrade={() => {
-                setGate(null)
-                setPaywall({ open: true, reason: 'Espandi a 5 slot chat attivi in contemporanea. Una volta, per sempre.' })
-              }}
-              slotLimit={limits.slots}
-              lifetime={state.lifetime}
-            />
-            <QuickCreate
-              open={creating}
-              onClose={() => setCreating(false)}
-              onPaywall={(reason) => {
-                setCreating(false)
-                setPaywall({ open: true, reason })
-              }}
-              onCreated={() => setTab('plans')}
-            />
             <Paywall open={paywall.open} reason={paywall.reason} onClose={() => setPaywall({ open: false })} />
             <SafetySheet
               target={safety}
               onClose={() => setSafety(null)}
-              onViewProfile={(id) => {
-                setPlanId(null)
-                setUserId(id)
-              }}
+              onViewProfile={(id) => setUserId(id)}
             />
             <MatchOverlay />
             <VerifyFlow open={!!verify} reason={verify?.reason} onClose={() => setVerify(null)} />

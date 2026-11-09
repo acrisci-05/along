@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { motion } from 'motion/react'
-import { BadgeCheck, BellRing, Eye, ShieldAlert, Crown, Info, KeyRound, MapPin, Pencil, RotateCcw, Sparkles } from 'lucide-react'
+import { BadgeCheck, BellRing, Eye, ShieldAlert, Heart, Info, MapPin, Pencil, RotateCcw } from 'lucide-react'
 import { useNav } from '../nav'
 import { AccountSection } from '../components/Account'
 import { useStore } from '../store/store'
@@ -13,7 +13,6 @@ import { InfoRows } from '../components/ProfileInfo'
 import { VerifiedBadge } from '../components/Verify'
 import { verifyStatus } from '../lib/verify'
 import { backendConfigured, backendHost, checkBackend } from '../lib/supabase'
-import { BadgeRow, earnedBadges, KarmaMeter } from '../components/Karma'
 import { Avatar, Button, Eyebrow, LifetimeBadge, RevolutTip, Sheet, Toggle } from '../components/ui'
 
 export function Profile() {
@@ -24,7 +23,6 @@ export function Profile() {
   const [editing, setEditing] = useState(false)
   const [previewing, setPreviewing] = useState(false)
   const [confirmReset, setConfirmReset] = useState(false)
-  const badges = earnedBadges(state.stats)
 
   return (
     <div className="space-y-5 pb-8">
@@ -56,11 +54,8 @@ export function Profile() {
             Aggiungi due righe su di te
           </button>
         )}
-        <div className="mt-3">
-          <BadgeRow badges={badges} />
-        </div>
         <div className="mt-4">
-          <InfoRows user={me} showHabitats={false} />
+          <InfoRows user={me} />
         </div>
         <div className="mt-4 grid grid-cols-2 gap-2">
           <button onClick={() => setEditing(true)} className="h-11 rounded-full bg-brand text-sm font-bold text-ink">
@@ -76,16 +71,27 @@ export function Profile() {
 
       <PhotoStrip onEdit={() => setEditing(true)} />
 
-      {/* gatekeeper */}
-      <section className="rounded-3xl bg-forest p-4 text-cream">
-        <p className="flex items-center gap-1.5 font-display text-xs font-bold text-cream/60">
-          <KeyRound size={13} /> Il tuo dilemma Gatekeeper
-        </p>
-        <p className="mt-1 font-display text-lg font-bold leading-tight">{me.dilemma.question}</p>
-        <p className="mt-2 text-sm text-cream/60">Chi vuole scriverti deve prima rispondere. Mai più “ciao” a vuoto.</p>
+      {/* questo o quello */}
+      <section className="rounded-2xl bg-forest p-4 text-cream">
+        <p className="text-xs font-semibold text-cream/60">Il tuo Questo o quello</p>
+        {me.thisOrThat ? (
+          <>
+            <p className="mt-1 text-lg font-bold leading-tight">{me.thisOrThat.question}</p>
+            <p className="mt-2 flex gap-2 text-sm">
+              <span className="rounded-full bg-ink/40 px-3 py-1">{me.thisOrThat.a}</span>
+              <span className="rounded-full bg-ink/40 px-3 py-1">{me.thisOrThat.b}</span>
+            </p>
+          </>
+        ) : (
+          <p className="mt-1 text-base font-semibold">Nessuna domanda ancora</p>
+        )}
+        <p className="mt-2 text-sm text-cream/65">Chi ti mette like può scegliere una risposta: è il vostro primo argomento.</p>
+        <button onClick={() => setEditing(true)} className="mt-2 text-sm font-semibold text-brand">
+          Cambia domanda
+        </button>
       </section>
 
-      <section className="glass space-y-3 rounded-3xl p-4">
+      <section className="space-y-3 rounded-2xl bg-surface p-4">
         <div className="flex items-center justify-between">
           <p className="text-base font-semibold">Cosa cerchi</p>
           <span className="text-xs text-cream/45">visibile sulla tua card</span>
@@ -93,8 +99,8 @@ export function Profile() {
         <div className="grid grid-cols-2 gap-2">
           {(
             [
-              ['date', '💘 Date', 'bg-brand text-ink'],
-              ['friends', '🤝 Amici', 'bg-brand text-ink'],
+              ['date', 'Date', 'bg-brand text-ink'],
+              ['friends', 'Amici', 'bg-brand text-ink'],
             ] as const
           ).map(([k, l, on]) => {
             const active = me.intent.includes(k)
@@ -115,16 +121,7 @@ export function Profile() {
           })}
         </div>
         {minor && <p className="text-sm text-gold">Hai {me.age} anni: fino ai 18 anni ALONG è solo per nuove amicizie, con persone di 16 e 17 anni.</p>}
-        <button onClick={() => nav.setTab('plans')} className="flex w-full items-center justify-between rounded-2xl bg-cream/[0.04] px-3 py-2.5 text-left hover:bg-cream/[0.08]">
-          <span>
-            <span className="block text-sm font-semibold">I miei piani</span>
-            <span className="block text-xs text-cream/50">Quello che proponi appare sulla tua card</span>
-          </span>
-          <span className="text-sm font-semibold text-brand">Apri →</span>
-        </button>
       </section>
-
-      <KarmaMeter karma={me.karma} stats={state.stats} />
 
 
       {/* interests */}
@@ -144,37 +141,21 @@ export function Profile() {
             ))}
           </div>
         </div>
-        <div>
-          <Eyebrow>Habitat dichiarati</Eyebrow>
-          <div className="mt-2 flex flex-wrap gap-1.5">
-            {!me.habitats.length && (
-              <button onClick={() => setEditing(true)} className="text-sm text-muted underline-offset-2 hover:text-cream hover:underline">
-                Scegli i posti che frequenti
-              </button>
-            )}
-            {me.habitats.map((h) => (
-              <span key={h} className="rounded-md border border-line px-2.5 py-1 text-sm">
-                {h}
-              </span>
-            ))}
-          </div>
-        </div>
       </section>
 
-      {/* forever */}
+      {/* sostieni */}
       {state.lifetime ? (
-        <section className="rounded-3xl border border-brand/25 bg-brand/5 p-4">
-          <p className="flex items-center gap-2 font-display font-bold">
-            <Crown size={18} className="text-brand" /> ALONG Forever attivo
+        <section className="rounded-2xl border border-brand/25 bg-brand/5 p-4">
+          <p className="flex items-center gap-2 font-bold">
+            <Heart size={18} className="text-brand" fill="currentColor" /> Sostieni ALONG: grazie!
           </p>
-          <p className="mt-1 text-sm text-cream/60">Piani illimitati, 5 slot chat, Travel Bridge illimitato e finiture sticker premium. Per sempre.</p>
+          <p className="mt-1 text-sm text-cream/65">Hai il segno Sostenitore sul profilo. Nessun vantaggio sugli altri: è la nostra promessa.</p>
         </section>
       ) : (
-        <motion.button whileTap={{ scale: 0.98 }} onClick={() => nav.openPaywall()} className="relative w-full overflow-hidden rounded-3xl bg-forest text-cream p-4 text-left">
-          <Sparkles className="absolute right-4 top-4 text-brand" size={20} />
-          <p className="text-sm font-semibold text-brand">Pay once, forever</p>
-          <p className="mt-1 font-display text-xl font-extrabold">Sblocca ALONG Forever</p>
-          <p className="mt-1 text-sm text-cream/75">19,99 € una tantum (14,99 € al lancio). Niente abbonamenti, mai.</p>
+        <motion.button whileTap={{ scale: 0.98 }} onClick={() => nav.openPaywall()} className="relative w-full overflow-hidden rounded-2xl bg-forest p-4 text-left text-cream">
+          <p className="text-sm font-semibold text-brand">Niente trucchi a pagamento</p>
+          <p className="mt-1 text-xl font-extrabold">Sostieni ALONG</p>
+          <p className="mt-1 text-sm text-cream/75">Un pagamento unico, per sempre. Non compri più like né più visibilità: aiuti l’app a restare onesta.</p>
         </motion.button>
       )}
 
@@ -191,7 +172,7 @@ export function Profile() {
               const reported = state.reports.some((r) => r.userId === id)
               return (
                 <li key={id} className="flex items-center gap-3 p-3">
-                  <Avatar user={u} size={36} blur />
+                  <Avatar user={u} size={36} />
                   <div className="min-w-0 flex-1">
                     <p className="font-semibold">{u.name}</p>
                     <p className="text-xs text-muted">{reported ? 'Bloccat* e segnalat*' : 'Bloccat*'}</p>
@@ -245,15 +226,15 @@ export function Profile() {
         <div className="glass divide-y divide-cream/5 rounded-3xl">
           <div className="flex items-center justify-between gap-3 p-3.5">
             <div>
-              <p className="text-base font-semibold">Stato Lifetime (simulato)</p>
-              <p className="text-sm text-cream/50">Attiva/disattiva ALONG Forever nel localStorage</p>
+              <p className="text-base font-semibold">Sostenitore (simulato)</p>
+              <p className="text-sm text-cream/50">Attiva o disattiva il segno Sostenitore</p>
             </div>
             <Toggle checked={state.lifetime} onChange={setLifetime} label="Stato Lifetime" tone="gold" />
           </div>
           <button onClick={simulateIncoming} className="flex w-full items-center justify-between gap-3 p-3.5 text-left hover:bg-cream/[0.03]">
             <div>
-              <p className="text-base font-semibold">Simula richiesta in arrivo</p>
-              <p className="text-sm text-cream/50">Qualcuno risponde al dilemma di un tuo piano</p>
+              <p className="text-base font-semibold">Simula un like in arrivo</p>
+              <p className="text-sm text-cream/50">Qualcuno della demo ti mette like</p>
             </div>
             <BellRing size={18} className="text-violet" />
           </button>
@@ -267,7 +248,7 @@ export function Profile() {
           <button onClick={() => setConfirmReset(true)} className="flex w-full items-center justify-between gap-3 p-3.5 text-left hover:bg-cream/[0.03]">
             <div>
               <p className="text-base font-semibold text-brand">Ripristina Dati Demo</p>
-              <p className="text-sm text-cream/50">Riporta piani, chat e karma allo stato iniziale</p>
+              <p className="text-sm text-cream/50">Riporta like e chat allo stato iniziale</p>
             </div>
             <RotateCcw size={18} className="text-brand" />
           </button>
@@ -279,14 +260,14 @@ export function Profile() {
 
       <footer className="pt-2 text-center">
         <p className="font-display text-sm font-bold tracking-[0.3em] text-cream/60">ALONG</p>
-        <p className="text-xs text-cream/35">Less scrolling. More doing. Find your people.</p>
+        <p className="text-xs text-cream/35">Persone vere, vicine.</p>
       </footer>
 
       <EditProfile open={editing} onClose={() => setEditing(false)} />
       <ProfilePreview open={previewing} onClose={() => setPreviewing(false)} />
 
       <Sheet open={confirmReset} onClose={() => setConfirmReset(false)} title="Ripristinare i dati demo?">
-        <p className="text-sm text-cream/65">Piani creati, messaggi, karma e stato Lifetime verranno riportati allo stato iniziale. L’operazione non è reversibile.</p>
+        <p className="text-sm text-cream/65">Like, chat e profilo verranno riportati allo stato iniziale. L’operazione non è reversibile.</p>
         <div className="mt-4 grid grid-cols-2 gap-2">
           <Button variant="ghost" onClick={() => setConfirmReset(false)}>
             Annulla
@@ -332,7 +313,7 @@ function PhotoStrip({ onEdit }: { onEdit: () => void }) {
           </button>
         </div>
       )}
-      <p className="text-xs text-muted">Prima del match gli altri vedono solo la principale, sfocata. Dopo il match tutte.</p>
+      <p className="text-xs text-muted">La prima foto è quella che vedono tutti per prima in Scopri.</p>
     </section>
   )
 }

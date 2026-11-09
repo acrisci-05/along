@@ -6,7 +6,7 @@ import { Button, Eyebrow, Sheet } from './ui'
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/
 
 /** Email → 6-digit code. The same flow creates the account or signs you back in. */
-export function SignIn({ account, onBack }: { account: Account; onBack: () => void }) {
+export function SignIn({ account, intent = 'signup', onBack }: { account: Account; intent?: 'signup' | 'login'; onBack: () => void }) {
   const [step, setStep] = useState<'email' | 'code'>('email')
   const [email, setEmail] = useState(account.email ?? '')
   const [code, setCode] = useState('')
@@ -57,8 +57,8 @@ export function SignIn({ account, onBack }: { account: Account; onBack: () => vo
             void send()
           }}
         >
-          <h2 className="text-2xl">La tua email</h2>
-          <p className="mt-1 text-sm text-muted">Ti mandiamo un’email per entrare. Niente password da ricordare: vale sia per iscriverti sia per rientrare.</p>
+          <h2 className="text-2xl">{intent === 'login' ? 'Bentornat*' : 'Crea il tuo account'}</h2>
+          <p className="mt-1 text-sm text-muted">Scrivi la tua email: ti mandiamo un link per entrare. Niente password da ricordare.</p>
           <label className="mt-6 block">
             <span className="text-sm font-semibold">Email</span>
             <input

@@ -3,7 +3,8 @@ import { createPortal } from 'react-dom'
 import { motion } from 'motion/react'
 import { Plus, X } from 'lucide-react'
 import type { Habit, User } from '../types'
-import { DILEMMA_LIST, HABITATS, LANGUAGES, PASSION_CATEGORIES } from '../data/mock'
+import { LANGUAGES, PASSION_CATEGORIES } from '../data/mock'
+import { ThisOrThatEditor, validThisOrThat } from './ThisOrThatEditor'
 import { PHOTO_MAX, PHOTO_MIN } from '../lib/photos'
 import { cn } from '../lib/utils'
 import { useStore } from '../store/store'
@@ -14,7 +15,6 @@ import { Button, Sheet } from './ui'
 
 const BIO_MAX = 160
 const PASSIONS = { min: 3, max: 8 }
-const HABITAT_MAX = 5
 const HABITS: Array<[Habit | undefined, string]> = [
   [undefined, 'Preferisco non dirlo'],
   ['no', 'No'],
@@ -61,25 +61,23 @@ function Editor({ onClose }: { onClose: () => void }) {
     smoke: me.smoke,
     drink: me.drink,
     interests: me.interests,
-    habitats: me.habitats,
-    dilemma: me.dilemma.question,
+    thisOrThat: me.thisOrThat,
     photos: me.photos ?? [],
     look: me.look,
     mode: (me.photos?.length ? 'photos' : 'avatar') as 'photos' | 'avatar',
   }))
   const [initial] = useState(() => JSON.stringify(d))
   const [custom, setCustom] = useState('')
-  const [tone, setTone] = useState(() => Math.max(0, DILEMMA_LIST.findIndex((g) => g.items.includes(me.dilemma.question))))
   const [confirmDiscard, setConfirmDiscard] = useState(false)
   const set = <K extends keyof typeof d>(k: K, v: (typeof d)[K]) => setD((x) => ({ ...x, [k]: v }))
-  const toggle = (k: 'languages' | 'interests' | 'habitats', v: string, max: number) =>
+  const toggle = (k: 'languages' | 'interests', v: string, max: number) =>
     setD((x) => ({ ...x, [k]: x[k].includes(v) ? x[k].filter((i) => i !== v) : x[k].length < max ? [...x[k], v] : x[k] }))
 
   const errors = {
     name: d.name.trim().length < 2 && 'Il nome deve avere almeno 2 lettere.',
     photos: d.mode === 'photos' && d.photos.length < PHOTO_MIN && `Servono almeno ${PHOTO_MIN} foto, oppure scegli l’avatar.`,
     interests: d.interests.length < PASSIONS.min && `Scegli almeno ${PASSIONS.min} passioni.`,
-    habitats: d.habitats.length < 1 && 'Scegli almeno un posto che frequenti.',
+    thisOrThat: !validThisOrThat(d.thisOrThat) && 'Scrivi la domanda e le due risposte.',
   }
   const valid = !Object.values(errors).some(Boolean)
   const dirty = JSON.stringify(d) !== initial
@@ -94,8 +92,7 @@ function Editor({ onClose }: { onClose: () => void }) {
       smoke: d.smoke,
       drink: d.drink,
       interests: d.interests,
-      habitats: d.habitats,
-      dilemma: { question: d.dilemma, options: [] },
+      thisOrThat: d.thisOrThat && { question: d.thisOrThat.question.trim(), a: d.thisOrThat.a.trim(), b: d.thisOrThat.b.trim() },
       photos: d.mode === 'photos' ? d.photos : [],
       look: d.look,
     }
@@ -104,10 +101,6 @@ function Editor({ onClose }: { onClose: () => void }) {
     onClose()
   }
 
-  const byDistrict = Object.entries(HABITATS).reduce<Record<string, string[]>>((acc, [name, h]) => {
-    ;(acc[h.district] ??= []).push(name)
-    return acc
-  }, {})
   const allPassions = PASSION_CATEGORIES.flatMap((c) => c.items)
   const customPassions = d.interests.filter((i) => !allPassions.includes(i))
 
@@ -235,37 +228,9 @@ function Editor({ onClose }: { onClose: () => void }) {
           </form>
         </Section>
 
-        <Section title="I tuoi Habitat" hint={`${d.habitats.length}/${HABITAT_MAX} · minimo 1`} error={errors.habitats}>
-          <p className="mb-3 text-sm text-muted">I posti pubblici che frequenti a {me.city}. Servono a trovare persone e piani vicini, senza GPS.</p>
-          {Object.entries(byDistrict).map(([district, places]) => (
-            <div key={district} className="mb-3">
-              <p className="mb-1.5 text-sm font-semibold text-muted">{district}</p>
-              <div className="flex flex-wrap gap-1.5">
-                {places.map((h) => (
-                  <Pill key={h} on={d.habitats.includes(h)} disabled={!d.habitats.includes(h) && d.habitats.length >= HABITAT_MAX} onClick={() => toggle('habitats', h, HABITAT_MAX)}>
-                    {h}
-                  </Pill>
-                ))}
-              </div>
-            </div>
-          ))}
-        </Section>
-
-        <Section title="Il tuo dilemma">
-          <div className="no-scrollbar -mx-5 flex gap-2 overflow-x-auto px-5" role="tablist" aria-label="Tono del dilemma">
-            {DILEMMA_LIST.map((g, i) => (
-              <button key={g.tone} role="tab" aria-selected={tone === i} onClick={() => setTone(i)} className={cn('h-9 shrink-0 rounded-md border px-3 text-sm font-semibold', tone === i ? 'border-cream bg-cream text-ink' : 'border-line text-cream/75')}>
-                {g.tone}
-              </button>
-            ))}
-          </div>
-          <div className="mt-3 space-y-2" role="radiogroup" aria-label="Dilemmi">
-            {DILEMMA_LIST[tone].items.map((q) => (
-              <button key={q} role="radio" aria-checked={d.dilemma === q} onClick={() => set('dilemma', q)} className={cn('w-full rounded-xl border p-3.5 text-left text-base', d.dilemma === q ? 'border-brand bg-forest font-semibold' : 'border-line hover:border-cream/30')}>
-                {q}
-              </button>
-            ))}
-          </div>
+        <Section title="Questo o quello" error={errors.thisOrThat}>
+          <p className="mb-3 text-sm text-muted">Una domanda con due risposte. Chi ti mette like può sceglierne una: è il vostro primo argomento.</p>
+          <ThisOrThatEditor value={d.thisOrThat} onChange={(t) => set('thisOrThat', t)} />
         </Section>
 
         <div className="pt-6">

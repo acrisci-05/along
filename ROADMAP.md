@@ -51,6 +51,17 @@ Obiettivo: un'app che si può far provare a qualcuno e che "sembra vera".
 
 > **Fine Fase 3.** Punti aperti: verifica con un fornitore vero (oggi l’esito è simulato), timer scaduti anche ad app chiusa (job programmato, con le notifiche 4.1), email da un mittente tuo (SMTP) prima della beta: il mittente gratuito di Supabase manda pochi codici l’ora e solo agli indirizzi del team.
 
+## Fase 3B — Più semplice ✅ (decisa il 9/11 con i quiz)
+L’app diventa un’app d’incontri 1:1, più semplice e più viva.
+- **Via:** dilemma obbligatorio, piani (Mappa, crew, tasto +, Split the Bill, proposta d’uscita), foto sfocate, timer 48 ore, Karma e badge, “chi ti ha salvato” a pagamento
+- **Like con un tocco.** Sul profilo **1 “Questo o quello”** (es. Pizza fritta o al forno?): chi mette like può toccare una risposta, che arriva insieme al like come rompighiaccio
+- **Restano:** massimo **3 chat** alla volta (le altre in Sala d’Attesa), **congedo gentile** quando chiudi una chat, **niente trucchi a pagamento** (Forever = sostegno, mai più like o visibilità)
+- **Barra in basso:** Scopri · Like · Chat · Profilo
+- **Pagina iniziale:** logo che si compone, “Persone vere, vicine”, Registrati / Ho già un account
+- **Animazioni morbide e discrete** in tutta l’app, vibrazione leggera nei momenti importanti
+- Testi tutti in italiano
+- Provato: `npm run db:test` e percorsi completi nel browser sul database (registrazione, like con Questo o quello, match in tempo reale, chat, chiusura gentile, esci/rientra, elimina account, 16-17 separati)
+
 ## Fase 4 — Esperienza completa
 - 🔜 **4.1 Notifiche** — nuovo like, match, timer in scadenza
 - ⬜ **4.2 Piani di gruppo reali (D)** — crew, partecipanti, Split the Bill condiviso

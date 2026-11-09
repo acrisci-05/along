@@ -1,23 +1,12 @@
-export type Mode = 'local' | 'remote'
+export type Gender = 'f' | 'm' | 'nb'
+export type Habit = 'si' | 'a volte' | 'no'
+export type Intent = 'date' | 'friends'
 
-export type Category =
-  | 'food'
-  | 'drink'
-  | 'sport'
-  | 'cinema'
-  | 'study'
-  | 'walk'
-  | 'gaming'
-  | 'music'
-  | 'books'
-  | 'talk'
-  | 'travel'
-
-export type PlanStatus = 'OPEN' | 'ALMOST FULL' | 'FULL' | 'CONFIRMED' | 'EXPIRED'
-
-export interface Dilemma {
+/** “Questo o quello”: one playful question with two answers, shown on the profile. */
+export interface ThisOrThat {
   question: string
-  options?: string[]
+  a: string
+  b: string
 }
 
 export interface User {
@@ -28,22 +17,16 @@ export interface User {
   hue: number
   emoji: string
   bio: string
-  pronouns?: string
   interests: string[]
-  habitats: string[]
-  dilemma: Dilemma
-  karma: number
-  badges: Array<'fast' | 'voice' | 'zero'>
+  thisOrThat?: ThisOrThat
+  /** supporter (ALONG Forever): never gives more likes or visibility */
   lifetime?: boolean
-  travel?: string
   gender: Gender
   intent: Intent[]
   look: Look
-  /** ISO date (YYYY-MM-DD); age is derived from it */
+  /** ISO date (YYYY-MM-DD), only for yourself; age is derived from it */
   birthDate?: string
-  /** compressed data: URL of an uploaded photo (local demo only). Legacy single photo; see `photos`. */
-  photo?: string
-  /** 4:5 cropped JPEG data: URLs, first = main photo. 0 = avatar mode, otherwise 2..6 */
+  /** 4:5 cropped JPEG (data: or signed URL), first = main photo. Empty = illustrated avatar */
   photos?: string[]
   work?: string
   languages?: string[]
@@ -56,10 +39,6 @@ export interface User {
   distanceKm?: number
 }
 
-export type Gender = 'f' | 'm' | 'nb'
-export type Habit = 'si' | 'a volte' | 'no'
-export type Intent = 'date' | 'friends'
-
 export interface Look {
   skin: number
   hair: 'short' | 'long' | 'bun' | 'curly' | 'buzz' | 'wavy' | 'bob'
@@ -70,18 +49,19 @@ export interface Look {
   earring?: boolean
 }
 
+/** A like you received. `pick` is their answer to your “Questo o quello”, if they chose one. */
 export interface Like {
   id: string
   userId: string
-  answer: string
-  question: string
+  pick?: string
+  question?: string
   at: number
   status: 'new' | 'accepted' | 'declined'
 }
 
 export interface OutgoingLike {
   userId: string
-  answer: string
+  pick?: string
   at: number
   status: 'pending' | 'matched' | 'missed'
 }
@@ -97,51 +77,8 @@ export interface Prefs {
   verifiedOnly?: boolean
 }
 
-export interface PlanDetails {
-  cuisine?: string
-  budget?: string
-  level?: string
-  missing?: number
-  film?: string
-  language?: string
-  studyMode?: 'silenzioso' | 'collaborativo'
-  timezone?: string
-  platform?: string
-  track?: { title: string; artist: string; length: string }
-  destination?: string
-}
-
-export interface Plan {
-  id: string
-  hostId: string
-  title: string
-  category: Category
-  mode: Mode
-  city: string
-  habitat: string
-  district?: string
-  when: number
-  whenLabel?: string
-  capacity: number
-  participants: string[]
-  vibes: string[]
-  dilemma: Dilemma
-  details: PlanDetails
-  privacy: boolean
-  cost?: number
-  confirmed?: boolean
-  interested: string[]
-  createdAt: number
-}
-
+/** 'dilemma' = the opening card of a match: the “Questo o quello” answer sent with the like */
 export type MessageKind = 'text' | 'voice' | 'system' | 'dilemma' | 'track' | 'farewell' | 'proposal'
-
-export interface Proposal {
-  title: string
-  when: string
-  place: string
-  status: 'pending' | 'accepted'
-}
 
 export interface Message {
   id: string
@@ -151,8 +88,7 @@ export interface Message {
   duration?: number
   wave?: number[]
   question?: string
-  proposal?: Proposal
-  /** blob: URL of a real recording (session only, not persisted across reloads) */
+  /** playable URL of a real recording */
   audioUrl?: string
   seen?: boolean
   at: number
@@ -162,18 +98,15 @@ export type ChatStatus = 'active' | 'waiting' | 'closed' | 'evolved' | 'expired'
 
 export interface Chat {
   id: string
-  planId?: string
   peerIds: string[]
-  mode: Mode
   title: string
   messages: Message[]
   status: ChatStatus
   createdAt: number
-  deadline?: number
-  clockStopped?: boolean
   closedReason?: string
   unread: number
-  incoming?: { answer: string; question: string }
+  /** for chats in the waiting room: what they sent with the like */
+  incoming?: { question?: string; pick?: string }
 }
 
 export interface Toast {
@@ -183,32 +116,18 @@ export interface Toast {
   body?: string
 }
 
-export interface MeStats {
-  replyTimes: number[]
-  voiceSent: number
-  textSent: number
-  elegantCloses: number
-  ghosted: number
-  clocksStopped: number
-}
-
 export interface AppState {
   version: number
   me: User
   users: Record<string, User>
-  plans: Plan[]
   chats: Chat[]
-  saved: string[]
   lifetime: boolean
-  stats: MeStats
-  travelDestinations: string[]
   onboarded: boolean
   swipes: Record<string, 'pass' | 'like'>
   swipeHistory: string[]
   likesIn: Like[]
   likesOut: OutgoingLike[]
   prefs: Prefs
-  savedBy: string[]
   daily: Daily
   blocked: string[]
   reports: Report[]
@@ -225,6 +144,6 @@ export interface Report {
 export interface Daily {
   day: string
   seen: number
-  answered: number
+  liked: number
   matches: number
 }

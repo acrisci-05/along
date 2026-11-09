@@ -54,7 +54,7 @@ const selfVerify = await tryq(U.adult1, `update profiles set verified = true, ka
 ok('client cannot self-verify or set karma', selfVerify.ok && selfVerify.rows[0].verified === false && selfVerify.rows[0].karma === 100)
 
 // likes
-ok('adult can like adult', (await tryq(U.adult1, `insert into likes (from_user, to_user, question, answer) values ($1, $2, 'Alba o tramonto?', 'Tramonto sul mare')`, [U.adult1, U.adult2])).ok)
+ok('adult can like adult', (await tryq(U.adult1, `insert into likes (from_user, to_user, question, answer) values ($1, $2, 'Alba o tramonto?', 'Tramonto')`, [U.adult1, U.adult2])).ok)
 ok('adult cannot like teen', !(await tryq(U.adult1, `insert into likes (from_user, to_user, question, answer) values ($1, $2, 'q', 'risposta')`, [U.adult1, U.teen1])).ok)
 ok('unverified teen cannot like', !(await tryq(U.teen1, `insert into likes (from_user, to_user, question, answer) values ($1, $2, 'q', 'risposta')`, [U.teen1, U.teen2])).ok)
 await db.exec(`set test.role='service_role'`); await db.query(`update profiles set verified = true, verified_at = now() where id in ($1, $2)`, [U.teen1, U.teen2]); await db.exec(`reset test.role`)
@@ -106,10 +106,11 @@ ok('reports not readable by users', (await tryq(U.adult1, `select * from reports
 ok('upload own photo', (await tryq(U.adult1, `insert into storage.objects (bucket_id, name) values ('photos', $1)`, [`${U.adult1}/a.jpg`])).ok)
 ok('cannot upload into someone else folder', !(await tryq(U.adult1, `insert into storage.objects (bucket_id, name) values ('photos', $1)`, [`${U.adult2}/x.jpg`])).ok)
 await db.exec(`set test.role='service_role'`); await db.query(`insert into storage.objects (bucket_id, name) values ('photos', $1), ('photos-blurred', $1)`, [`${U.teen2}/t.jpg`]); await db.exec(`reset test.role`)
-ok('teen original photo hidden before match', (await tryq(U.teen1, `select name from storage.objects where bucket_id = 'photos' and name like $1`, [`${U.teen2}/%`])).rows.length === 0)
+ok('teen photo visible to compatible teen', (await tryq(U.teen1, `select name from storage.objects where bucket_id = 'photos' and name like $1`, [`${U.teen2}/%`])).rows.length === 1)
+ok('adult cannot see teen photo', (await tryq(U.adult1, `select name from storage.objects where bucket_id = 'photos' and name like $1`, [`${U.teen2}/%`])).rows.length === 0)
 ok('teen blurred photo visible to compatible teen', (await tryq(U.teen1, `select name from storage.objects where bucket_id = 'photos-blurred' and name like $1`, [`${U.teen2}/%`])).rows.length === 1)
 ok('adult cannot see teen blurred photo', (await tryq(U.adult1, `select name from storage.objects where bucket_id = 'photos-blurred' and name like $1`, [`${U.teen2}/%`])).rows.length === 0)
-ok('adult1 original visible to its match adult2', (await tryq(U.adult2, `select name from storage.objects where bucket_id = 'photos' and name like $1`, [`${U.adult1}/%`])).rows.length === 1)
+ok('adult1 photo visible to compatible adult2', (await tryq(U.adult2, `select name from storage.objects where bucket_id = 'photos' and name like $1`, [`${U.adult1}/%`])).rows.length === 1)
 
 // funzioni dell'app (step 3.2)
 {
@@ -135,7 +136,7 @@ ok('adult1 original visible to its match adult2', (await tryq(U.adult2, `select 
   const c2 = (await tryq(B, `select accept_like($1) as c`, [lAB])).rows?.[0]?.c
   ok('mutual like -> both matched', (await db.query(`select count(*)::int c from likes where status = 'matched'`)).rows[0].c === 2)
   ok('new chat has spark + dilemma', JSON.stringify((await tryq(A, `select kind from messages where chat_id = $1 order by created_at`, [c2])).rows.map((r) => r.kind)) === '["system","dilemma"]')
-  ok('48h timer set', (await db.query(`select deadline is not null d from chats where id = $1`, [c2])).rows[0].d === true)
+  ok('no 48h timer', (await db.query(`select deadline is null d from chats where id = $1`, [c2])).rows[0].d === true)
   const persona = (await db.query(`select id from profiles where name = 'Persona' limit 1`)).rows[0].id
   await db.query(`insert into likes (from_user, to_user, question, answer) values ($1, $2, 'q', 'ciao Bruno')`, [persona, B])
   const lx = (await db.query(`select id from likes where answer = 'ciao Bruno'`)).rows[0].id
@@ -144,6 +145,13 @@ ok('adult1 original visible to its match adult2', (await tryq(U.adult2, `select 
   { const ka = (await db.query(`select karma from profiles where id = $1`, [A])).rows[0].karma; await tryq(A, `select decline_like($1)`, [lx]); ok('cannot decline others likes', (await db.query(`select karma from profiles where id = $1`, [A])).rows[0].karma === ka) }
   ok('birth date not readable by others', !(await tryq(A, `select birth_date from profiles where id = $1`, [B])).ok)
   { const r = await tryq(A, `select id, age, birth_date from profile_ages()`); ok('ages visible, own birth date only', r.ok && r.rows.some((x) => x.id === B && x.age === 30 && x.birth_date === null) && r.rows.some((x) => x.id === A && x.birth_date)) }
+  // like con un tocco e "Questo o quello"
+  const persona2 = (await db.query(`select id from profiles where name = 'Persona' offset 1 limit 1`)).rows[0].id
+  ok('like without answer', (await tryq(B, `insert into likes (from_user, to_user) values ($1, $2)`, [B, persona2])).ok)
+  ok('this_or_that saved', (await tryq(A, `update profiles set this_or_that = '{"question":"Mare o montagna?","a":"Mare","b":"Montagna"}' where id = $1`, [A])).ok)
+  ok('this_or_that readable by compatible', (await tryq(B, `select this_or_that->>'a' a from profiles where id = $1`, [A])).rows[0]?.a === 'Mare')
+  ok('bad this_or_that rejected', !(await tryq(A, `update profiles set this_or_that = '{"question":"?","a":"","b":"x"}' where id = $1`, [A])).ok)
+  ok('slots are 3 even with Forever', (await db.query(`select slot_limit($1) s`, [A])).rows[0].s === 3)
   // blocco
   ok('block_user', (await tryq(B, `select block_user($1)`, [A])).ok)
   ok('chat closed after block', (await db.query(`select count(*)::int c from chat_members where chat_id = $1 and status = 'closed'`, [c2])).rows[0].c === 2)
