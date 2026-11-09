@@ -6,6 +6,7 @@ import { useNav } from '../nav'
 import { useNow, useStore } from '../store/store'
 import { cn, timeAgo } from '../lib/utils'
 import { Avatar, Button, Eyebrow } from '../components/ui'
+import { Scene } from '../components/Brand'
 
 export function lastPreview(chat: Chat) {
   const m = chat.messages[chat.messages.length - 1]
@@ -25,54 +26,53 @@ export function Crew() {
   const [showArchive, setShowArchive] = useState(false)
   const archived = state.chats.filter((c) => c.status === 'closed' || c.status === 'evolved' || c.status === 'expired')
   const free = limits.slots - activeChats.length
+  const isNew = (c: Chat) => !c.messages.some((m) => m.kind !== 'system' && m.kind !== 'dilemma')
+  const fresh = activeChats.filter(isNew)
+  const talking = activeChats.filter((c) => !isNew(c))
 
   return (
     <div className="space-y-5 pb-6">
-      <header>
-        <Eyebrow>Chat</Eyebrow>
-        <h1 className="mt-1 text-2xl font-bold leading-[1.05]">
-          Poche chat, <span className="text-brand">vere</span>
-        </h1>
-        <p className="mt-1 text-sm text-muted">Al massimo {limits.slots} conversazioni insieme: le altre aspettano in Sala d’Attesa.</p>
+      <header className="flex items-end justify-between gap-3">
+        <div>
+          <Eyebrow>Chat</Eyebrow>
+          <h1 className="mt-1 text-2xl font-bold leading-[1.05]">Le tue conversazioni</h1>
+        </div>
+        <span className="shrink-0 rounded-full bg-surface px-3 py-1.5 text-sm font-semibold tabular-nums" title={`Massimo ${limits.slots} chat attive insieme`}>
+          {activeChats.length}/{limits.slots} attive
+        </span>
       </header>
 
-      <section className="rounded-2xl bg-surface p-4" aria-label="Chat attive">
-        <p className="text-sm font-semibold">
-          Chat attive <span className="tabular-nums text-brand">{activeChats.length}</span>/{limits.slots}
-        </p>
-        <div className="mt-3 flex gap-2">
-          {Array.from({ length: limits.slots }).map((_, i) => {
-            const c = activeChats[i]
-            return (
+      {fresh.length > 0 && (
+        <section aria-label="Nuovi match">
+          <Eyebrow>Nuovi match</Eyebrow>
+          <div className="no-scrollbar -mx-4 mt-2 flex gap-3 overflow-x-auto px-4">
+            {fresh.map((c, i) => (
               <motion.button
-                key={c?.id ?? `empty-${i}`}
-                layout
-                whileTap={{ scale: 0.95 }}
-                onClick={() => (c ? nav.openChat(c.id) : nav.setTab('explore'))}
-                className={cn('flex flex-1 flex-col items-center gap-1.5 rounded-2xl border py-3', c ? 'border-line bg-ink/40' : 'border-dashed border-cream/15')}
-                aria-label={c ? `Apri chat con ${c.title}` : 'Posto libero'}
+                key={c.id}
+                initial={{ opacity: 0, scale: 0.85 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: i * 0.05 }}
+                whileTap={{ scale: 0.93 }}
+                onClick={() => nav.openChat(c.id)}
+                className="flex w-[68px] shrink-0 flex-col items-center gap-1"
+                aria-label={`Nuovo match con ${c.title}: scrivi tu per primo`}
               >
-                {c ? (
-                  <>
-                    <Avatar user={user(c.peerIds[0])} size={40} />
-                    <span className="max-w-full truncate px-1 text-xs font-semibold">{c.title}</span>
-                  </>
-                ) : (
-                  <>
-                    <span className="grid size-10 place-items-center rounded-full bg-cream/5 text-cream/30">+</span>
-                    <span className="text-xs text-cream/35">libero</span>
-                  </>
-                )}
+                <span className="rounded-full bg-love p-[2.5px]">
+                  <span className="block rounded-full bg-ink p-[2px]">
+                    <Avatar user={user(c.peerIds[0])} size={56} />
+                  </span>
+                </span>
+                <span className="w-full truncate text-center text-xs font-semibold">{c.title}</span>
               </motion.button>
-            )
-          })}
-        </div>
-      </section>
+            ))}
+          </div>
+        </section>
+      )}
 
-      <section className="space-y-2">
-        <Eyebrow>Conversazioni</Eyebrow>
+      <section className="space-y-1">
+        {talking.length > 0 && <Eyebrow>Messaggi</Eyebrow>}
         <AnimatePresence initial={false}>
-          {activeChats.map((c, i) => (
+          {talking.map((c, i) => (
             <motion.button
               layout
               key={c.id}
@@ -81,22 +81,28 @@ export function Crew() {
               exit={{ opacity: 0, x: 40 }}
               whileTap={{ scale: 0.98 }}
               onClick={() => nav.openChat(c.id)}
-              className="flex w-full items-center gap-3 rounded-2xl bg-surface p-3 text-left transition-colors hover:bg-surface-2"
+              className="flex w-full items-center gap-3 rounded-2xl px-1 py-2.5 text-left transition-colors hover:bg-surface"
             >
-              <Avatar user={user(c.peerIds[0])} size={48} />
-              <div className="min-w-0 flex-1">
+              <Avatar user={user(c.peerIds[0])} size={52} />
+              <div className="min-w-0 flex-1 border-b border-line pb-2.5">
                 <div className="flex items-center gap-2">
-                  <p className="truncate text-base font-bold">{c.title}</p>
-                  {c.unread > 0 && <span className="grid size-5 place-items-center rounded-full bg-brand text-xs font-bold text-ink">{c.unread}</span>}
+                  <p className="min-w-0 flex-1 truncate text-base font-bold">{c.title}</p>
+                  <span className="shrink-0 text-xs text-muted">{timeAgo(c.messages.at(-1)?.at ?? c.createdAt, now)}</span>
                 </div>
-                <p className={cn('truncate text-sm', c.unread ? 'font-semibold text-cream' : 'text-cream/60')}>{lastPreview(c)}</p>
+                <div className="flex items-center gap-2">
+                  <p className={cn('min-w-0 flex-1 truncate text-sm', c.unread ? 'font-semibold text-cream' : 'text-cream/60')}>{lastPreview(c)}</p>
+                  {c.unread > 0 && <span className="grid size-5 shrink-0 place-items-center rounded-full bg-love text-xs font-bold text-cream">{c.unread}</span>}
+                </div>
               </div>
-              <span className="shrink-0 text-xs text-muted">{timeAgo(c.messages.at(-1)?.at ?? c.createdAt, now)}</span>
             </motion.button>
           ))}
         </AnimatePresence>
         {!activeChats.length && (
-          <p className="rounded-2xl border border-dashed border-cream/15 p-4 text-center text-sm text-cream/50">Nessuna chat. Metti like in Scopri: quando è reciproco, si apre qui.</p>
+          <div className="rounded-2xl border border-dashed border-cream/15 p-6 text-center">
+            <Scene kind="wave" size={90} />
+            <p className="mt-3 font-bold">Ancora nessuna chat</p>
+            <p className="mt-1 text-sm text-cream/55">Metti like in Scopri: quando è reciproco, la chat si apre qui.</p>
+          </div>
         )}
       </section>
 

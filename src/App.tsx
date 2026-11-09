@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactElement } from 'react'
 import { AnimatePresence, MotionConfig, motion } from 'motion/react'
-import { Flame, Heart, MessagesSquare, Monitor, Smartphone, UserRound, X } from 'lucide-react'
+import { Flame, Heart, MessagesSquare, Monitor, SlidersHorizontal, Smartphone, UserRound, X } from 'lucide-react'
 import { NavCtx, type Nav, type Tab } from './nav'
 import { useStore } from './store/store'
 import { cn } from './lib/utils'
@@ -17,6 +17,7 @@ import { UserSheet } from './components/Overlays'
 import { Paywall } from './components/Paywall'
 import { RevolutTip } from './components/ui'
 import { ClapMark } from './components/Brand'
+import { Landing } from './components/Landing'
 
 const TABS: Array<{ id: Tab; label: string; icon: typeof Flame }> = [
   { id: 'explore', label: 'Scopri', icon: Flame },
@@ -43,12 +44,21 @@ export default function App() {
   })
   const [dir, setDir] = useState(1)
   const [userId, setUserId] = useState<string | null>(null)
+  const [filters, setFilters] = useState(false)
   const [chatId, setChatId] = useState<string | null>(null)
   const [paywall, setPaywall] = useState<{ open: boolean; reason?: string }>({ open: false })
   const [safety, setSafety] = useState<{ userId: string; mode: SafetyMode } | null>(null)
   const [verify, setVerify] = useState<{ reason?: string } | null>(null)
   const [frame, setFrame] = useState<'phone' | 'wide'>(() => readPref('along:frame', 'phone'))
   const scrollRef = useRef<HTMLDivElement>(null)
+  const desktop = useDesktop()
+  const [opened, setOpened] = useState(() => {
+    try {
+      return sessionStorage.getItem('along:open') === '1'
+    } catch {
+      return false
+    }
+  })
 
   useEffect(() => {
     try {
@@ -93,7 +103,7 @@ export default function App() {
   const badgeFor = (id: string) => (id === 'crew' ? crewBadge : id === 'likes' ? likesBadge : 0)
 
   const views: Record<Tab, ReactElement> = {
-    explore: <Discover />,
+    explore: <Discover filters={filters} setFilters={setFilters} />,
     likes: <Likes />,
     crew: <Crew />,
     profile: <Profile />,
@@ -101,6 +111,24 @@ export default function App() {
 
   const wide = frame === 'wide'
   const overlayOpen = !!(userId || paywall.open || chatId || !state.onboarded || store.match || safety || verify)
+
+  // on a computer, people who aren't signed in first see what ALONG is
+  const signedOut = store.account ? store.account.phase === 'signedOut' : !state.onboarded
+  if (desktop && signedOut && !opened)
+    return (
+      <MotionConfig reducedMotion="user">
+        <Landing
+          onOpen={() => {
+            try {
+              sessionStorage.setItem('along:open', '1')
+            } catch {
+              /* ignore */
+            }
+            setOpened(true)
+          }}
+        />
+      </MotionConfig>
+    )
 
   return (
     <MotionConfig reducedMotion="user">
@@ -161,6 +189,11 @@ export default function App() {
                   ))}
                 </nav>
               )}
+              {tab === 'explore' && (
+                <motion.button whileTap={{ scale: 0.9 }} onClick={() => setFilters(true)} className="grid size-10 place-items-center rounded-full bg-surface text-cream hover:bg-surface-2" aria-label="Filtri">
+                  <SlidersHorizontal size={18} />
+                </motion.button>
+              )}
             </header>
 
             {/* content */}
@@ -178,7 +211,7 @@ export default function App() {
                   animate="center"
                   exit="exit"
                   transition={{ duration: 0.22, ease: [0.25, 0.1, 0.25, 1] }}
-                  className={cn('flex min-h-full flex-col', tab === 'explore' ? 'pb-[76px]' : 'pb-24', wide && 'md:pb-8')}
+                  className={cn('flex min-h-full flex-col', tab === 'explore' ? 'pb-[88px]' : 'pb-24', wide && 'md:pb-8')}
                 >
                   {views[tab]}
                 </motion.div>
@@ -215,7 +248,7 @@ export default function App() {
                               animate={{ scale: 1, opacity: 1 }}
                               exit={{ scale: 0.4, opacity: 0 }}
                               transition={{ type: 'spring', stiffness: 600, damping: 22 }}
-                              className="absolute -right-2.5 -top-1.5 grid h-4 min-w-4 place-items-center rounded-full bg-brand px-1 text-[10px] font-bold leading-none text-ink"
+                              className="absolute -right-2.5 -top-1.5 grid h-4 min-w-4 place-items-center rounded-full bg-love px-1 text-[10px] font-bold leading-none text-cream"
                             >
                               {badgeFor(t.id)}
                             </motion.span>
@@ -306,4 +339,16 @@ function FrameSwitch({ frame, setFrame }: { frame: 'phone' | 'wide'; setFrame: (
       ))}
     </div>
   )
+}
+
+function useDesktop() {
+  const query = '(min-width: 1024px) and (pointer: fine)'
+  const [on, setOn] = useState(() => typeof window !== 'undefined' && window.matchMedia(query).matches)
+  useEffect(() => {
+    const mq = window.matchMedia(query)
+    const fn = () => setOn(mq.matches)
+    mq.addEventListener('change', fn)
+    return () => mq.removeEventListener('change', fn)
+  }, [])
+  return on
 }

@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { AnimatePresence, motion, useMotionValue, useTransform, type Variants } from 'motion/react'
-import { Heart, Info, MoreHorizontal, RotateCcw, SlidersHorizontal, X } from 'lucide-react'
+import { ChevronUp, Heart, MoreHorizontal, RotateCcw, X } from 'lucide-react'
 import type { User } from '../types'
 import { useNav } from '../nav'
 import { useNow, useStore } from '../store/store'
@@ -11,6 +11,8 @@ import { galleryItems } from '../components/Portrait'
 import { Portrait } from '../components/Portrait'
 import { Button, Chip, Sheet, Toggle } from '../components/ui'
 import { useNeedsVerification, VerifiedBadge } from '../components/Verify'
+import { InfoRows } from '../components/ProfileInfo'
+import { Scene } from '../components/Brand'
 import { isVerified } from '../lib/verify'
 
 /** like = the card glides up and away; pass = it drops to the side */
@@ -23,7 +25,7 @@ const CARD_EXIT: Variants = {
 
 const intentLabel = (u: User) => u.intent.map((i) => (i === 'date' ? 'Date' : 'Amici')).join(' · ')
 
-export function Discover() {
+export function Discover({ filters, setFilters }: { filters: boolean; setFilters: (v: boolean) => void }) {
   const store = useStore()
   const { state, setPrefs, passUser, likeUser, undoSwipe, resetDeck, toast, newDay, allowed, demo } = store
   const minor = isMinor(state.me)
@@ -32,7 +34,6 @@ export function Discover() {
   const daily = state.daily.day === todayKey() ? state.daily : { day: todayKey(), seen: 0, liked: 0, matches: 0 }
   const dayOver = daily.seen >= DAILY_LIMIT
   const nav = useNav()
-  const [filters, setFilters] = useState(false)
   const { prefs, me } = state
 
   const deck = useMemo(() => {
@@ -80,9 +81,6 @@ export function Discover() {
             </button>
           ))}
         </div>
-        <motion.button whileTap={{ scale: 0.92 }} onClick={() => setFilters(true)} className="grid size-11 place-items-center rounded-2xl bg-surface" aria-label="Filtri">
-          <SlidersHorizontal size={17} />
-        </motion.button>
       </div>
 
       <div className="flex items-center gap-3" aria-label={`Selezione di oggi: ${Math.min(daily.seen, DAILY_LIMIT)} su ${DAILY_LIMIT}`}>
@@ -125,7 +123,8 @@ export function Discover() {
         {!top && !dayOver && (
           <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="absolute inset-0 grid place-items-center rounded-2xl border border-dashed border-line p-6 text-center">
             <div>
-              <p className="text-xl font-bold">{nobodyYet ? `Sei tra i primi a ${me.city}` : 'Per ora è tutto, qui'}</p>
+              <Scene kind={nobodyYet ? 'waiting' : 'search'} size={110} />
+              <p className="mt-3 text-xl font-bold">{nobodyYet ? `Sei tra i primi a ${me.city}` : 'Per ora è tutto, qui'}</p>
               <p className="mt-1 text-sm text-muted">
                 {nobodyYet
                   ? 'ALONG è appena partita. Invita chi vorresti trovare qui: ogni persona in più rende Scopri più ricco.'
@@ -257,6 +256,7 @@ export function SwipeCard({
   const likeOpacity = useTransform(x, [30, 120], [0, 1])
   const [photo, setPhoto] = useState(0)
   const [pick, setPick] = useState<string | undefined>()
+  const [scrolled, setScrolled] = useState(false)
   const dragged = useRef(false)
   const items = galleryItems(user)
   const common = sharedInterests(me, user)
@@ -308,73 +308,74 @@ export function SwipeCard({
         }}
       >
         <article className="relative min-h-0 flex-1 overflow-hidden rounded-2xl bg-surface text-cream shadow-[0_20px_50px_-20px_rgb(0_0_0/0.8)]" aria-label={`${user.name}, ${user.age}`}>
-          <AnimatePresence initial={false} mode="popLayout">
-            <motion.div key={photo} className="absolute inset-0" initial={{ opacity: 0.4, scale: 1.03 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.25 }}>
-              <CardImage item={items[photo]} />
-            </motion.div>
-          </AnimatePresence>
-          <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgb(28_22_18/0.35)_0%,transparent_22%,transparent_45%,rgb(28_22_18/0.85)_72%,rgb(28_22_18/0.97)_100%)]" />
-
-          {items.length > 1 && (
-            <div className="absolute inset-x-3 top-2.5 z-10 flex gap-1.5" aria-hidden>
-              {items.map((_, i) => (
-                <span key={i} className="h-[3px] flex-1 overflow-hidden rounded-full bg-cream/30">
-                  {i === photo && <motion.span layoutId={`bar-${user.id}`} className="block h-full w-full bg-cream" />}
+          <div className="no-scrollbar h-full overflow-y-auto overscroll-contain" onScroll={(e) => setScrolled(e.currentTarget.scrollTop > 24)}>
+            {/* the photo, free: only name, age and city on top */}
+            <section className="relative h-full">
+              <AnimatePresence initial={false} mode="popLayout">
+                <motion.div key={photo} className="absolute inset-0" initial={{ opacity: 0.4, scale: 1.03 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.25 }}>
+                  <CardImage item={items[photo]} />
+                </motion.div>
+              </AnimatePresence>
+              <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgb(28_22_18/0.35)_0%,transparent_20%,transparent_62%,rgb(28_22_18/0.9)_100%)]" />
+              {items.length > 1 && (
+                <div className="absolute inset-x-3 top-2.5 z-10 flex gap-1.5" aria-hidden>
+                  {items.map((_, i) => (
+                    <span key={i} className="h-[3px] flex-1 overflow-hidden rounded-full bg-cream/30">
+                      {i === photo && <motion.span layoutId={`bar-${user.id}`} className="block h-full w-full bg-cream" />}
+                    </span>
+                  ))}
+                </div>
+              )}
+              {items.length > 1 && (
+                <>
+                  <button className="absolute left-0 top-0 bottom-[30%] z-0 w-2/5" onClick={() => !dragged.current && goPhoto(-1)} aria-label="Foto precedente" disabled={photo === 0} />
+                  <button className="absolute right-0 top-0 bottom-[30%] z-0 w-3/5" onClick={() => !dragged.current && goPhoto(1)} aria-label="Foto successiva" disabled={photo === items.length - 1} />
+                </>
+              )}
+              <button onClick={() => !dragged.current && onInfo?.()} className="absolute inset-x-0 bottom-0 z-10 px-4 pb-4 text-left" aria-label={`Profilo completo di ${user.name}`}>
+                <span className="block text-[30px] font-extrabold leading-none tracking-[-0.03em]">
+                  {user.name} <span className="font-medium">{user.age}</span> <VerifiedBadge user={user} size={20} />
                 </span>
-              ))}
-            </div>
-          )}
-          {onMore && (
-            <button onClick={() => !dragged.current && onMore()} className="absolute right-2 top-5 z-10 grid size-9 place-items-center rounded-full bg-ink/40 text-cream hover:bg-ink/60" aria-label={`Altre opzioni per ${user.name}: blocca o segnala`}>
+                <span className="mt-1.5 block truncate text-sm text-cream/85">
+                  {user.city === me.city ? `A ${user.city}` : user.city} · {intentLabel(user)}
+                </span>
+                <motion.span animate={{ opacity: scrolled ? 0 : 1, y: [0, -3, 0] }} transition={{ y: { repeat: Infinity, duration: 1.8 } }} className="mt-2 flex items-center gap-1 text-xs font-semibold text-cream/70">
+                  <ChevronUp size={14} /> Scorri: {user.thisOrThat ? 'bio e Questo o quello' : 'bio e passioni'}
+                </motion.span>
+              </button>
+            </section>
+
+            {/* below the photo: the rest of the profile */}
+            <section className="space-y-4 px-4 pb-6 pt-4">
+              {user.bio && <p className="text-base leading-snug text-cream/90">{user.bio}</p>}
+              {user.thisOrThat && <ThisOrThatPicker q={user.thisOrThat} value={pick} onChange={setPick} disabled={preview} />}
+              {user.interests.length > 0 && (
+                <div>
+                  <p className="text-xs font-semibold text-muted">Passioni{common.length ? ` · ${common.length} in comune` : ''}</p>
+                  <div className="mt-1.5 flex flex-wrap gap-1.5">
+                    {user.interests.map((i) => (
+                      <span key={i} className={cn('rounded-full border px-2.5 py-1 text-sm', common.includes(i) ? 'border-brand/50 bg-brand/15' : 'border-line text-cream/75')}>
+                        {i}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+              <InfoRows user={user} />
+            </section>
+          </div>
+
+          {onMore && !scrolled && (
+            <button onClick={() => !dragged.current && onMore()} className="absolute right-2 top-5 z-20 grid size-9 place-items-center rounded-full bg-ink/40 text-cream hover:bg-ink/60" aria-label={`Altre opzioni per ${user.name}: blocca o segnala`}>
               <MoreHorizontal size={18} />
             </button>
           )}
-
-          {/* tap zones to flip through photos */}
-          {items.length > 1 && (
-            <>
-              <button className="absolute left-0 top-0 bottom-[50%] z-0 w-2/5" onClick={() => !dragged.current && goPhoto(-1)} aria-label="Foto precedente" disabled={photo === 0} />
-              <button className="absolute right-0 top-0 bottom-[50%] z-0 w-3/5" onClick={() => !dragged.current && goPhoto(1)} aria-label="Foto successiva" disabled={photo === items.length - 1} />
-            </>
-          )}
-
-          <motion.span style={{ opacity: likeOpacity }} className="pointer-events-none absolute left-4 top-14 z-20 -rotate-12 rounded-md border-2 border-brand px-3 py-1 text-2xl font-extrabold tracking-wide text-brand">
+          <motion.span style={{ opacity: likeOpacity }} className="pointer-events-none absolute left-4 top-14 z-20 -rotate-12 rounded-md border-2 border-love px-3 py-1 text-2xl font-extrabold tracking-wide text-love">
             MI PIACE
           </motion.span>
           <motion.span style={{ opacity: passOpacity }} className="pointer-events-none absolute right-4 top-14 z-20 rotate-12 rounded-md border-2 border-cream px-3 py-1 text-2xl font-extrabold tracking-wide text-cream">
             PASSO
           </motion.span>
-
-          <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 px-4 pb-4">
-            <button onClick={() => !dragged.current && onInfo?.()} className="pointer-events-auto flex w-full items-end justify-between gap-2 text-left" aria-label={`Profilo completo di ${user.name}`}>
-              <span className="min-w-0">
-                <span className="block text-[28px] font-extrabold leading-none tracking-[-0.03em]">
-                  {user.name} <span className="font-medium">{user.age}</span> <VerifiedBadge user={user} size={20} />
-                </span>
-                <span className="mt-1.5 block truncate text-sm text-cream/80">
-                  {user.city === me.city ? `A ${user.city}` : user.city} · {intentLabel(user)}
-                  {user.work ? ` · ${user.work}` : ''}
-                </span>
-              </span>
-              <Info size={20} className="mb-0.5 shrink-0 text-cream/80" />
-            </button>
-            {user.bio && <p className="mt-2 line-clamp-2 text-sm text-cream/85">{user.bio}</p>}
-            {common.length > 0 && (
-              <p className="mt-2 flex flex-wrap gap-1.5">
-                {common.slice(0, 3).map((i) => (
-                  <span key={i} className="rounded-full bg-brand/20 px-2.5 py-0.5 text-xs font-semibold text-brand">
-                    {i}
-                  </span>
-                ))}
-                <span className="self-center text-xs text-cream/60">in comune</span>
-              </p>
-            )}
-            {user.thisOrThat && (
-              <div className="pointer-events-auto mt-3">
-                <ThisOrThatPicker q={user.thisOrThat} value={pick} onChange={setPick} disabled={preview} compact />
-              </div>
-            )}
-          </div>
         </article>
 
         {!preview && (
@@ -388,7 +389,7 @@ export function SwipeCard({
             <motion.button
               whileTap={{ scale: 0.88 }}
               onClick={() => onLike?.(pick)}
-              className="flex h-14 items-center gap-2 whitespace-nowrap rounded-full bg-brand px-8 text-base font-bold text-ink hover:brightness-105"
+              className="flex h-14 items-center gap-2 whitespace-nowrap rounded-full bg-love px-8 text-base font-bold text-cream hover:brightness-110"
               aria-label={`Mi piace ${user.name}`}
             >
               <Heart size={20} fill="currentColor" />

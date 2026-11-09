@@ -12,13 +12,14 @@ import { ThisOrThatPicker } from '../views/Discover'
 
 /** Full profile of someone: photos, facts, “Questo o quello” and one-tap like. */
 export function UserSheet({ userId, onClose }: { userId: string | null; onClose: () => void }) {
-  const { state, user, allowed, likeUser, passUser } = useStore()
+  const { state, user, allowed, likeUser, passUser, acceptLike, declineLike } = useStore()
   const nav = useNav()
   const needsVerify = useNeedsVerification()
   const [pick, setPick] = useState<string | undefined>()
   const u = userId && allowed(userId) ? user(userId) : null
   const dm = u && state.chats.find((c) => c.peerIds.length === 1 && c.peerIds[0] === u.id && (c.status === 'active' || c.status === 'waiting'))
   const liked = u && state.swipes[u.id] === 'like'
+  const incoming = u ? state.likesIn.find((l) => l.userId === u.id && l.status === 'new') : undefined
   const common = u ? sharedInterests(state.me, u) : []
 
   return (
@@ -39,6 +40,16 @@ export function UserSheet({ userId, onClose }: { userId: string | null; onClose:
             )}
           </div>
           <PhotoCarousel user={u} />
+          {incoming && (
+            <div className="rounded-2xl border border-love/40 bg-love/10 p-3.5">
+              <p className="text-sm font-semibold text-love">Ti ha messo like</p>
+              {incoming.pick && (
+                <p className="mt-0.5 text-base">
+                  {incoming.question ?? 'Al tuo Questo o quello'}: ha scelto <span className="font-bold">“{incoming.pick}”</span>
+                </p>
+              )}
+            </div>
+          )}
           {u.bio && <p className="text-base leading-snug text-cream/85">{u.bio}</p>}
           {u.thisOrThat && (
             <div className="rounded-2xl bg-surface-2">
@@ -83,6 +94,36 @@ export function UserSheet({ userId, onClose }: { userId: string | null; onClose:
               <Button className="w-full" size="lg" onClick={() => nav.openChat(dm.id)}>
                 <MessageCircle size={18} /> Apri la chat
               </Button>
+            ) : incoming ? (
+              <div className="flex gap-2">
+                <Button
+                  className="flex-1 rounded-full"
+                  size="lg"
+                  variant="ghost"
+                  onClick={() => {
+                    declineLike(incoming.id)
+                    onClose()
+                  }}
+                >
+                  <X size={18} /> No, grazie
+                </Button>
+                <motion.button
+                  whileTap={{ scale: 0.95 }}
+                  className="flex h-13 flex-1 items-center justify-center gap-2 rounded-full bg-love text-base font-bold text-cream"
+                  onClick={() => {
+                    if (needsVerify) {
+                      onClose()
+                      nav.openVerify('Sotto i 18 anni devi verificare il profilo prima di accettare un match.')
+                      return
+                    }
+                    acceptLike(incoming.id)
+                    onClose()
+                  }}
+                  aria-label={`Match con ${u.name}`}
+                >
+                  <Heart size={18} fill="currentColor" /> Match
+                </motion.button>
+              </div>
             ) : liked ? (
               <Button className="w-full" size="lg" variant="ghost" disabled>
                 <Heart size={18} fill="currentColor" /> Like inviato
@@ -101,7 +142,7 @@ export function UserSheet({ userId, onClose }: { userId: string | null; onClose:
                   <X size={22} />
                 </motion.button>
                 <Button
-                  className="flex-1 rounded-full"
+                  className="flex-1 rounded-full !bg-love !text-cream"
                   size="lg"
                   onClick={() => {
                     if (needsVerify) {

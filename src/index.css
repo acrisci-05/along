@@ -17,6 +17,9 @@
   --color-coral: #9cc5a1;      /* alias legacy -> brand */
   --color-lime: #9cc5a1;       /* alias legacy -> brand */
 
+  /* ---- secondo colore, caldo: solo like e match ---- */
+  --color-love: #c4553a;       /* terracotta */
+
   /* ---- semantici (solo dove servono) ---- */
   --color-violet: #c9bba8;     /* Senza Confini: neutro caldo */
   --color-cyan: #9cc5a1;       /* timer > 12h */
@@ -242,3 +245,11 @@ input[type="range"] { accent-color: var(--color-lime); }
 @keyframes clap-loop-l { 0%, 100% { transform: rotate(10deg) } 40%, 60% { transform: rotate(-147deg) } }
 @keyframes clap-loop-r { 0%, 100% { transform: rotate(-10deg) } 40%, 60% { transform: rotate(147deg) } }
 @keyframes clap-pulse { 0%, 38% { transform: scale(0); opacity: 0 } 50% { transform: scale(1); opacity: 1 } 70%, 100% { transform: scale(1.1); opacity: 0 } }
+
+/* scenes for empty states */
+.scene .wave { transform-box: fill-box; transform-origin: 50% 0; animation: scene-wave 1.4s ease-in-out infinite; }
+.scene .bob { animation: scene-bob 2.4s ease-in-out infinite; }
+.scene .blink { animation: scene-blink 1.8s ease-in-out infinite; }
+@keyframes scene-wave { 0%, 100% { transform: rotate(0deg) } 25% { transform: rotate(-22deg) } 75% { transform: rotate(18deg) } }
+@keyframes scene-bob { 0%, 100% { transform: translateY(0) } 50% { transform: translateY(-4px) } }
+@keyframes scene-blink { 0%, 100% { opacity: 0.35 } 50% { opacity: 1 } }

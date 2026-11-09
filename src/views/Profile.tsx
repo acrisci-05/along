@@ -1,6 +1,7 @@
-import { useState } from 'react'
-import { motion } from 'motion/react'
-import { BadgeCheck, BellRing, Eye, ShieldAlert, Heart, Info, MapPin, Pencil, RotateCcw } from 'lucide-react'
+import { useEffect, useState } from 'react'
+import { createPortal } from 'react-dom'
+import { AnimatePresence, motion } from 'motion/react'
+import { ArrowLeft, BadgeCheck, BellRing, Eye, ShieldAlert, Heart, Info, MapPin, Pencil, RotateCcw, Settings } from 'lucide-react'
 import { useNav } from '../nav'
 import { AccountSection } from '../components/Account'
 import { useStore } from '../store/store'
@@ -16,16 +17,32 @@ import { backendConfigured, backendHost, checkBackend } from '../lib/supabase'
 import { Avatar, Button, Eyebrow, LifetimeBadge, RevolutTip, Sheet, Toggle } from '../components/ui'
 
 export function Profile() {
-  const { state, updateMe, setLifetime, reset, simulateIncoming, toast, setPrefs, unblockUser, injectSuspicious, demo } = useStore()
-  const nav = useNav()
+  const { state, updateMe } = useStore()
   const me = state.me
   const minor = isMinor(me)
   const [editing, setEditing] = useState(false)
   const [previewing, setPreviewing] = useState(false)
-  const [confirmReset, setConfirmReset] = useState(false)
+  const [settings, setSettings] = useState(false)
+  // signing out (or deleting the account) closes Settings
+  useEffect(() => {
+    if (!state.onboarded) setSettings(false)
+  }, [state.onboarded])
+  const missing = [
+    (me.photos?.length ?? 0) < 2 && 'Almeno 2 foto',
+    !me.bio.trim() && 'Due righe su di te',
+    !me.thisOrThat && 'Il tuo Questo o quello',
+    me.interests.length < 3 && 'Almeno 3 passioni',
+  ].filter(Boolean) as string[]
 
   return (
     <div className="space-y-5 pb-8">
+      <header className="flex items-center justify-between">
+        <h1 className="text-2xl font-bold">Il mio profilo</h1>
+        <motion.button whileTap={{ scale: 0.9 }} onClick={() => setSettings(true)} className="grid size-10 place-items-center rounded-full bg-surface hover:bg-surface-2" aria-label="Impostazioni">
+          <Settings size={19} />
+        </motion.button>
+      </header>
+
       {/* identity */}
       <section className="relative overflow-hidden rounded-3xl border border-cream/10 bg-surface p-5">
         <div className="flex items-start gap-4">
@@ -66,6 +83,24 @@ export function Profile() {
           </button>
         </div>
       </section>
+
+      {missing.length > 0 && (
+        <section className="rounded-2xl border border-line bg-surface p-4">
+          <p className="text-base font-semibold">Cosa manca al tuo profilo</p>
+          <ul className="mt-2 space-y-1.5">
+            {missing.map((m) => (
+              <li key={m}>
+                <button onClick={() => setEditing(true)} className="flex w-full items-center justify-between rounded-lg px-1 py-1 text-left text-sm hover:bg-cream/[0.04]">
+                  <span className="flex items-center gap-2">
+                    <span className="size-1.5 rounded-full bg-love" aria-hidden /> {m}
+                  </span>
+                  <span className="text-xs font-semibold text-brand">Aggiungi</span>
+                </button>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
 
       <VerifySection />
 
@@ -143,6 +178,33 @@ export function Profile() {
         </div>
       </section>
 
+      <EditProfile open={editing} onClose={() => setEditing(false)} />
+      <ProfilePreview open={previewing} onClose={() => setPreviewing(false)} />
+      <SettingsScreen open={settings} onClose={() => setSettings(false)} />
+
+    </div>
+  )
+}
+
+/** Impostazioni: everything that isn't what others see. */
+function SettingsScreen({ open, onClose }: { open: boolean; onClose: () => void }) {
+  const host = typeof document !== 'undefined' ? document.getElementById('phone-root') : null
+  return host ? createPortal(<AnimatePresence>{open && <SettingsBody onClose={onClose} />}</AnimatePresence>, host) : null
+}
+
+function SettingsBody({ onClose }: { onClose: () => void }) {
+  const { state, setLifetime, reset, simulateIncoming, toast, setPrefs, unblockUser, injectSuspicious, demo } = useStore()
+  const nav = useNav()
+  const [confirmReset, setConfirmReset] = useState(false)
+  return (
+    <motion.div className="absolute inset-0 z-[60] flex flex-col bg-ink" initial={{ x: '100%' }} animate={{ x: 0 }} exit={{ x: '100%' }} transition={{ type: 'spring', damping: 32, stiffness: 320 }} role="dialog" aria-modal="true" aria-label="Impostazioni">
+      <header className="flex items-center gap-2 border-b border-line px-3 pb-3 pt-[max(12px,env(safe-area-inset-top))] md:pt-10">
+        <button onClick={onClose} className="grid size-10 place-items-center rounded-full hover:bg-surface" aria-label="Chiudi impostazioni">
+          <ArrowLeft size={20} />
+        </button>
+        <h2 className="text-lg">Impostazioni</h2>
+      </header>
+      <div className="no-scrollbar min-h-0 flex-1 space-y-5 overflow-y-auto px-4 py-4">
       {/* sostieni */}
       {state.lifetime ? (
         <section className="rounded-2xl border border-brand/25 bg-brand/5 p-4">
@@ -152,7 +214,10 @@ export function Profile() {
           <p className="mt-1 text-sm text-cream/65">Hai il segno Sostenitore sul profilo. Nessun vantaggio sugli altri: è la nostra promessa.</p>
         </section>
       ) : (
-        <motion.button whileTap={{ scale: 0.98 }} onClick={() => nav.openPaywall()} className="relative w-full overflow-hidden rounded-2xl bg-forest p-4 text-left text-cream">
+        <motion.button whileTap={{ scale: 0.98 }} onClick={() => {
+          onClose()
+          nav.openPaywall()
+        }} className="relative w-full overflow-hidden rounded-2xl bg-forest p-4 text-left text-cream">
           <p className="text-sm font-semibold text-brand">Niente trucchi a pagamento</p>
           <p className="mt-1 text-xl font-extrabold">Sostieni ALONG</p>
           <p className="mt-1 text-sm text-cream/75">Un pagamento unico, per sempre. Non compri più like né più visibilità: aiuti l’app a restare onesta.</p>
@@ -263,9 +328,7 @@ export function Profile() {
         <p className="text-xs text-cream/35">Persone vere, vicine.</p>
       </footer>
 
-      <EditProfile open={editing} onClose={() => setEditing(false)} />
-      <ProfilePreview open={previewing} onClose={() => setPreviewing(false)} />
-
+      </div>
       <Sheet open={confirmReset} onClose={() => setConfirmReset(false)} title="Ripristinare i dati demo?">
         <p className="text-sm text-cream/65">Like, chat e profilo verranno riportati allo stato iniziale. L’operazione non è reversibile.</p>
         <div className="mt-4 grid grid-cols-2 gap-2">
@@ -283,7 +346,7 @@ export function Profile() {
           </Button>
         </div>
       </Sheet>
-    </div>
+    </motion.div>
   )
 }
 
