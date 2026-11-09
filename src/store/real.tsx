@@ -116,12 +116,19 @@ const ms = (iso: string | null | undefined) => (iso ? Date.parse(iso) : 0)
 /** Italian, human messages for the errors people can actually hit. */
 function friendly(e: unknown): string {
   const msg = e && typeof e === 'object' && 'message' in e ? String((e as { message: unknown }).message) : String(e ?? '')
-  if (/rate limit|too many|security purposes/i.test(msg)) return 'Troppi tentativi. Aspetta qualche minuto e riprova.'
+  const status = e && typeof e === 'object' && 'status' in e ? Number((e as { status: unknown }).status) : 0
+  const detail = `(dettaglio: ${[status || null, msg || (e as Error)?.name].filter(Boolean).join(' · ') || 'nessuno'})`
+  if (/rate limit|too many|security purposes/i.test(msg) || status === 429) return 'Troppi tentativi. Aspetta qualche minuto e riprova.'
   if (/expired|invalid.*(otp|token)|token.*(expired|invalid)/i.test(msg)) return 'Codice sbagliato o scaduto. Controlla l’email o chiedine uno nuovo.'
-  if (/Failed to fetch|NetworkError|network/i.test(msg)) return 'Connessione assente. Controlla la rete e riprova.'
+  if (/sending|smtp|mail/i.test(msg)) return `Supabase non riesce a spedire l’email: controlla il mittente in Authentication → Emails → SMTP Settings. ${detail}`
+  if (/Failed to fetch|NetworkError|network|Load failed/i.test(msg) || status === 0 && /fetch/i.test((e as Error)?.name ?? '')) {
+    if (typeof navigator !== 'undefined' && navigator.onLine === false) return 'Connessione assente. Controlla la rete e riprova.'
+    return `Il server non ha risposto. Se hai appena attivato il mittente Gmail, ricontrolla host, porta e password; altrimenti controlla l’indirizzo in .env.local. ${detail}`
+  }
+  if (status >= 500) return `Errore del server Supabase. ${detail}`
   if (/duplicate key/i.test(msg)) return 'Già fatto.'
   if (/JWT|not authenticated|Non autenticato/i.test(msg)) return 'Sessione scaduta. Accedi di nuovo.'
-  return msg.replace(/^.*?ERROR:\s*/, '') || 'Qualcosa non ha funzionato. Riprova.'
+  return msg.replace(/^.*?ERROR:\s*/, '') || `Qualcosa non ha funzionato. ${detail}`
 }
 
 /* ───────────────────────── immagini ───────────────────────── */
@@ -768,7 +775,10 @@ export function RealStoreProvider({ children }: { children: ReactNode }) {
         if (!sb) return 'Servizio non raggiungibile. Riprova tra poco.'
         const clean = address.trim().toLowerCase()
         const { error } = await sb.auth.signInWithOtp({ email: clean, options: { shouldCreateUser: true, emailRedirectTo: window.location.origin } })
-        if (error) return friendly(error)
+        if (error) {
+          console.error('ALONG invio email', error)
+          return friendly(error)
+        }
         setEmail(clean)
         return null
       },
