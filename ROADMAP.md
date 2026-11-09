@@ -60,6 +60,7 @@ L’app diventa un’app d’incontri 1:1, più semplice e più viva.
 - **Pagina iniziale:** logo che si compone, “Persone vere, vicine”, Registrati / Ho già un account
 - **Animazioni morbide e discrete** in tutta l’app, vibrazione leggera nei momenti importanti
 - Testi tutti in italiano
+- **Identità:** simbolo di due omini stilizzati che si incontrano e si danno il cinque, frase “Due persone, una strada.”. Animato nella pagina iniziale, al match e nei caricamenti; fermo come icona dell’app e nell’intestazione
 - Provato: `npm run db:test` e percorsi completi nel browser sul database (registrazione, like con Questo o quello, match in tempo reale, chat, chiusura gentile, esci/rientra, elimina account, 16-17 separati)
 
 ## Fase 4 — Esperienza completa

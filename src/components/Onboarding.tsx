@@ -11,6 +11,7 @@ import { PhotoGallery } from './PhotoGallery'
 import { UserPicture } from './Portrait'
 import { Button } from './ui'
 import { Offline, SignIn, Splash } from './Account'
+import { ClapMark } from './Brand'
 
 const MONTHS = ['gennaio', 'febbraio', 'marzo', 'aprile', 'maggio', 'giugno', 'luglio', 'agosto', 'settembre', 'ottobre', 'novembre', 'dicembre']
 const SKINS = ['#f6d7c3', '#eec1a0', '#d9a07a', '#b97a52', '#8d5a3b', '#5e3a26']
@@ -395,39 +396,37 @@ export function AvatarEditor({ look, onChange }: { look: Look; onChange: (l: Loo
 
 const LETTERS = ['a', 'l', 'o', 'n', 'g']
 
-/** First screen: the logo writes itself, then “Registrati” / “Ho già un account”. */
+/** First screen: two people meet and high-five, then the name writes itself. */
 function Welcome({ onSignup, onLogin }: { onSignup: () => void; onLogin?: () => void }) {
   return (
     <div className="relative flex flex-1 flex-col pt-[max(40px,env(safe-area-inset-top))] md:pt-16">
       <motion.div
         aria-hidden
-        className="pointer-events-none absolute left-1/2 top-[30%] size-72 -translate-x-1/2 rounded-full bg-brand/15 blur-3xl"
+        className="pointer-events-none absolute left-1/2 top-[28%] size-72 -translate-x-1/2 rounded-full bg-brand/12 blur-3xl"
         initial={{ opacity: 0, scale: 0.6 }}
         animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 1.4, ease: 'easeOut' }}
+        transition={{ duration: 1.6, ease: 'easeOut' }}
       />
-      <div className="relative my-auto text-center">
-        <h1 className="flex justify-center text-[64px] font-extrabold leading-none tracking-[-0.06em] text-brand" aria-label="along">
+      <div className="relative my-auto flex flex-col items-center text-center">
+        <ClapMark mode="intro" size={150} />
+        <h1 className="mt-4 flex justify-center text-[60px] font-extrabold leading-none tracking-[-0.06em] text-cream" aria-label="along">
           {LETTERS.map((l, i) => (
             <motion.span
               key={i}
               aria-hidden
-              initial={{ opacity: 0, y: 28, filter: 'blur(8px)' }}
+              initial={{ opacity: 0, y: 22, filter: 'blur(6px)' }}
               animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
-              transition={{ delay: 0.15 + i * 0.09, duration: 0.5, ease: [0.2, 0.8, 0.2, 1] }}
+              transition={{ delay: 1.35 + i * 0.07, duration: 0.45, ease: [0.2, 0.8, 0.2, 1] }}
             >
               {l}
             </motion.span>
           ))}
         </h1>
-        <motion.p initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.8, duration: 0.5 }} className="mt-3 text-xl text-cream">
-          Persone vere, vicine.
-        </motion.p>
-        <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1.0, duration: 0.5 }} className="mt-1 text-sm text-muted">
-          Date o nuove amicizie, senza trucchi a pagamento.
+        <motion.p initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 1.8, duration: 0.45 }} className="mt-2 text-xl font-semibold text-cream">
+          Due persone, una strada.
         </motion.p>
       </div>
-      <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 1.15, type: 'spring', stiffness: 200, damping: 24 }} className="relative pb-2 pt-8">
+      <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 2.0, type: 'spring', stiffness: 200, damping: 24 }} className="relative pb-2 pt-8">
         <Button size="lg" className="w-full rounded-full" onClick={onSignup}>
           Registrati
         </Button>

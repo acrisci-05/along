@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { ArrowLeft, Loader2, LogOut, Mail, RefreshCw, Trash2, WifiOff } from 'lucide-react'
 import { useStore, type Account } from '../store/store'
 import { Button, Eyebrow, Sheet } from './ui'
+import { ClapMark } from './Brand'
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/
 
@@ -133,9 +134,9 @@ export function SignIn({ account, intent = 'signup', onBack }: { account: Accoun
 export function Splash() {
   return (
     <div className="grid min-h-full place-items-center" aria-busy="true" aria-label="Caricamento">
-      <div className="text-center">
-        <p className="text-3xl font-extrabold tracking-[-0.05em] text-brand">along</p>
-        <Loader2 size={20} className="mx-auto mt-4 animate-spin text-muted" />
+      <div className="flex flex-col items-center">
+        <ClapMark mode="loop" size={84} />
+        <p className="mt-3 text-2xl font-extrabold tracking-[-0.05em] text-cream">along</p>
       </div>
     </div>
   )

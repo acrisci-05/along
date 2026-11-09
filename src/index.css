@@ -194,3 +194,51 @@ input[type="range"] { accent-color: var(--color-lime); }
 /* Match ticket notches */
 .ticket-left { -webkit-mask: radial-gradient(circle at 100% 0, transparent 9px, #000 9.5px) top right / 100% 51% no-repeat, radial-gradient(circle at 100% 100%, transparent 9px, #000 9.5px) bottom right / 100% 51% no-repeat; }
 .ticket-right { -webkit-mask: radial-gradient(circle at 0 0, transparent 9px, #000 9.5px) top left / 100% 51% no-repeat, radial-gradient(circle at 0 100%, transparent 9px, #000 9.5px) bottom left / 100% 51% no-repeat; }
+
+/* ───────── ALONG mark: two people meet and high-five ───────── */
+.clap g, .clap line { transform-box: fill-box; }
+.clap .pv { transform-origin: 50% 0; }
+.clap .b1 { transform-origin: 50% 100%; }
+.clap .b2 { transform-origin: 100% 100%; }
+.clap .b3 { transform-origin: 0 100%; }
+/* final pose (also what 'static' shows) */
+.clap .leg1 { transform: rotate(20deg); }
+.clap .leg2 { transform: rotate(-20deg); }
+.clap .L .ao { transform: rotate(36deg); }
+.clap .R .ao { transform: rotate(-36deg); }
+.clap .L .ai { transform: rotate(-147deg); }
+.clap .R .ai { transform: rotate(147deg); }
+
+/* intro: walk in from the sides, then the high five */
+.clap--intro .walk-L { animation: clap-walk-l 1.1s cubic-bezier(.3,.6,.3,1) both; }
+.clap--intro .walk-R { animation: clap-walk-r 1.1s cubic-bezier(.3,.6,.3,1) both; }
+.clap--intro .leg1 { animation: clap-leg1 1.1s ease-in-out both; }
+.clap--intro .leg2 { animation: clap-leg2 1.1s ease-in-out both; }
+.clap--intro .L .ao { animation: clap-swing-ao-l 1.1s ease-in-out both; }
+.clap--intro .R .ao { animation: clap-swing-ao-r 1.1s ease-in-out both; }
+.clap--intro .L .ai { animation: clap-swing-ai-l 1.1s ease-in-out both, clap-raise-l .32s ease-out 1.05s forwards; }
+.clap--intro .R .ai { animation: clap-swing-ai-r 1.1s ease-in-out both, clap-raise-r .32s ease-out 1.05s forwards; }
+.clap--intro .burst line { animation: clap-burst .3s ease-out 1.3s both; }
+/* clap: standing, only the high five */
+.clap--clap .L .ai { animation: clap-raise-l .4s ease-out .15s both; }
+.clap--clap .R .ai { animation: clap-raise-r .4s ease-out .15s both; }
+.clap--clap .burst line { animation: clap-burst .3s ease-out .5s both; }
+/* loop: keeps clapping (loading) */
+.clap--loop .L .ai { animation: clap-loop-l 1.2s ease-in-out infinite; }
+.clap--loop .R .ai { animation: clap-loop-r 1.2s ease-in-out infinite; }
+.clap--loop .burst line { animation: clap-pulse 1.2s ease-out infinite; }
+
+@keyframes clap-walk-l { 0% { transform: translate(-100px, 0) } 20% { transform: translate(-80px, -4px) } 40% { transform: translate(-60px, 0) } 60% { transform: translate(-40px, -4px) } 80% { transform: translate(-20px, 0) } 100% { transform: none } }
+@keyframes clap-walk-r { 0% { transform: translate(100px, 0) } 20% { transform: translate(80px, -4px) } 40% { transform: translate(60px, 0) } 60% { transform: translate(40px, -4px) } 80% { transform: translate(20px, 0) } 100% { transform: none } }
+@keyframes clap-leg1 { 0%, 50% { transform: rotate(25deg) } 25%, 75% { transform: rotate(-25deg) } 100% { transform: rotate(20deg) } }
+@keyframes clap-leg2 { 0%, 50% { transform: rotate(-25deg) } 25%, 75% { transform: rotate(25deg) } 100% { transform: rotate(-20deg) } }
+@keyframes clap-swing-ao-l { 0%, 50% { transform: rotate(-15deg) } 25%, 75% { transform: rotate(15deg) } 100% { transform: rotate(36deg) } }
+@keyframes clap-swing-ao-r { 0%, 50% { transform: rotate(15deg) } 25%, 75% { transform: rotate(-15deg) } 100% { transform: rotate(-36deg) } }
+@keyframes clap-swing-ai-l { 0%, 50% { transform: rotate(15deg) } 25%, 75% { transform: rotate(-15deg) } 100% { transform: rotate(10deg) } }
+@keyframes clap-swing-ai-r { 0%, 50% { transform: rotate(-15deg) } 25%, 75% { transform: rotate(15deg) } 100% { transform: rotate(-10deg) } }
+@keyframes clap-raise-l { 0% { transform: rotate(10deg) } 80% { transform: rotate(-153deg) } 100% { transform: rotate(-147deg) } }
+@keyframes clap-raise-r { 0% { transform: rotate(-10deg) } 80% { transform: rotate(153deg) } 100% { transform: rotate(147deg) } }
+@keyframes clap-burst { 0% { transform: scale(0); opacity: 0 } 100% { transform: scale(1); opacity: 1 } }
+@keyframes clap-loop-l { 0%, 100% { transform: rotate(10deg) } 40%, 60% { transform: rotate(-147deg) } }
+@keyframes clap-loop-r { 0%, 100% { transform: rotate(-10deg) } 40%, 60% { transform: rotate(147deg) } }
+@keyframes clap-pulse { 0%, 38% { transform: scale(0); opacity: 0 } 50% { transform: scale(1); opacity: 1 } 70%, 100% { transform: scale(1.1); opacity: 0 } }

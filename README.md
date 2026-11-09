@@ -1,6 +1,6 @@
 # ALONG
 
-> Persone vere, vicine.
+> Due persone, una strada.
 
 **App d’incontri 1:1 per date e nuove amicizie.** Like con un tocco; sul profilo un **Questo o quello** (es. *Pizza fritta o al forno?*): chi mette like può scegliere una risposta, che diventa il primo messaggio del match. Massimo **3 chat** alla volta (le altre in Sala d’Attesa), **congedo gentile** quando chiudi una chat, **nessun trucco a pagamento**.
 

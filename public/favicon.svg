@@ -1,1 +1,14 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="14" fill="#1c1612"/><text x="32" y="44" text-anchor="middle" font-family="Work Sans,Arial,sans-serif" font-weight="800" font-size="34" fill="#9cc5a1">a</text></svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="30 5 180 180">
+  <rect x="30" y="5" width="180" height="180" rx="40" fill="#1c1612"/>
+  <g fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="12">
+    <g stroke="#f2ebdf">
+      <circle cx="95" cy="54" r="13" fill="#f2ebdf" stroke="none"/>
+      <path d="M95 70V122M95 122L80 163M95 122L110 163M95 84L76 108M95 84L117 50"/>
+    </g>
+    <g stroke="#9cc5a1">
+      <circle cx="145" cy="54" r="13" fill="#9cc5a1" stroke="none"/>
+      <path d="M145 70V122M145 122L130 163M145 122L160 163M145 84L164 108M145 84L123 50"/>
+    </g>
+    <path stroke="#f2ebdf" stroke-width="8" d="M120 34V22M108 36L102 28M132 36L138 28"/>
+  </g>
+</svg>

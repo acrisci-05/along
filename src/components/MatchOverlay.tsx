@@ -1,11 +1,12 @@
 import { AnimatePresence, motion } from 'motion/react'
-import { Heart, Hourglass, MessageCircle } from 'lucide-react'
+import { Hourglass, MessageCircle } from 'lucide-react'
+import { ClapMark } from './Brand'
 import { useNav } from '../nav'
 import { useStore } from '../store/store'
 import { UserPicture } from './Portrait'
 import { Button } from './ui'
 
-/** Match moment: the two photos glide towards each other, a heart lands between them. */
+/** Match moment: the two photos glide towards each other and the two stickmen high-five between them. */
 export function MatchOverlay() {
   const { match, dismissMatch, user, state, limits } = useStore()
   const nav = useNav()
@@ -50,17 +51,17 @@ export function MatchOverlay() {
               </motion.div>
               <motion.span
                 initial={{ scale: 0, opacity: 0 }}
-                animate={{ scale: [0, 1.25, 1], opacity: 1 }}
-                transition={{ delay: 0.6, duration: 0.45, ease: 'easeOut' }}
-                className="absolute bottom-0 grid size-14 place-items-center rounded-full bg-brand text-ink shadow-xl"
+                animate={{ scale: [0, 1.15, 1], opacity: 1 }}
+                transition={{ delay: 0.5, duration: 0.4, ease: 'easeOut' }}
+                className="absolute -bottom-6 grid size-24 place-items-center rounded-full border-4 border-ink bg-surface shadow-xl"
                 aria-hidden
               >
-                <Heart size={26} fill="currentColor" />
+                <ClapMark mode="clap" size={56} title="" />
               </motion.span>
             </div>
 
             {match.pick && (
-              <motion.p initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.8 }} className="mt-5 w-full max-w-sm rounded-xl bg-surface p-3 text-center text-sm text-muted">
+              <motion.p initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.8 }} className="mt-10 w-full max-w-sm rounded-xl bg-surface p-3 text-center text-sm text-muted">
                 {match.question}
                 <span className="mt-0.5 block text-base font-semibold text-cream">
                   {match.fromMe ? 'Hai scelto' : `${other.name} ha scelto`} “{match.pick}”

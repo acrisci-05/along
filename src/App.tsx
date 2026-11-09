@@ -16,6 +16,7 @@ import { ChatRoom } from './views/ChatRoom'
 import { UserSheet } from './components/Overlays'
 import { Paywall } from './components/Paywall'
 import { RevolutTip } from './components/ui'
+import { ClapMark } from './components/Brand'
 
 const TABS: Array<{ id: Tab; label: string; icon: typeof Flame }> = [
   { id: 'explore', label: 'Scopri', icon: Flame },
@@ -114,9 +115,9 @@ export default function App() {
           <aside className={cn('relative z-10 hidden max-w-sm flex-col gap-6 lg:flex', wide && 'lg:hidden')}>
             <Logo big />
             <p className="font-display text-3xl font-bold leading-[1.05] text-cream">
-              Persone vere,
+              Due persone,
               <br />
-              <span className="text-brand">vicine.</span>
+              <span className="text-brand">una strada.</span>
             </p>
             <p className="text-base leading-relaxed text-cream/60">
               Date o nuove amicizie, una persona alla volta. Like con un tocco, massimo 3 chat insieme e nessun trucco a pagamento.
@@ -283,7 +284,10 @@ export default function App() {
 
 function Logo({ big }: { big?: boolean }) {
   return (
-    <span className={cn('font-display font-extrabold tracking-[-0.05em] text-brand', big ? 'text-3xl' : 'text-2xl')}>along</span>
+    <span className="inline-flex items-center gap-1.5">
+      <ClapMark size={big ? 34 : 24} />
+      <span className={cn('font-extrabold tracking-[-0.05em] text-brand', big ? 'text-3xl' : 'text-2xl')}>along</span>
+    </span>
   )
 }
 

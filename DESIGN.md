@@ -27,11 +27,14 @@ Titoli 800 con tracking leggermente stretto. Etichette: testo semplice 600 in `m
 - Raggi: `rounded-md` 10 per chip, badge e pulsanti secondari; `rounded-2xl` 14 per card; `rounded-full` solo per avatar e i due pulsanti d'azione di Scopri/Like.
 - Niente "pillole" tonde ovunque.
 
+## Simbolo
+Due omini stilizzati (crema e salvia) che si incontrano e si danno il cinque, con tre trattini sul battito delle mani. Componente `ClapMark` (`src/components/Brand.tsx`) con 4 modi: `intro` (arrivano camminando e battono il cinque: pagina iniziale), `clap` (solo il cinque: match), `loop` (battono il cinque di continuo: caricamenti), `static` (posa finale: icona dell’app, intestazione). Frase: **Due persone, una strada.** Icone in `public/favicon.svg` e `public/apple-touch-icon.png`.
+
 ## Componenti chiave
-- **Pagina iniziale:** logo “along” che si compone lettera per lettera, “Persone vere, vicine.”, Registrati / Ho già un account.
+- **Pagina iniziale:** i due omini arrivano e si danno il cinque, poi “along” si compone lettera per lettera e compare “Due persone, una strada.”; Registrati / Ho già un account.
 - **Card di Scopri:** foto a tutto schermo (si sfogliano toccando), nome, età, città, bio, passioni in comune e il **Questo o quello** con due risposte toccabili. Azioni: annulla · ✕ · **Mi piace**. Trascinando compaiono MI PIACE / PASSO.
 - **Like ricevuti:** mazzo, una persona alla volta con la sua scelta al tuo Questo o quello; destra = Match, sinistra = No, grazie.
-- **Match:** le due foto si avvicinano inclinate e un cuore cade in mezzo; vibrazione leggera.
+- **Match:** le due foto si avvicinano inclinate e in mezzo i due omini si danno il cinque; vibrazione leggera.
 - **Chat:** intestazione con avatar, nome, età e città (o “sta scrivendo…”). Il primo messaggio è la carta Questo o quello. Fumetti: miei `forest`, suoi `surface-2`. Azioni nel “+”: brano, chiudi con gentilezza. Conferme ✓ / ✓✓ disattivabili.
 
 ## Movimento
